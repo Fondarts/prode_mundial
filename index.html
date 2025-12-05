@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixture Interactivo Mundial 2026</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚽ Fixture Interactivo Mundial 2026</h1>
+            <p class="subtitle">Predice los resultados y visualiza los cruces</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="grupos">Grupos</button>
+            <button class="tab-btn" data-tab="eliminatorias">Eliminatorias</button>
+        </div>
+
+        <!-- Tab Grupos -->
+        <div id="grupos" class="tab-content active">
+            <div id="grupos-container"></div>
+        </div>
+
+        <!-- Tab Eliminatorias -->
+        <div id="eliminatorias" class="tab-content">
+            <h2>Eliminatorias</h2>
+            <p style="text-align: center; color: #475569; margin-bottom: 20px; font-size: 0.95em;">
+                Ingresa los resultados para ver los cruces y predecir el torneo completo
+            </p>
+            <div id="bracket-completo-container" class="eliminatoria-container"></div>
+        </div>
+
+        <div class="actions">
+            <button id="reset-btn" class="btn-secondary">Resetear Todo</button>
+            <button id="export-btn" class="btn-secondary">Exportar Predicciones</button>
+            <button id="import-btn" class="btn-secondary">Importar Predicciones</button>
+            <input type="file" id="import-file" accept=".json" style="display: none;">
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+
