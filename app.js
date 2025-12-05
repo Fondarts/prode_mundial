@@ -75,34 +75,47 @@ function calcularPosiciones(grupo, grupoIndex) {
     
     grupo.partidos.forEach((partido, partidoIndex) => {
         const resultado = partidos[partidoIndex];
-        if (resultado && resultado.golesLocal !== '' && resultado.golesVisitante !== '') {
-            const golesLocal = parseInt(resultado.golesLocal) || 0;
-            const golesVisitante = parseInt(resultado.golesVisitante) || 0;
+        if (resultado) {
+            // Obtener valores como strings y tratar vacío como 0
+            const golesLocalStr = (resultado.golesLocal !== undefined && resultado.golesLocal !== null && resultado.golesLocal !== '') 
+                ? String(resultado.golesLocal).trim() : '';
+            const golesVisitanteStr = (resultado.golesVisitante !== undefined && resultado.golesVisitante !== null && resultado.golesVisitante !== '') 
+                ? String(resultado.golesVisitante).trim() : '';
             
-            const equipoLocal = equipos[partido.local];
-            const equipoVisitante = equipos[partido.visitante];
-            
-            equipoLocal.partidosJugados++;
-            equipoVisitante.partidosJugados++;
-            
-            equipoLocal.golesFavor += golesLocal;
-            equipoLocal.golesContra += golesVisitante;
-            equipoVisitante.golesFavor += golesVisitante;
-            equipoVisitante.golesContra += golesLocal;
-            
-            if (golesLocal > golesVisitante) {
-                equipoLocal.puntos += 3;
-                equipoLocal.ganados++;
-                equipoVisitante.perdidos++;
-            } else if (golesLocal < golesVisitante) {
-                equipoVisitante.puntos += 3;
-                equipoVisitante.ganados++;
-                equipoLocal.perdidos++;
-            } else {
-                equipoLocal.puntos += 1;
-                equipoVisitante.puntos += 1;
-                equipoLocal.empatados++;
-                equipoVisitante.empatados++;
+            // Si al menos uno de los valores fue ingresado, procesar el partido
+            // Tratando el vacío como 0
+            if (golesLocalStr !== '' || golesVisitanteStr !== '') {
+                const golesLocal = golesLocalStr !== '' ? (parseInt(golesLocalStr) || 0) : 0;
+                const golesVisitante = golesVisitanteStr !== '' ? (parseInt(golesVisitanteStr) || 0) : 0;
+                
+                // Solo procesar si ambos valores son números válidos
+                if (!isNaN(golesLocal) && !isNaN(golesVisitante)) {
+                    const equipoLocal = equipos[partido.local];
+                    const equipoVisitante = equipos[partido.visitante];
+                    
+                    equipoLocal.partidosJugados++;
+                    equipoVisitante.partidosJugados++;
+                    
+                    equipoLocal.golesFavor += golesLocal;
+                    equipoLocal.golesContra += golesVisitante;
+                    equipoVisitante.golesFavor += golesVisitante;
+                    equipoVisitante.golesContra += golesLocal;
+                    
+                    if (golesLocal > golesVisitante) {
+                        equipoLocal.puntos += 3;
+                        equipoLocal.ganados++;
+                        equipoVisitante.perdidos++;
+                    } else if (golesLocal < golesVisitante) {
+                        equipoVisitante.puntos += 3;
+                        equipoVisitante.ganados++;
+                        equipoLocal.perdidos++;
+                    } else {
+                        equipoLocal.puntos += 1;
+                        equipoVisitante.puntos += 1;
+                        equipoLocal.empatados++;
+                        equipoVisitante.empatados++;
+                    }
+                }
             }
         }
     });
@@ -170,10 +183,12 @@ document.addEventListener('input', (e) => {
             resultados[grupoIndex].partidos[partidoIndex] = { golesLocal: '', golesVisitante: '' };
         }
         
-        resultados[grupoIndex].partidos[partidoIndex][tipo === 'local' ? 'golesLocal' : 'golesVisitante'] = e.target.value;
+        // Guardar el valor (incluso si es vacío, se guarda como string vacío)
+        resultados[grupoIndex].partidos[partidoIndex][tipo === 'local' ? 'golesLocal' : 'golesVisitante'] = e.target.value || '';
         
         guardarResultados();
         renderizarGrupos();
+        // Actualizar eliminatorias inmediatamente para que los ganadores se propaguen
         actualizarEliminatorias();
         return;
     }
@@ -192,9 +207,12 @@ document.addEventListener('input', (e) => {
             resultados[fase][partidoIndex] = { golesLocal: '', golesVisitante: '' };
         }
         
-        resultados[fase][partidoIndex][tipo === 'local' ? 'golesLocal' : 'golesVisitante'] = e.target.value;
+        // Guardar el valor (incluso si es vacío, se guarda como string vacío)
+        resultados[fase][partidoIndex][tipo === 'local' ? 'golesLocal' : 'golesVisitante'] = e.target.value || '';
         
         guardarResultados();
+        
+        // Actualizar todas las eliminatorias y re-renderizar el bracket inmediatamente
         actualizarEliminatorias();
     }
 });
@@ -312,26 +330,30 @@ function generarDieciseisavos() {
     // Generar 16 partidos: 12 primeros y segundos + 8 mejores terceros
     // Primera mitad: primeros vs segundos (8 partidos)
     for (let i = 0; i < 8; i++) {
+        const primero = clasificados.primeros[i] || { equipo: 'Por definir', grupo: '', datos: {} };
+        const segundo = clasificados.segundos[i] || { equipo: 'Por definir', grupo: '', datos: {} };
         partidos.push({
-            local: clasificados.primeros[i] || { equipo: 'Por definir', grupo: '', datos: {} },
-            visitante: clasificados.segundos[i] || { equipo: 'Por definir', grupo: '', datos: {} }
+            local: { ...primero, posicion: '1º' },
+            visitante: { ...segundo, posicion: '2º' }
         });
     }
     
     // Segunda mitad: primeros restantes vs mejores terceros (8 partidos)
     for (let i = 0; i < 8; i++) {
         const primerIndex = (i + 4) % 12;
+        const primero = clasificados.primeros[primerIndex] || mejoresTerceros[i] || { equipo: 'Por definir', grupo: '', datos: {} };
+        const tercero = mejoresTerceros[i] || clasificados.segundos[primerIndex] || { equipo: 'Por definir', grupo: '', datos: {} };
         partidos.push({
-            local: clasificados.primeros[primerIndex] || mejoresTerceros[i] || { equipo: 'Por definir', grupo: '', datos: {} },
-            visitante: mejoresTerceros[i] || clasificados.segundos[primerIndex] || { equipo: 'Por definir', grupo: '', datos: {} }
+            local: { ...primero, posicion: primero.grupo ? '1º' : (tercero.grupo ? '3º' : '') },
+            visitante: { ...tercero, posicion: tercero.grupo ? '3º' : (primero.grupo ? '1º' : '') }
         });
     }
     
     // Asegurar que siempre haya 16 partidos
     while (partidos.length < 16) {
         partidos.push({
-            local: { equipo: 'Por definir', grupo: '', datos: {} },
-            visitante: { equipo: 'Por definir', grupo: '', datos: {} }
+            local: { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' },
+            visitante: { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' }
         });
     }
     
@@ -369,8 +391,8 @@ function actualizarOctavos() {
     // Generar 8 partidos de octavos
     for (let i = 0; i < 16; i += 2) {
         partidosOctavos.push({
-            local: ganadores[i] || { equipo: 'Por definir', grupo: '', datos: {} },
-            visitante: ganadores[i + 1] || { equipo: 'Por definir', grupo: '', datos: {} }
+            local: ganadores[i] || { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' },
+            visitante: ganadores[i + 1] || { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' }
         });
     }
 }
@@ -383,8 +405,8 @@ function actualizarCuartos() {
     // Generar 4 partidos de cuartos
     for (let i = 0; i < 8; i += 2) {
         partidosCuartos.push({
-            local: ganadores[i] || { equipo: 'Por definir', grupo: '', datos: {} },
-            visitante: ganadores[i + 1] || { equipo: 'Por definir', grupo: '', datos: {} }
+            local: ganadores[i] || { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' },
+            visitante: ganadores[i + 1] || { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' }
         });
     }
 }
@@ -397,8 +419,8 @@ function actualizarSemis() {
     // Generar 2 partidos de semis
     for (let i = 0; i < 4; i += 2) {
         partidosSemis.push({
-            local: ganadores[i] || { equipo: 'Por definir', grupo: '', datos: {} },
-            visitante: ganadores[i + 1] || { equipo: 'Por definir', grupo: '', datos: {} }
+            local: ganadores[i] || { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' },
+            visitante: ganadores[i + 1] || { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' }
         });
     }
 }
@@ -408,8 +430,8 @@ function actualizarFinal() {
     const ganadores = obtenerGanadores('semis', partidosSemis);
     
     partidoFinal = {
-        local: ganadores[0] || { equipo: 'Por definir', grupo: '', datos: {} },
-        visitante: ganadores[1] || { equipo: 'Por definir', grupo: '', datos: {} }
+        local: ganadores[0] || { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' },
+        visitante: ganadores[1] || { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' }
     };
 }
 
@@ -433,7 +455,7 @@ function actualizarBracketCompleto() {
     
     // Dieciseisavos (16 partidos) - Columna 1
     const dieciseisavos = partidosDieciseisavos.length > 0 ? partidosDieciseisavos : 
-        Array(16).fill(null).map(() => ({ local: { equipo: 'Por definir' }, visitante: { equipo: 'Por definir' } }));
+        Array(16).fill(null).map(() => ({ local: { equipo: 'Por definir', grupo: '', posicion: '' }, visitante: { equipo: 'Por definir', grupo: '', posicion: '' } }));
     
     dieciseisavos.forEach((partido, index) => {
         const matchWrapper = document.createElement('div');
@@ -450,7 +472,7 @@ function actualizarBracketCompleto() {
     
     // Octavos (8 partidos) - Columna 2
     const octavos = partidosOctavos.length > 0 ? partidosOctavos : 
-        Array(8).fill(null).map(() => ({ local: { equipo: 'Por definir' }, visitante: { equipo: 'Por definir' } }));
+        Array(8).fill(null).map(() => ({ local: { equipo: 'Por definir', grupo: '', posicion: '' }, visitante: { equipo: 'Por definir', grupo: '', posicion: '' } }));
     
     octavos.forEach((partido, index) => {
         const matchWrapper = document.createElement('div');
@@ -469,7 +491,7 @@ function actualizarBracketCompleto() {
     
     // Cuartos (4 partidos) - Columna 3
     const cuartos = partidosCuartos.length > 0 ? partidosCuartos : 
-        Array(4).fill(null).map(() => ({ local: { equipo: 'Por definir' }, visitante: { equipo: 'Por definir' } }));
+        Array(4).fill(null).map(() => ({ local: { equipo: 'Por definir', grupo: '', posicion: '' }, visitante: { equipo: 'Por definir', grupo: '', posicion: '' } }));
     
     cuartos.forEach((partido, index) => {
         const matchWrapper = document.createElement('div');
@@ -487,7 +509,7 @@ function actualizarBracketCompleto() {
     
     // Semis (2 partidos) - Columna 4
     const semis = partidosSemis.length > 0 ? partidosSemis : 
-        Array(2).fill(null).map(() => ({ local: { equipo: 'Por definir' }, visitante: { equipo: 'Por definir' } }));
+        Array(2).fill(null).map(() => ({ local: { equipo: 'Por definir', grupo: '', posicion: '' }, visitante: { equipo: 'Por definir', grupo: '', posicion: '' } }));
     
     semis.forEach((partido, index) => {
         const matchWrapper = document.createElement('div');
@@ -505,7 +527,7 @@ function actualizarBracketCompleto() {
     
     // Final (1 partido) - Columna 5
     const final = partidoFinal ? [partidoFinal] : 
-        [{ local: { equipo: 'Por definir' }, visitante: { equipo: 'Por definir' } }];
+        [{ local: { equipo: 'Por definir', grupo: '', posicion: '' }, visitante: { equipo: 'Por definir', grupo: '', posicion: '' } }];
     
     const matchWrapper = document.createElement('div');
     matchWrapper.className = 'bracket-match-wrapper';
@@ -527,8 +549,11 @@ function crearMatchCard(fase, index, partido) {
     matchDiv.className = 'bracket-match';
     
     const resultado = resultados[fase]?.[index] || { golesLocal: '', golesVisitante: '' };
-    const golesLocal = parseInt(resultado.golesLocal) || 0;
-    const golesVisitante = parseInt(resultado.golesVisitante) || 0;
+    // Tratar valores vacíos como 0 para la visualización
+    const golesLocal = (resultado.golesLocal !== '' && resultado.golesLocal !== undefined && resultado.golesLocal !== null) 
+        ? (parseInt(resultado.golesLocal) || 0) : 0;
+    const golesVisitante = (resultado.golesVisitante !== '' && resultado.golesVisitante !== undefined && resultado.golesVisitante !== null) 
+        ? (parseInt(resultado.golesVisitante) || 0) : 0;
     
     const ganadorLocal = golesLocal > golesVisitante;
     const ganadorVisitante = golesVisitante > golesLocal;
@@ -537,9 +562,22 @@ function crearMatchCard(fase, index, partido) {
     const esPorDefinirLocal = equipoLocalNombre === 'Por definir';
     const esPorDefinirVisitante = equipoVisitanteNombre === 'Por definir';
     
+    // Obtener información de posición y grupo
+    const localPosicion = partido.local?.posicion || '';
+    const localGrupo = partido.local?.grupo || '';
+    const visitantePosicion = partido.visitante?.posicion || '';
+    const visitanteGrupo = partido.visitante?.grupo || '';
+    
+    // Formatear texto de posición y grupo
+    const localInfo = (localPosicion && localGrupo) ? `${localPosicion} ${localGrupo}` : '';
+    const visitanteInfo = (visitantePosicion && visitanteGrupo) ? `${visitantePosicion} ${visitanteGrupo}` : '';
+    
     matchDiv.innerHTML = `
         <div class="bracket-team ${ganadorLocal ? 'ganador' : ''} ${esPorDefinirLocal ? 'por-definir' : ''}">
-            <span class="bracket-team-nombre">${equipoLocalNombre}</span>
+            <div class="bracket-team-info">
+                <span class="bracket-team-nombre">${equipoLocalNombre}</span>
+                ${localInfo ? `<span class="bracket-team-posicion">${localInfo}</span>` : ''}
+            </div>
             <div class="bracket-resultado">
                 <input type="number" min="0" max="20" 
                        value="${resultado.golesLocal}" 
@@ -551,7 +589,10 @@ function crearMatchCard(fase, index, partido) {
             </div>
         </div>
         <div class="bracket-team ${ganadorVisitante ? 'ganador' : ''} ${esPorDefinirVisitante ? 'por-definir' : ''}">
-            <span class="bracket-team-nombre">${equipoVisitanteNombre}</span>
+            <div class="bracket-team-info">
+                <span class="bracket-team-nombre">${equipoVisitanteNombre}</span>
+                ${visitanteInfo ? `<span class="bracket-team-posicion">${visitanteInfo}</span>` : ''}
+            </div>
             <div class="bracket-resultado">
                 <input type="number" min="0" max="20" 
                        value="${resultado.golesVisitante}" 
@@ -573,24 +614,58 @@ function obtenerGanadores(fase, partidosFase) {
     const resultadosFase = resultados[fase] || {};
     
     partidosFase.forEach((partido, index) => {
-        if (!partido) return;
+        if (!partido) {
+            ganadores.push({ equipo: 'Por definir', grupo: '', datos: {}, posicion: '' });
+            return;
+        }
         
         const resultado = resultadosFase[index];
-        if (resultado && resultado.golesLocal !== '' && resultado.golesVisitante !== '') {
-            const golesLocal = parseInt(resultado.golesLocal) || 0;
-            const golesVisitante = parseInt(resultado.golesVisitante) || 0;
+        if (resultado) {
+            // Obtener valores como strings y tratar vacío como 0
+            const golesLocalStr = (resultado.golesLocal !== undefined && resultado.golesLocal !== null && resultado.golesLocal !== '') 
+                ? String(resultado.golesLocal).trim() : '';
+            const golesVisitanteStr = (resultado.golesVisitante !== undefined && resultado.golesVisitante !== null && resultado.golesVisitante !== '') 
+                ? String(resultado.golesVisitante).trim() : '';
             
-            if (golesLocal > golesVisitante && partido.local) {
-                ganadores.push(partido.local);
-            } else if (golesVisitante > golesLocal && partido.visitante) {
-                ganadores.push(partido.visitante);
+            // Convertir a números, tratando vacío como 0
+            const golesLocal = golesLocalStr !== '' ? (parseInt(golesLocalStr) || 0) : 0;
+            const golesVisitante = golesVisitanteStr !== '' ? (parseInt(golesVisitanteStr) || 0) : 0;
+            
+            // Si al menos uno de los valores fue ingresado explícitamente, determinar ganador
+            // Esto permite que si uno tiene 1 y el otro está vacío (0 por defecto), se determine el ganador
+            if (golesLocalStr !== '' || golesVisitanteStr !== '') {
+                if (!isNaN(golesLocal) && !isNaN(golesVisitante)) {
+                    if (golesLocal > golesVisitante && partido.local) {
+                        // Copiar todo el objeto del ganador para preservar toda la información
+                        ganadores.push({ 
+                            equipo: partido.local.equipo || 'Por definir',
+                            grupo: partido.local.grupo || '',
+                            datos: partido.local.datos || {},
+                            posicion: partido.local.posicion || ''
+                        });
+                    } else if (golesVisitante > golesLocal && partido.visitante) {
+                        // Copiar todo el objeto del ganador para preservar toda la información
+                        ganadores.push({ 
+                            equipo: partido.visitante.equipo || 'Por definir',
+                            grupo: partido.visitante.grupo || '',
+                            datos: partido.visitante.datos || {},
+                            posicion: partido.visitante.posicion || ''
+                        });
+                    } else {
+                        // Empate - mantener "Por definir"
+                        ganadores.push({ equipo: 'Por definir', grupo: '', datos: {}, posicion: '' });
+                    }
+                } else {
+                    // Valores inválidos
+                    ganadores.push({ equipo: 'Por definir', grupo: '', datos: {}, posicion: '' });
+                }
             } else {
-                // Empate o sin resultado - mantener "Por definir"
-                ganadores.push({ equipo: 'Por definir', grupo: '', datos: {} });
+                // Ambos campos vacíos - no hay resultado aún
+                ganadores.push({ equipo: 'Por definir', grupo: '', datos: {}, posicion: '' });
             }
         } else {
             // Sin resultado aún
-            ganadores.push({ equipo: 'Por definir', grupo: '', datos: {} });
+            ganadores.push({ equipo: 'Por definir', grupo: '', datos: {}, posicion: '' });
         }
     });
     
