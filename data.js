@@ -1,6 +1,16 @@
 // Datos del Mundial 2026
 // 12 grupos de 4 equipos cada uno
 
+// Mapeo de playoffs a sus opciones
+const PLAYOFFS_OPCIONES = {
+    'Playoff D': ['Rep. Checa', 'Irlanda', 'Dinamarca', 'Macedonia del Norte'],
+    'Playoff B1': ['Gales', 'Bosnia', 'Italia', 'Irlanda del Norte'],
+    'Playoff C': ['Eslovaquia', 'Kosovo', 'Turquía', 'Rumania'],
+    'Playoff B2': ['Ucrania', 'Suecia', 'Polonia', 'Albania'],
+    'Playoff 2': ['Bolivia', 'Surinam', 'Irak'],
+    'Playoff 1': ['Nueva Caledonia', 'Jamaica', 'RD Congo']
+};
+
 const GRUPOS_MUNDIAL_2026 = [
     {
         nombre: 'Grupo A',
@@ -157,8 +167,16 @@ function inicializarResultados() {
     GRUPOS_MUNDIAL_2026.forEach((grupo, grupoIndex) => {
         resultados[grupoIndex] = {
             partidos: grupo.partidos.map(() => ({ golesLocal: '', golesVisitante: '' })),
-            posiciones: []
+            posiciones: [],
+            playoffSelecciones: {}
         };
+        
+        // Inicializar selecciones de playoffs
+        grupo.equipos.forEach((equipo, equipoIndex) => {
+            if (PLAYOFFS_OPCIONES[equipo]) {
+                resultados[grupoIndex].playoffSelecciones[equipoIndex] = '';
+            }
+        });
     });
     
     // Cargar desde localStorage si existe
@@ -166,6 +184,24 @@ function inicializarResultados() {
     if (guardado) {
         try {
             resultados = JSON.parse(guardado);
+            // Asegurar que playoffSelecciones existe para cada grupo
+            GRUPOS_MUNDIAL_2026.forEach((grupo, grupoIndex) => {
+                if (!resultados[grupoIndex]) {
+                    resultados[grupoIndex] = {
+                        partidos: grupo.partidos.map(() => ({ golesLocal: '', golesVisitante: '' })),
+                        posiciones: [],
+                        playoffSelecciones: {}
+                    };
+                }
+                if (!resultados[grupoIndex].playoffSelecciones) {
+                    resultados[grupoIndex].playoffSelecciones = {};
+                }
+                grupo.equipos.forEach((equipo, equipoIndex) => {
+                    if (PLAYOFFS_OPCIONES[equipo] && !resultados[grupoIndex].playoffSelecciones[equipoIndex]) {
+                        resultados[grupoIndex].playoffSelecciones[equipoIndex] = '';
+                    }
+                });
+            });
         } catch (e) {
             console.error('Error al cargar resultados guardados:', e);
         }

@@ -27,6 +27,41 @@ function renderizarGrupos() {
         
         container.appendChild(grupoDiv);
     });
+    
+    // Asegurar que los selects tengan los event listeners correctos
+    // (aunque usamos event delegation, esto ayuda a debuggear)
+    container.querySelectorAll('.playoff-select').forEach(select => {
+        select.addEventListener('change', (e) => {
+            e.stopPropagation();
+            const grupoIndex = parseInt(e.target.getAttribute('data-grupo'));
+            const equipoIndex = parseInt(e.target.getAttribute('data-equipo'));
+            const seleccion = e.target.value;
+            
+            if (!resultados[grupoIndex]) {
+                resultados[grupoIndex] = { partidos: [], posiciones: [], playoffSelecciones: {} };
+            }
+            
+            if (!resultados[grupoIndex].playoffSelecciones) {
+                resultados[grupoIndex].playoffSelecciones = {};
+            }
+            
+            resultados[grupoIndex].playoffSelecciones[equipoIndex] = seleccion;
+            
+            guardarResultados();
+            renderizarGrupos();
+            actualizarEliminatorias();
+        });
+    });
+}
+
+// Obtener nombre real del equipo (considerando selección de playoff)
+function obtenerNombreEquipo(grupo, grupoIndex, equipoIndex) {
+    const equipo = grupo.equipos[equipoIndex];
+    if (PLAYOFFS_OPCIONES[equipo]) {
+        const seleccion = resultados[grupoIndex]?.playoffSelecciones?.[equipoIndex] || '';
+        return seleccion || equipo;
+    }
+    return equipo;
 }
 
 // Renderizar tabla de posiciones
@@ -41,7 +76,23 @@ function renderizarTablaPosiciones(grupo, grupoIndex) {
         const clasePos = index < 2 ? `pos-${index + 1}` : (index === 2 ? 'pos-3' : '');
         html += `<tr class="${clasePos}">`;
         html += `<td>${index + 1}</td>`;
-        html += `<td>${grupo.equipos[pos.indice]}</td>`;
+        html += `<td>`;
+        
+        // Si es un playoff, mostrar select
+        const equipoOriginal = grupo.equipos[pos.indice];
+        if (PLAYOFFS_OPCIONES[equipoOriginal]) {
+            const seleccion = resultados[grupoIndex]?.playoffSelecciones?.[pos.indice] || '';
+            html += `<select class="playoff-select" data-grupo="${grupoIndex}" data-equipo="${pos.indice}">`;
+            html += `<option value="">${equipoOriginal}</option>`;
+            PLAYOFFS_OPCIONES[equipoOriginal].forEach(opcion => {
+                html += `<option value="${opcion}" ${seleccion === opcion ? 'selected' : ''}>${opcion}</option>`;
+            });
+            html += `</select>`;
+        } else {
+            html += obtenerNombreEquipo(grupo, grupoIndex, pos.indice);
+        }
+        
+        html += `</td>`;
         html += `<td>${pos.partidosJugados}</td>`;
         html += `<td>${pos.ganados}</td>`;
         html += `<td>${pos.empatados}</td>`;
@@ -140,8 +191,9 @@ function renderizarPartidos(grupo, grupoIndex) {
     
     return grupo.partidos.map((partido, partidoIndex) => {
         const resultado = partidos[partidoIndex] || { golesLocal: '', golesVisitante: '' };
-        const equipoLocal = grupo.equipos[partido.local];
-        const equipoVisitante = grupo.equipos[partido.visitante];
+        // En los partidos, solo mostrar el nombre del equipo (usando la selección si existe)
+        const equipoLocal = obtenerNombreEquipo(grupo, grupoIndex, partido.local);
+        const equipoVisitante = obtenerNombreEquipo(grupo, grupoIndex, partido.visitante);
         
         return `
             <div class="partido">
@@ -167,7 +219,7 @@ function renderizarPartidos(grupo, grupoIndex) {
     }).join('');
 }
 
-// Event listeners para inputs de resultados
+// Event listeners para inputs de resultados y selects de playoffs
 document.addEventListener('input', (e) => {
     // Para grupos
     if (e.target.hasAttribute('data-grupo')) {
@@ -176,7 +228,7 @@ document.addEventListener('input', (e) => {
         const tipo = e.target.getAttribute('data-tipo');
         
         if (!resultados[grupoIndex]) {
-            resultados[grupoIndex] = { partidos: [], posiciones: [] };
+            resultados[grupoIndex] = { partidos: [], posiciones: [], playoffSelecciones: {} };
         }
         
         if (!resultados[grupoIndex].partidos[partidoIndex]) {
@@ -213,6 +265,30 @@ document.addEventListener('input', (e) => {
         guardarResultados();
         
         // Actualizar todas las eliminatorias y re-renderizar el bracket inmediatamente
+        actualizarEliminatorias();
+    }
+});
+
+// Event listener para cambios en selects de playoffs
+document.addEventListener('change', (e) => {
+    if (e.target.classList.contains('playoff-select')) {
+        const grupoIndex = parseInt(e.target.getAttribute('data-grupo'));
+        const equipoIndex = parseInt(e.target.getAttribute('data-equipo'));
+        const seleccion = e.target.value;
+        
+        if (!resultados[grupoIndex]) {
+            resultados[grupoIndex] = { partidos: [], posiciones: [], playoffSelecciones: {} };
+        }
+        
+        if (!resultados[grupoIndex].playoffSelecciones) {
+            resultados[grupoIndex].playoffSelecciones = {};
+        }
+        
+        resultados[grupoIndex].playoffSelecciones[equipoIndex] = seleccion;
+        
+        guardarResultados();
+        renderizarGrupos();
+        // Actualizar eliminatorias inmediatamente
         actualizarEliminatorias();
     }
 });
@@ -294,17 +370,17 @@ function obtenerClasificados() {
         const posiciones = calcularPosiciones(grupo, grupoIndex);
         clasificados.primeros.push({
             grupo: grupo.nombre,
-            equipo: grupo.equipos[posiciones[0].indice],
+            equipo: obtenerNombreEquipo(grupo, grupoIndex, posiciones[0].indice),
             datos: posiciones[0]
         });
         clasificados.segundos.push({
             grupo: grupo.nombre,
-            equipo: grupo.equipos[posiciones[1].indice],
+            equipo: obtenerNombreEquipo(grupo, grupoIndex, posiciones[1].indice),
             datos: posiciones[1]
         });
         clasificados.terceros.push({
             grupo: grupo.nombre,
-            equipo: grupo.equipos[posiciones[2].indice],
+            equipo: obtenerNombreEquipo(grupo, grupoIndex, posiciones[2].indice),
             datos: posiciones[2]
         });
     });

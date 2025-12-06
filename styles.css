@@ -121,15 +121,20 @@ header h1 {
     margin-bottom: 15px;
     border-collapse: collapse;
     font-size: 0.85em;
+    table-layout: fixed;
 }
 
 .tabla-posiciones th {
     background: #1e3c72;
     color: white;
-    padding: 8px 5px;
+    padding: 8px 4px;
     text-align: center;
     font-size: 0.85em;
     font-weight: 600;
+}
+
+.tabla-posiciones th:nth-child(2) {
+    width: 35%;
 }
 
 .tabla-posiciones td {
@@ -141,6 +146,10 @@ header h1 {
 
 .tabla-posiciones tr:hover {
     background: #f0f0f0;
+}
+
+.tabla-posiciones tr:hover .playoff-select {
+    z-index: 20;
 }
 
 .pos-1, .pos-2 {
@@ -179,6 +188,72 @@ header h1 {
     font-weight: 600;
     text-align: center;
     font-size: 0.9em;
+}
+
+.playoff-select {
+    width: 100%;
+    padding: 6px 8px;
+    border: 2px solid #1e3c72;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: 600;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
+    -webkit-appearance: menulist;
+    -moz-appearance: menulist;
+    appearance: menulist;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.playoff-select:hover {
+    border-color: #2a5298;
+    background: #f0f4ff;
+    box-shadow: 0 1px 3px rgba(30, 60, 114, 0.1);
+}
+
+.playoff-select:focus {
+    outline: none;
+    border-color: #1e3c72;
+    box-shadow: 0 0 0 2px rgba(30, 60, 114, 0.15);
+    background: white;
+}
+
+.playoff-select option {
+    padding: 6px 8px;
+    font-weight: 600;
+    font-size: 0.85em;
+}
+
+.tabla-posiciones .playoff-select {
+    width: 100%;
+    max-width: 140px;
+    margin: 0 auto;
+    display: block;
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+.tabla-posiciones td {
+    padding: 8px 5px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+    font-size: 0.85em;
+    position: relative;
+}
+
+.tabla-posiciones td:has(.playoff-select) {
+    padding: 6px 4px;
+    text-align: center;
+    min-width: 120px;
 }
 
 .resultado-input {

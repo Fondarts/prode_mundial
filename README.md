@@ -42,3 +42,4 @@ Puedes modificar los equipos y grupos en el archivo `data.js` según el sorteo o
 - Puedes exportar tus predicciones para compartirlas o guardarlas
 - La aplicación calcula automáticamente las posiciones según puntos, diferencia de goles y goles a favor
 
+
