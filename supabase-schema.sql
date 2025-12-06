@@ -18,12 +18,14 @@ CREATE TABLE IF NOT EXISTS participantes (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     torneo_id UUID REFERENCES torneos(id) ON DELETE CASCADE,
     nombre VARCHAR(50) NOT NULL,
+    usuario_id VARCHAR(100), -- ID único del usuario (para prevenir múltiples predicciones)
     predicciones JSONB DEFAULT '{}'::jsonb,
     puntos INTEGER DEFAULT 0,
     estadisticas JSONB DEFAULT '{"resultadosExactos": 0, "resultadosAcertados": 0, "partidosJugados": 0, "puntosTotales": 0}'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(torneo_id, nombre)
+    UNIQUE(torneo_id, nombre),
+    UNIQUE(torneo_id, usuario_id) -- Un usuario solo puede tener una predicción por torneo
 );
 
 -- Índices para mejorar el rendimiento
@@ -84,5 +86,41 @@ CREATE POLICY "Cualquiera puede crear participantes" ON participantes
 
 -- Política: Cualquiera puede actualizar participantes (para actualizar predicciones)
 CREATE POLICY "Cualquiera puede actualizar participantes" ON participantes
+    FOR UPDATE USING (true);
+
+-- Tabla de usuarios
+CREATE TABLE IF NOT EXISTS usuarios (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    nombre_usuario VARCHAR(30) UNIQUE NOT NULL,
+    clave VARCHAR(5) NOT NULL,
+    creado_en TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    ultimo_acceso TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Índices para usuarios
+CREATE INDEX IF NOT EXISTS idx_usuarios_nombre ON usuarios(nombre_usuario);
+
+-- Trigger para actualizar updated_at en usuarios
+DROP TRIGGER IF EXISTS update_usuarios_updated_at ON usuarios;
+CREATE TRIGGER update_usuarios_updated_at BEFORE UPDATE ON usuarios
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Habilitar RLS en usuarios
+ALTER TABLE usuarios ENABLE ROW LEVEL SECURITY;
+
+-- Políticas para usuarios
+DROP POLICY IF EXISTS "Cualquiera puede leer usuarios" ON usuarios;
+DROP POLICY IF EXISTS "Cualquiera puede crear usuarios" ON usuarios;
+DROP POLICY IF EXISTS "Cualquiera puede actualizar su propio usuario" ON usuarios;
+
+CREATE POLICY "Cualquiera puede leer usuarios" ON usuarios
+    FOR SELECT USING (true);
+
+CREATE POLICY "Cualquiera puede crear usuarios" ON usuarios
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Cualquiera puede actualizar su propio usuario" ON usuarios
     FOR UPDATE USING (true);
 

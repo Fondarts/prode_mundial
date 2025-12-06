@@ -7,10 +7,33 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
+    <div class="main-layout">
+        <!-- Banner Publicitario Izquierdo -->
+        <aside class="banner-ad banner-left">
+            <div class="banner-placeholder">
+                <p>Publicidad</p>
+                <div class="banner-content">
+                    <!-- Aquí irá el código del banner publicitario -->
+                    <div style="width: 100%; height: 100%; background: #f0f0f0; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; color: #999; font-size: 0.9em;">
+                        160x600<br/>Banner Lateral
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Contenido Principal -->
+        <main class="main-content">
+            <div class="container">
         <header>
-            <h1>⚽ Fixture Interactivo Mundial 2026</h1>
-            <p class="subtitle">Predice los resultados y visualiza los cruces</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <div>
+                    <h1>⚽ Fixture Interactivo Mundial 2026</h1>
+                    <p class="subtitle">Predice los resultados y visualiza los cruces</p>
+                </div>
+                <div id="auth-status" class="auth-status">
+                    <!-- Se llenará dinámicamente -->
+                </div>
+            </div>
         </header>
 
         <div class="tabs">
@@ -47,11 +70,37 @@
         </div>
 
         <div class="actions">
-            <button id="reset-btn" class="btn-secondary">Resetear Todo</button>
-            <button id="export-btn" class="btn-secondary">Exportar Predicciones</button>
-            <button id="import-btn" class="btn-secondary">Importar Predicciones</button>
-            <input type="file" id="import-file" accept=".json" style="display: none;">
+            <div class="actions-left">
+                <button id="reset-btn" class="btn-secondary">Resetear Todo</button>
+                <button id="export-btn" class="btn-secondary">Exportar Predicciones</button>
+                <button id="import-btn" class="btn-secondary">Importar Predicciones</button>
+                <input type="file" id="import-file" accept=".json" style="display: none;">
+            </div>
+            <div class="actions-right">
+                <button id="actualizar-resultados-btn" class="btn-primary-api" title="Actualizar resultados desde la API">
+                    🔄 Actualizar Resultados
+                </button>
+                <label class="toggle-auto-update">
+                    <input type="checkbox" id="auto-update-checkbox">
+                    <span>Actualización Automática</span>
+                </label>
+            </div>
         </div>
+            </div>
+        </main>
+
+        <!-- Banner Publicitario Derecho -->
+        <aside class="banner-ad banner-right">
+            <div class="banner-placeholder">
+                <p>Publicidad</p>
+                <div class="banner-content">
+                    <!-- Aquí irá el código del banner publicitario -->
+                    <div style="width: 100%; height: 100%; background: #f0f0f0; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; color: #999; font-size: 0.9em;">
+                        160x600<br/>Banner Lateral
+                    </div>
+                </div>
+            </div>
+        </aside>
     </div>
 
     <!-- Modal personalizado -->
@@ -63,7 +112,12 @@
             </div>
             <div class="modal-body">
                 <p id="modal-message"></p>
-                <input type="text" id="modal-input" class="modal-input" style="display: none;" placeholder="">
+                <div class="modal-input-wrapper" id="modal-input-wrapper" style="display: none;">
+                    <input type="text" id="modal-input" class="modal-input" placeholder="">
+                    <button type="button" id="modal-toggle-password" class="modal-toggle-password" style="display: none;" aria-label="Mostrar/Ocultar contraseña">
+                        <span class="eye-icon">👁️</span>
+                    </button>
+                </div>
             </div>
             <div class="modal-footer">
                 <button id="modal-ok" class="modal-btn modal-btn-primary">OK</button>
@@ -78,6 +132,10 @@
     <script src="data.js"></script>
     <script src="supabase-config.js"></script>
     <script src="supabase-service.js"></script>
+    <script src="auth-service.js"></script>
+    <script src="auth-ui.js"></script>
+    <script src="api-config.js"></script>
+    <script src="api-service.js"></script>
     <script src="torneo.js"></script>
     <script src="app.js"></script>
 </body>

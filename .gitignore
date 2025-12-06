@@ -1,0 +1,33 @@
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos de editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Archivos temporales
+*.tmp
+*.log
+*.cache
+
+# Node modules (si se agregan en el futuro)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Archivos de configuración sensibles (opcional - no incluimos porque ya están en el repo)
+# supabase-config.js (contiene API keys, pero ya está en el repo)
+
+# Archivos de build
+dist/
+build/
+
+# Variables de entorno
+.env
+.env.local
+

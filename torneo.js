@@ -4,6 +4,85 @@
 let torneos = {}; // { codigo: { nombre: string, participantes: [], creadoPor: string, fechaCreacion: timestamp, resultadosReales: {} } }
 let miNombre = localStorage.getItem('mundial2026_mi_nombre') || '';
 
+// Obtener ID único del usuario (para prevenir múltiples predicciones por torneo)
+function obtenerIdUsuarioUnico() {
+    // Si está logueado, usar el ID del usuario
+    if (typeof obtenerUsuarioActual === 'function') {
+        const usuario = obtenerUsuarioActual();
+        if (usuario && usuario.id) {
+            return `user_${usuario.id}`;
+        }
+        if (usuario && usuario.nombreUsuario) {
+            // Si no hay ID pero hay nombre de usuario, usar el nombre como identificador
+            return `user_${usuario.nombreUsuario}`;
+        }
+    }
+    
+    // Si no está logueado, generar/obtener un ID único del navegador
+    let browserId = localStorage.getItem('mundial2026_browser_id');
+    if (!browserId) {
+        // Generar un ID único para este navegador
+        browserId = 'browser_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('mundial2026_browser_id', browserId);
+    }
+    return browserId;
+}
+
+// Verificar si el usuario ya tiene una predicción en un torneo
+async function usuarioYaTienePrediccion(codigo) {
+    const usuarioId = obtenerIdUsuarioUnico();
+    
+    // Verificar en Supabase primero si está disponible
+    if (usarSupabase() && typeof obtenerParticipantesSupabase === 'function') {
+        try {
+            const participantes = await obtenerParticipantesSupabase(codigo);
+            if (participantes) {
+                const yaTiene = participantes.some(p => {
+                    if (p.usuarioId && p.usuarioId === usuarioId) {
+                        return true;
+                    }
+                    // Si está logueado, también verificar por nombre de usuario
+                    if (typeof obtenerUsuarioActual === 'function') {
+                        const usuario = obtenerUsuarioActual();
+                        if (usuario && usuario.nombreUsuario && p.nombre === usuario.nombreUsuario) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+                if (yaTiene) return true;
+            }
+        } catch (error) {
+            console.error('Error al verificar en Supabase:', error);
+        }
+    }
+    
+    // Verificar en localStorage
+    if (!torneos[codigo] || !torneos[codigo].participantes) {
+        return false;
+    }
+    
+    const torneo = torneos[codigo];
+    
+    // Verificar si algún participante tiene el mismo usuarioId
+    return torneo.participantes.some(p => {
+        if (!p) return false;
+        // Si el participante tiene usuarioId, comparar
+        if (p.usuarioId) {
+            return p.usuarioId === usuarioId;
+        }
+        // Si no tiene usuarioId pero está logueado, verificar por nombre de usuario
+        if (typeof obtenerUsuarioActual === 'function') {
+            const usuario = obtenerUsuarioActual();
+            if (usuario && usuario.nombreUsuario) {
+                // Si el participante tiene el mismo nombre de usuario, es el mismo usuario
+                return p.nombre === usuario.nombreUsuario;
+            }
+        }
+        return false;
+    });
+}
+
 // Inicializar datos del torneo
 async function inicializarTorneo() {
     // Inicializar Supabase primero
@@ -185,12 +264,20 @@ async function unirseATorneo(codigo, nombre) {
 // Enviar predicciones a un torneo
 async function enviarPredicciones(codigo, nombre, predicciones) {
     if (!torneos[codigo]) {
-        return false;
+        return { exito: false, mensaje: 'Torneo no encontrado' };
     }
+    
+    // Verificar si el usuario ya tiene una predicción en este torneo
+    const yaTiene = await usuarioYaTienePrediccion(codigo);
+    if (yaTiene) {
+        return { exito: false, mensaje: 'Ya has enviado una predicción para este torneo. Solo puedes enviar una predicción por torneo, incluso si usas un nick diferente.' };
+    }
+    
+    const usuarioId = obtenerIdUsuarioUnico();
     
     // Guardar en Supabase si está disponible
     if (usarSupabase() && typeof guardarParticipanteSupabase === 'function') {
-        const exito = await guardarParticipanteSupabase(codigo, nombre, predicciones);
+        const exito = await guardarParticipanteSupabase(codigo, nombre, predicciones, usuarioId);
         if (!exito) {
             console.warn('No se pudo guardar participante en Supabase, usando localStorage');
         }
@@ -203,9 +290,15 @@ async function enviarPredicciones(codigo, nombre, predicciones) {
         participante = {
             nombre: nombre,
             predicciones: {},
-            puntos: 0
+            puntos: 0,
+            usuarioId: usuarioId // Guardar el ID único del usuario
         };
         torneos[codigo].participantes.push(participante);
+    } else {
+        // Si ya existe, actualizar el usuarioId si no lo tiene
+        if (!participante.usuarioId) {
+            participante.usuarioId = usuarioId;
+        }
     }
     
     // Guardar predicciones
@@ -221,7 +314,7 @@ async function enviarPredicciones(codigo, nombre, predicciones) {
         }
     }
     
-    return true;
+    return { exito: true };
 }
 
 // Guardar resultado real (para el creador del torneo)
@@ -474,6 +567,11 @@ function renderizarTorneo() {
                         <p><strong>Participantes:</strong> ${participantes ? participantes.length : 0}</p>
                         ${miParticipante ? `<p><strong>Tu posición:</strong> ${miPosicion}º con ${miParticipante.puntos || 0} puntos</p>` : ''}
                     </div>
+                    <div class="torneo-item-acciones">
+                        <button class="btn-ver-predicciones" data-codigo="${codigo}">
+                            👁️ Ver Mis Predicciones
+                        </button>
+                    </div>
                     <div class="torneo-item-participantes">
                         <h5>Clasificación:</h5>
                         <table class="tabla-clasificacion-torneo">
@@ -528,6 +626,14 @@ function renderizarTorneo() {
                     icono.textContent = '▼';
                 }
             });
+            
+            // Agregar event listener para el botón de ver predicciones
+            const btnVerPredicciones = torneoItem.querySelector('.btn-ver-predicciones');
+            if (btnVerPredicciones) {
+                btnVerPredicciones.addEventListener('click', () => {
+                    mostrarPrediccionesTorneo(codigo);
+                });
+            }
         });
     }
     
@@ -563,51 +669,228 @@ function renderizarTorneo() {
     }
 }
 
+// Función para mostrar las predicciones del usuario para un torneo específico
+function mostrarPrediccionesTorneo(codigo) {
+    if (!torneos[codigo]) {
+        if (typeof mostrarModal === 'function') {
+            mostrarModal({
+                titulo: 'Error',
+                mensaje: 'Torneo no encontrado',
+                cancelar: false
+            });
+        }
+        return;
+    }
+    
+    const torneo = torneos[codigo];
+    const participante = torneo.participantes.find(p => p && p.nombre === miNombre);
+    
+    if (!participante || !participante.predicciones) {
+        if (typeof mostrarModal === 'function') {
+            mostrarModal({
+                titulo: 'Sin Predicciones',
+                mensaje: 'No has enviado predicciones para este torneo aún.',
+                cancelar: false
+            });
+        }
+        return;
+    }
+    
+    const predicciones = participante.predicciones;
+    
+    // Crear modal con las predicciones
+    const modalContent = document.createElement('div');
+    modalContent.className = 'modal-predicciones';
+    modalContent.innerHTML = `
+        <div class="modal-predicciones-header">
+            <h2>Mis Predicciones - ${torneo.nombre || `Torneo ${codigo}`}</h2>
+            <button class="modal-predicciones-cerrar" onclick="this.closest('.modal-predicciones-overlay').remove()">&times;</button>
+        </div>
+        <div class="modal-predicciones-body">
+            <p class="modal-predicciones-info">Estas son tus predicciones para este torneo. Los resultados están bloqueados y no se pueden modificar.</p>
+            <div id="predicciones-container" class="predicciones-container-solo-lectura"></div>
+        </div>
+    `;
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-predicciones-overlay';
+    overlay.appendChild(modalContent);
+    document.body.appendChild(overlay);
+    
+    // Renderizar predicciones en modo solo lectura
+    const container = document.getElementById('predicciones-container');
+    renderizarPrediccionesSoloLectura(container, predicciones);
+    
+    // Cerrar al hacer click fuera
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            overlay.remove();
+        }
+    });
+}
+
+// Función para renderizar predicciones en modo solo lectura
+function renderizarPrediccionesSoloLectura(container, predicciones) {
+    if (!container || typeof GRUPOS_MUNDIAL_2026 === 'undefined') return;
+    
+    container.innerHTML = '';
+    
+    GRUPOS_MUNDIAL_2026.forEach((grupo, grupoIndex) => {
+        const prediccionesGrupo = predicciones[grupoIndex] || {};
+        
+        const grupoDiv = document.createElement('div');
+        grupoDiv.className = 'grupo-solo-lectura';
+        
+        grupoDiv.innerHTML = `
+            <h3>${grupo.nombre}</h3>
+            ${renderizarTablaPosicionesSoloLectura(grupo, grupoIndex, prediccionesGrupo)}
+            <div class="partidos-solo-lectura">
+                <h4>Partidos</h4>
+                ${renderizarPartidosSoloLectura(grupo, grupoIndex, prediccionesGrupo)}
+            </div>
+        `;
+        
+        container.appendChild(grupoDiv);
+    });
+}
+
+// Función para renderizar tabla de posiciones en solo lectura
+function renderizarTablaPosicionesSoloLectura(grupo, grupoIndex, prediccionesGrupo) {
+    // Calcular posiciones basadas en las predicciones
+    const equipos = grupo.equipos.map((equipo, index) => {
+        let puntos = 0, golesFavor = 0, golesContra = 0, partidosJugados = 0, ganados = 0, empatados = 0, perdidos = 0;
+        
+        grupo.partidos.forEach((partido, partidoIndex) => {
+            const prediccion = prediccionesGrupo[partidoIndex];
+            if (!prediccion || prediccion.golesLocal === '' || prediccion.golesVisitante === '') {
+                return;
+            }
+            
+            const golesLocal = parseInt(prediccion.golesLocal) || 0;
+            const golesVisitante = parseInt(prediccion.golesVisitante) || 0;
+            
+            if (partido.local === index) {
+                golesFavor += golesLocal;
+                golesContra += golesVisitante;
+                partidosJugados++;
+                if (golesLocal > golesVisitante) { ganados++; puntos += 3; }
+                else if (golesLocal === golesVisitante) { empatados++; puntos += 1; }
+                else { perdidos++; }
+            } else if (partido.visitante === index) {
+                golesFavor += golesVisitante;
+                golesContra += golesLocal;
+                partidosJugados++;
+                if (golesVisitante > golesLocal) { ganados++; puntos += 3; }
+                else if (golesVisitante === golesLocal) { empatados++; puntos += 1; }
+                else { perdidos++; }
+            }
+        });
+        
+        return {
+            nombre: typeof obtenerNombreEquipo === 'function' ? obtenerNombreEquipo(grupo, grupoIndex, index) : grupo.equipos[index],
+            puntos,
+            golesFavor,
+            golesContra,
+            diferencia: golesFavor - golesContra,
+            partidosJugados,
+            ganados,
+            empatados,
+            perdidos
+        };
+    });
+    
+    equipos.sort((a, b) => {
+        if (b.puntos !== a.puntos) return b.puntos - a.puntos;
+        if (b.diferencia !== a.diferencia) return b.diferencia - a.diferencia;
+        return b.golesFavor - a.golesFavor;
+    });
+    
+    return `
+        <table class="tabla-posiciones tabla-solo-lectura">
+            <thead>
+                <tr>
+                    <th>Pos</th>
+                    <th>Equipo</th>
+                    <th>PJ</th>
+                    <th>PG</th>
+                    <th>PE</th>
+                    <th>PP</th>
+                    <th>GF</th>
+                    <th>GC</th>
+                    <th>DG</th>
+                    <th>Pts</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${equipos.map((equipo, index) => `
+                    <tr class="${index < 2 ? 'pos-' + (index + 1) : index === 2 ? 'pos-3' : ''}">
+                        <td>${index + 1}º</td>
+                        <td>${equipo.nombre}</td>
+                        <td>${equipo.partidosJugados}</td>
+                        <td>${equipo.ganados}</td>
+                        <td>${equipo.empatados}</td>
+                        <td>${equipo.perdidos}</td>
+                        <td>${equipo.golesFavor}</td>
+                        <td>${equipo.golesContra}</td>
+                        <td>${equipo.diferencia >= 0 ? '+' : ''}${equipo.diferencia}</td>
+                        <td><strong>${equipo.puntos}</strong></td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+// Función para renderizar partidos en solo lectura
+function renderizarPartidosSoloLectura(grupo, grupoIndex, prediccionesGrupo) {
+    return grupo.partidos.map((partido, partidoIndex) => {
+        const prediccion = prediccionesGrupo[partidoIndex];
+        const golesLocal = prediccion ? (prediccion.golesLocal || '0') : '0';
+        const golesVisitante = prediccion ? (prediccion.golesVisitante || '0') : '0';
+        
+        const equipoLocal = typeof obtenerNombreEquipo === 'function' 
+            ? obtenerNombreEquipo(grupo, grupoIndex, partido.local)
+            : grupo.equipos[partido.local];
+        const equipoVisitante = typeof obtenerNombreEquipo === 'function'
+            ? obtenerNombreEquipo(grupo, grupoIndex, partido.visitante)
+            : grupo.equipos[partido.visitante];
+        
+        return `
+            <div class="partido-solo-lectura">
+                <span class="equipo-nombre">${equipoLocal}</span>
+                <div class="resultado-input-solo-lectura">
+                    <input type="text" value="${golesLocal}" readonly class="input-solo-lectura">
+                    <span class="separador">-</span>
+                    <input type="text" value="${golesVisitante}" readonly class="input-solo-lectura">
+                </div>
+                <span class="equipo-nombre">${equipoVisitante}</span>
+            </div>
+        `;
+    }).join('');
+}
+
 // Sistema de modales personalizados
+let modalResolveActual = null;
+
 function mostrarModal(opciones) {
     return new Promise((resolve) => {
+        // Si hay un modal abierto, cerrarlo primero
+        if (modalResolveActual) {
+            modalResolveActual(false);
+        }
+        modalResolveActual = resolve;
+        
         const overlay = document.getElementById('modal-overlay');
         const title = document.getElementById('modal-title');
         const message = document.getElementById('modal-message');
+        const inputWrapper = document.getElementById('modal-input-wrapper');
         const input = document.getElementById('modal-input');
+        const togglePasswordBtn = document.getElementById('modal-toggle-password');
         const okBtn = document.getElementById('modal-ok');
         const cancelBtn = document.getElementById('modal-cancel');
         const closeBtn = document.getElementById('modal-close');
         
-        title.textContent = opciones.titulo || 'Atención';
-        message.textContent = opciones.mensaje || '';
-        message.style.display = opciones.mensaje ? 'block' : 'none';
-        
-        // Configurar input si es necesario
-        if (opciones.input) {
-            input.style.display = 'block';
-            input.type = opciones.inputType || 'text';
-            input.placeholder = opciones.placeholder || '';
-            input.value = opciones.valorInicial || '';
-            input.maxLength = opciones.maxLength || null;
-            if (opciones.maxLength) {
-                input.setAttribute('maxlength', opciones.maxLength);
-            }
-        } else {
-            input.style.display = 'none';
-        }
-        
-        // Configurar botones
-        okBtn.textContent = opciones.okTexto || 'OK';
-        if (opciones.cancelar) {
-            cancelBtn.style.display = 'inline-block';
-            cancelBtn.textContent = opciones.cancelarTexto || 'Cancelar';
-        } else {
-            cancelBtn.style.display = 'none';
-        }
-        
-        // Mostrar modal
-        overlay.style.display = 'flex';
-        if (opciones.input) {
-            setTimeout(() => input.focus(), 100);
-        }
-        
-        // Limpiar event listeners anteriores
+        // Limpiar event listeners anteriores creando nuevos elementos
         const nuevoOk = okBtn.cloneNode(true);
         okBtn.parentNode.replaceChild(nuevoOk, okBtn);
         const nuevoCancel = cancelBtn.cloneNode(true);
@@ -615,38 +898,133 @@ function mostrarModal(opciones) {
         const nuevoClose = closeBtn.cloneNode(true);
         closeBtn.parentNode.replaceChild(nuevoClose, closeBtn);
         
-        // Nuevos event listeners
-        document.getElementById('modal-ok').addEventListener('click', () => {
-            const valor = opciones.input ? document.getElementById('modal-input').value : true;
+        // Obtener referencias frescas
+        const okBtnFinal = document.getElementById('modal-ok');
+        const cancelBtnFinal = document.getElementById('modal-cancel');
+        const closeBtnFinal = document.getElementById('modal-close');
+        const inputFinal = document.getElementById('modal-input');
+        const togglePasswordFinal = document.getElementById('modal-toggle-password');
+        
+        // Configurar contenido
+        title.textContent = opciones.titulo || 'Atención';
+        message.textContent = opciones.mensaje || '';
+        message.style.display = opciones.mensaje ? 'block' : 'none';
+        
+        // Configurar input si es necesario
+        if (opciones.input) {
+            inputWrapper.style.display = 'flex';
+            inputFinal.type = opciones.inputType || 'text';
+            inputFinal.placeholder = opciones.placeholder || '';
+            inputFinal.value = opciones.valorInicial || '';
+            inputFinal.disabled = false;
+            inputFinal.readOnly = false;
+            inputFinal.style.pointerEvents = 'auto';
+            inputFinal.style.opacity = '1';
+            
+            if (opciones.maxLength) {
+                inputFinal.setAttribute('maxlength', opciones.maxLength);
+            } else {
+                inputFinal.removeAttribute('maxlength');
+            }
+            
+            // Mostrar botón de ojo si es password
+            if (opciones.inputType === 'password') {
+                togglePasswordFinal.style.display = 'block';
+                let mostrarPassword = false;
+                
+                togglePasswordFinal.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    mostrarPassword = !mostrarPassword;
+                    inputFinal.type = mostrarPassword ? 'text' : 'password';
+                    togglePasswordFinal.querySelector('.eye-icon').textContent = mostrarPassword ? '🙈' : '👁️';
+                };
+            } else {
+                togglePasswordFinal.style.display = 'none';
+            }
+            
+            // Si es password y maxLength es 5, solo permitir números
+            if (opciones.inputType === 'password' && opciones.maxLength === 5) {
+                inputFinal.pattern = '[0-9]*';
+                inputFinal.oninput = (e) => {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                };
+            } else {
+                inputFinal.oninput = null;
+            }
+        } else {
+            inputWrapper.style.display = 'none';
+        }
+        
+        // Configurar botones
+        okBtnFinal.textContent = opciones.okTexto || 'OK';
+        if (opciones.cancelar) {
+            cancelBtnFinal.style.display = 'inline-block';
+            cancelBtnFinal.textContent = opciones.cancelarTexto || 'Cancelar';
+        } else {
+            cancelBtnFinal.style.display = 'none';
+        }
+        
+        // Event listeners
+        const handleOk = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const valor = opciones.input ? inputFinal.value : true;
             overlay.style.display = 'none';
+            modalResolveActual = null;
             resolve(valor);
-        });
+        };
         
-        document.getElementById('modal-cancel').addEventListener('click', () => {
+        const handleCancel = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             overlay.style.display = 'none';
+            modalResolveActual = null;
             resolve(false);
-        });
+        };
         
-        document.getElementById('modal-close').addEventListener('click', () => {
+        const handleClose = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             overlay.style.display = 'none';
+            modalResolveActual = null;
             resolve(false);
-        });
+        };
         
-        overlay.addEventListener('click', (e) => {
+        const handleOverlayClick = (e) => {
             if (e.target === overlay) {
                 overlay.style.display = 'none';
+                modalResolveActual = null;
                 resolve(false);
             }
-        });
+        };
+        
+        okBtnFinal.addEventListener('click', handleOk);
+        cancelBtnFinal.addEventListener('click', handleCancel);
+        closeBtnFinal.addEventListener('click', handleClose);
+        overlay.addEventListener('click', handleOverlayClick);
         
         // Enter para confirmar
         if (opciones.input) {
-            document.getElementById('modal-input').addEventListener('keypress', (e) => {
+            const handleKeyPress = (e) => {
                 if (e.key === 'Enter') {
-                    document.getElementById('modal-ok').click();
+                    e.preventDefault();
+                    okBtnFinal.click();
                 }
-            });
+            };
+            inputFinal.addEventListener('keypress', handleKeyPress);
+            
+            // Focus después de un pequeño delay
+            setTimeout(() => {
+                inputFinal.focus();
+                if (inputFinal.value) {
+                    inputFinal.select();
+                }
+            }, 150);
         }
+        
+        // Mostrar modal
+        overlay.style.display = 'flex';
     });
 }
 
@@ -666,27 +1044,9 @@ async function mostrarDialogoEnviarPredicciones() {
         });
     });
     
-    // Pedir nombre
-    const nombre = await mostrarModal({
-        titulo: 'Enviar Predicciones',
-        mensaje: 'Ingresa tu nombre para participar en el torneo:',
-        input: true,
-        placeholder: 'Tu nombre',
-        maxLength: 30,
-        cancelar: false
-    });
-    
-    if (!nombre || nombre.trim() === '') {
-        return;
-    }
-    
-    miNombre = nombre.trim();
-    localStorage.setItem('mundial2026_mi_nombre', miNombre);
-    console.log('Nombre guardado:', miNombre);
-    
-    // Preguntar si crear o unirse
+    // PRIMERO: Preguntar si crear o unirse a un torneo
     const crearNuevo = await mostrarModal({
-        titulo: 'Torneo',
+        titulo: 'Enviar Predicciones',
         mensaje: '¿Quieres crear un nuevo torneo o unirte a uno existente?',
         cancelar: true,
         okTexto: 'Crear Nuevo',
@@ -704,32 +1064,158 @@ async function mostrarDialogoEnviarPredicciones() {
             cancelar: true
         });
         
-        if (!codigo || codigo.length !== 6) {
+        if (!codigo || codigo === false) return;
+        
+        const codigoLimpio = codigo.trim().replace(/\D/g, '');
+        if (codigoLimpio.length !== 6) {
             await mostrarModal({
                 titulo: 'Error',
-                mensaje: 'Código inválido. Debe tener 6 dígitos.',
+                mensaje: 'El código debe tener 6 dígitos',
                 cancelar: false
             });
             return;
         }
         
-        const resultado = await unirseATorneo(codigo, miNombre);
-        if (resultado.exito) {
-            await enviarPredicciones(codigo, miNombre, predicciones);
-            await mostrarModal({
-                titulo: '¡Éxito!',
-                mensaje: '¡Te has unido al torneo exitosamente!',
-                cancelar: false
-            });
-        } else {
+        // Verificar si el torneo existe
+        const torneo = await obtenerTorneoPorCodigoSupabase(codigoLimpio);
+        if (!torneo && !torneos[codigoLimpio]) {
             await mostrarModal({
                 titulo: 'Error',
-                mensaje: resultado.mensaje,
+                mensaje: 'No se encontró un torneo con ese código',
                 cancelar: false
             });
             return;
         }
-    } else if (crearNuevo) {
+        
+        // Verificar si ya tiene una predicción en este torneo ANTES de pedir el nick
+        const yaTienePrediccion = await usuarioYaTienePrediccion(codigoLimpio);
+        if (yaTienePrediccion) {
+            await mostrarModal({
+                titulo: 'Ya Participaste',
+                mensaje: 'Ya has enviado una predicción para este torneo. Solo puedes enviar una predicción por torneo, incluso si usas un nick diferente.',
+                cancelar: false
+            });
+            return;
+        }
+        
+        // SEGUNDO: Pedir nombre/nick para este torneo
+        let nombreParaTorneo = '';
+        const usuarioLogueado = typeof obtenerUsuarioActual === 'function' ? obtenerUsuarioActual() : null;
+        
+        if (usuarioLogueado) {
+            // Usuario logueado: pedir nick opcional
+            const nickOpcional = await mostrarModal({
+                titulo: 'Nick para el Torneo',
+                mensaje: `Estás logueado como: ${usuarioLogueado.nombreUsuario}\n\nIngresa un nick opcional para este torneo (o deja vacío para usar tu nombre de usuario):`,
+                input: true,
+                placeholder: 'Nick opcional',
+                maxLength: 30,
+                cancelar: true
+            });
+            
+            if (nickOpcional === false) return;
+            
+            nombreParaTorneo = nickOpcional && nickOpcional.trim() !== '' 
+                ? nickOpcional.trim() 
+                : usuarioLogueado.nombreUsuario;
+        } else {
+            // Modo invitado: pedir nombre
+            const nombre = await mostrarModal({
+                titulo: 'Nick para el Torneo',
+                mensaje: 'Ingresa tu nombre para participar en este torneo:',
+                input: true,
+                placeholder: 'Tu nombre',
+                maxLength: 30,
+                cancelar: true
+            });
+            
+            if (!nombre || nombre === false || nombre.trim() === '') {
+                return;
+            }
+            
+            nombreParaTorneo = nombre.trim();
+        }
+        
+        if (!nombreParaTorneo || nombreParaTorneo.trim() === '') {
+            return;
+        }
+        
+        miNombre = nombreParaTorneo.trim();
+        localStorage.setItem('mundial2026_mi_nombre', miNombre);
+        
+        // Unirse al torneo
+        await unirseATorneo(codigoLimpio, miNombre);
+        const resultado = await enviarPredicciones(codigoLimpio, miNombre, predicciones);
+        
+        if (resultado && !resultado.exito) {
+            await mostrarModal({
+                titulo: 'Error',
+                mensaje: resultado.mensaje || 'No se pudieron enviar las predicciones',
+                cancelar: false
+            });
+            return;
+        }
+        
+        await mostrarModal({
+            titulo: '¡Predicciones Enviadas!',
+            mensaje: `Te has unido al torneo ${codigoLimpio} como "${miNombre}"`,
+            cancelar: false
+        });
+        
+        if (typeof renderizarTorneo === 'function') {
+            await renderizarTorneo();
+        }
+        return;
+    }
+    
+    // Crear nuevo torneo
+    if (crearNuevo === null || crearNuevo === true) {
+        // SEGUNDO: Pedir nombre/nick para este torneo
+        let nombreParaTorneo = '';
+        const usuarioLogueado = typeof obtenerUsuarioActual === 'function' ? obtenerUsuarioActual() : null;
+        
+        if (usuarioLogueado) {
+            // Usuario logueado: pedir nick opcional
+            const nickOpcional = await mostrarModal({
+                titulo: 'Nick para el Torneo',
+                mensaje: `Estás logueado como: ${usuarioLogueado.nombreUsuario}\n\nIngresa un nick opcional para este torneo (o deja vacío para usar tu nombre de usuario):`,
+                input: true,
+                placeholder: 'Nick opcional',
+                maxLength: 30,
+                cancelar: true
+            });
+            
+            if (nickOpcional === false) return;
+            
+            nombreParaTorneo = nickOpcional && nickOpcional.trim() !== '' 
+                ? nickOpcional.trim() 
+                : usuarioLogueado.nombreUsuario;
+        } else {
+            // Modo invitado: pedir nombre
+            const nombre = await mostrarModal({
+                titulo: 'Nick para el Torneo',
+                mensaje: 'Ingresa tu nombre para participar en este torneo:',
+                input: true,
+                placeholder: 'Tu nombre',
+                maxLength: 30,
+                cancelar: true
+            });
+            
+            if (!nombre || nombre === false || nombre.trim() === '') {
+                return;
+            }
+            
+            nombreParaTorneo = nombre.trim();
+        }
+        
+        if (!nombreParaTorneo || nombreParaTorneo.trim() === '') {
+            return;
+        }
+        
+        miNombre = nombreParaTorneo.trim();
+        localStorage.setItem('mundial2026_mi_nombre', miNombre);
+        console.log('Nombre guardado:', miNombre);
+        
         // Crear nuevo torneo
         const nombreTorneo = await mostrarModal({
             titulo: 'Crear Torneo',
@@ -748,7 +1234,16 @@ async function mostrarDialogoEnviarPredicciones() {
         }
         
         const codigo = await crearTorneo(nombreTorneo || '', miNombre);
-        await enviarPredicciones(codigo, miNombre, predicciones);
+        const resultado = await enviarPredicciones(codigo, miNombre, predicciones);
+        
+        if (resultado && !resultado.exito) {
+            await mostrarModal({
+                titulo: 'Error',
+                mensaje: resultado.mensaje || 'No se pudieron enviar las predicciones',
+                cancelar: false
+            });
+            return;
+        }
         
         await mostrarModal({
             titulo: '¡Torneo Creado!',

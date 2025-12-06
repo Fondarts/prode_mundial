@@ -3,11 +3,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof inicializarTorneo === 'function') {
         await inicializarTorneo();
     }
+    if (typeof renderizarEstadoAuth === 'function') {
+        renderizarEstadoAuth();
+    }
     inicializarResultados();
     renderizarGrupos();
     configurarTabs();
     configurarBotones();
     actualizarEliminatorias();
+    
+    // Inicializar actualización automática si está activada
+    const autoUpdateGuardado = localStorage.getItem('mundial2026_auto_update');
+    if (autoUpdateGuardado === 'true' && typeof iniciarActualizacionAutomatica === 'function') {
+        if (typeof API_CONFIG !== 'undefined') {
+            API_CONFIG.autoUpdate = true;
+        }
+        iniciarActualizacionAutomatica();
+    }
 });
 
 // Renderizar grupos
@@ -373,6 +385,114 @@ function configurarBotones() {
             reader.readAsText(file);
         }
     });
+    
+    // Botón de actualizar resultados desde API
+    const actualizarBtn = document.getElementById('actualizar-resultados-btn');
+    if (actualizarBtn) {
+        actualizarBtn.addEventListener('click', async () => {
+            if (!tieneApiConfigurada()) {
+                if (typeof mostrarModal === 'function') {
+                    await mostrarModal({
+                        titulo: 'API no configurada',
+                        mensaje: 'No hay una API configurada. Por favor, configura una API en api-config.js para usar esta función.',
+                        cancelar: false
+                    });
+                } else {
+                    alert('No hay una API configurada. Por favor, configura una API en api-config.js');
+                }
+                return;
+            }
+            
+            actualizarBtn.disabled = true;
+            actualizarBtn.textContent = '🔄 Actualizando...';
+            
+            try {
+                if (typeof actualizarResultadosDesdeAPI === 'function') {
+                    const resultado = await actualizarResultadosDesdeAPI();
+                    
+                    if (resultado && resultado.exito) {
+                        if (typeof mostrarModal === 'function') {
+                            await mostrarModal({
+                                titulo: '¡Actualización Exitosa!',
+                                mensaje: resultado.mensaje || `Se actualizaron ${resultado.actualizados || 0} resultados`,
+                                cancelar: false
+                            });
+                        } else {
+                            alert(resultado.mensaje || 'Resultados actualizados correctamente');
+                        }
+                    } else {
+                        if (typeof mostrarModal === 'function') {
+                            await mostrarModal({
+                                titulo: 'Sin actualizaciones',
+                                mensaje: resultado?.mensaje || 'No se encontraron resultados nuevos para actualizar',
+                                cancelar: false
+                            });
+                        } else {
+                            alert(resultado?.mensaje || 'No se encontraron resultados nuevos');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error al actualizar resultados:', error);
+                if (typeof mostrarModal === 'function') {
+                    await mostrarModal({
+                        titulo: 'Error',
+                        mensaje: 'Hubo un error al actualizar los resultados. Por favor, intenta de nuevo.',
+                        cancelar: false
+                    });
+                } else {
+                    alert('Error al actualizar los resultados');
+                }
+            } finally {
+                actualizarBtn.disabled = false;
+                actualizarBtn.textContent = '🔄 Actualizar Resultados';
+            }
+        });
+    }
+    
+    // Checkbox de actualización automática
+    const autoUpdateCheckbox = document.getElementById('auto-update-checkbox');
+    if (autoUpdateCheckbox) {
+        // Cargar estado guardado
+        const autoUpdateGuardado = localStorage.getItem('mundial2026_auto_update');
+        if (autoUpdateGuardado === 'true') {
+            autoUpdateCheckbox.checked = true;
+            if (typeof iniciarActualizacionAutomatica === 'function') {
+                iniciarActualizacionAutomatica();
+            }
+        }
+        
+        autoUpdateCheckbox.addEventListener('change', (e) => {
+            const activado = e.target.checked;
+            localStorage.setItem('mundial2026_auto_update', activado ? 'true' : 'false');
+            
+            if (activado) {
+                if (!tieneApiConfigurada()) {
+                    e.target.checked = false;
+                    if (typeof mostrarModal === 'function') {
+                        mostrarModal({
+                            titulo: 'API no configurada',
+                            mensaje: 'No hay una API configurada. Por favor, configura una API en api-config.js para usar la actualización automática.',
+                            cancelar: false
+                        });
+                    } else {
+                        alert('No hay una API configurada');
+                    }
+                    return;
+                }
+                
+                API_CONFIG.autoUpdate = true;
+                if (typeof iniciarActualizacionAutomatica === 'function') {
+                    iniciarActualizacionAutomatica();
+                }
+            } else {
+                API_CONFIG.autoUpdate = false;
+                if (typeof detenerActualizacionAutomatica === 'function') {
+                    detenerActualizacionAutomatica();
+                }
+            }
+        });
+    }
 }
 
 // Obtener equipos clasificados

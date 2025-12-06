@@ -143,6 +143,7 @@ async function obtenerParticipantesSupabase(codigo) {
         // Convertir a formato esperado
         return data.map(p => ({
             nombre: p.nombre,
+            usuarioId: p.usuario_id || null,
             predicciones: p.predicciones || {},
             puntos: p.puntos || 0,
             estadisticas: p.estadisticas || {
@@ -159,7 +160,7 @@ async function obtenerParticipantesSupabase(codigo) {
 }
 
 // Agregar o actualizar participante
-async function guardarParticipanteSupabase(codigo, nombre, predicciones) {
+async function guardarParticipanteSupabase(codigo, nombre, predicciones, usuarioId = null) {
     if (!usarSupabase()) return false;
     
     try {
@@ -167,13 +168,28 @@ async function guardarParticipanteSupabase(codigo, nombre, predicciones) {
         const torneo = await obtenerTorneoPorCodigoSupabase(codigo);
         if (!torneo) return false;
         
-        // Verificar si el participante ya existe
+        // Si se proporciona usuarioId, verificar si ya existe una predicción de ese usuario
+        if (usuarioId) {
+            const { data: participanteExistentePorUsuario } = await supabaseClient
+                .from('participantes')
+                .select('id, nombre')
+                .eq('torneo_id', torneo.id)
+                .eq('usuario_id', usuarioId)
+                .maybeSingle();
+            
+            if (participanteExistentePorUsuario) {
+                // Ya existe una predicción de este usuario en este torneo
+                return false;
+            }
+        }
+        
+        // Verificar si el participante ya existe por nombre
         const { data: participanteExistente } = await supabaseClient
             .from('participantes')
             .select('id')
             .eq('torneo_id', torneo.id)
             .eq('nombre', nombre)
-            .single();
+            .maybeSingle();
         
         if (participanteExistente) {
             // Actualizar
@@ -181,6 +197,7 @@ async function guardarParticipanteSupabase(codigo, nombre, predicciones) {
                 .from('participantes')
                 .update({
                     predicciones: predicciones,
+                    usuario_id: usuarioId,
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', participanteExistente.id);
@@ -194,6 +211,7 @@ async function guardarParticipanteSupabase(codigo, nombre, predicciones) {
                     torneo_id: torneo.id,
                     nombre: nombre,
                     predicciones: predicciones,
+                    usuario_id: usuarioId,
                     puntos: 0,
                     estadisticas: {
                         resultadosExactos: 0,
