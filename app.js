@@ -678,16 +678,39 @@ function actualizarBracketCompleto() {
         tituloDiv.className = 'bracket-column-title';
         tituloDiv.textContent = titulo.text;
         tituloDiv.style.gridArea = `1 / ${titulo.col} / span 1 / span 1`;
+        // Agregar data attribute para identificar la ronda en móvil
+        tituloDiv.setAttribute('data-ronda', titulo.text.toLowerCase());
+        tituloDiv.setAttribute('data-col', titulo.col);
         bracketDiv.appendChild(tituloDiv);
     });
     
     // Dieciseisavos (16 partidos): 8 a la izquierda (col 1), 8 a la derecha (col 9)
-    const dieciseisavos = partidosDieciseisavos.length > 0 ? partidosDieciseisavos : 
+    // Asegurar que siempre haya exactamente 16 partidos
+    let dieciseisavos = partidosDieciseisavos.length > 0 ? [...partidosDieciseisavos] : 
         Array(16).fill(null).map(() => ({ local: { equipo: 'Por definir', grupo: '', posicion: '' }, visitante: { equipo: 'Por definir', grupo: '', posicion: '' } }));
     
+    // Si hay menos de 16 partidos, completar con "Por definir"
+    while (dieciseisavos.length < 16) {
+        dieciseisavos.push({
+            local: { equipo: 'Por definir', grupo: '', posicion: '' },
+            visitante: { equipo: 'Por definir', grupo: '', posicion: '' }
+        });
+    }
+    
+    // Asegurar que no haya más de 16
+    dieciseisavos = dieciseisavos.slice(0, 16);
+    
+    console.log('Dieciseisavos partidos a crear:', dieciseisavos.length); // Debug
+    console.log('partidosDieciseisavos original:', partidosDieciseisavos.length); // Debug
+    
     dieciseisavos.forEach((partido, index) => {
+        console.log(`Creando partido ${index} de dieciseisavos`); // Debug
         const matchWrapper = document.createElement('div');
         matchWrapper.className = 'bracket-match-wrapper';
+        matchWrapper.setAttribute('data-fase', 'dieciseisavos');
+        matchWrapper.setAttribute('data-index', index.toString());
+        // Para móvil: establecer order basado en el índice (1-16)
+        matchWrapper.style.setProperty('--mobile-order', (index + 1).toString());
         
         // Primeros 8 a la izquierda (col 1), últimos 8 a la derecha (col 9)
         // Ambos lados deben estar en las mismas filas para alinearse
@@ -695,17 +718,21 @@ function actualizarBracketCompleto() {
             // Lado izquierdo: filas 2, 4, 6, 8, 10, 12, 14, 16
             const startRow = index * 2 + 2;
             matchWrapper.style.gridArea = `${startRow} / 1 / span 2 / span 1`;
+            matchWrapper.setAttribute('data-col', '1');
         } else {
             // Lado derecho: mismas filas que el lado izquierdo (index 0-7 corresponden a index 8-15)
             const leftIndex = index - 8;
             const startRow = leftIndex * 2 + 2;
             matchWrapper.style.gridArea = `${startRow} / 9 / span 2 / span 1`;
+            matchWrapper.setAttribute('data-col', '9');
         }
         
         const matchDiv = crearMatchCard('dieciseisavos', index, partido);
         matchWrapper.appendChild(matchDiv);
         bracketDiv.appendChild(matchWrapper);
     });
+    
+    console.log('Total partidos dieciseisavos creados:', bracketDiv.querySelectorAll('[data-fase="dieciseisavos"]').length); // Debug
     
     // Octavos (8 partidos): 4 a la izquierda (col 2), 4 a la derecha (col 8)
     const octavos = partidosOctavos.length > 0 ? partidosOctavos : 
@@ -714,6 +741,8 @@ function actualizarBracketCompleto() {
     octavos.forEach((partido, index) => {
         const matchWrapper = document.createElement('div');
         matchWrapper.className = 'bracket-match-wrapper';
+        matchWrapper.setAttribute('data-fase', 'octavos');
+        matchWrapper.setAttribute('data-index', index);
         // Centrar entre los dos partidos de dieciseisavos correspondientes
         // Octavos 0: entre dieciseisavos 0 y 1 → fila 3
         // Octavos 1: entre dieciseisavos 2 y 3 → fila 7
@@ -727,6 +756,7 @@ function actualizarBracketCompleto() {
         const startRow = localIndex * 4 + 3;
         const col = index < 4 ? 2 : 8;
         matchWrapper.style.gridArea = `${startRow} / ${col} / span 2 / span 1`;
+        matchWrapper.setAttribute('data-col', col.toString());
         
         const matchDiv = crearMatchCard('octavos', index, partido);
         matchWrapper.appendChild(matchDiv);
@@ -740,6 +770,8 @@ function actualizarBracketCompleto() {
     cuartos.forEach((partido, index) => {
         const matchWrapper = document.createElement('div');
         matchWrapper.className = 'bracket-match-wrapper';
+        matchWrapper.setAttribute('data-fase', 'cuartos');
+        matchWrapper.setAttribute('data-index', index);
         // Centrar entre los dos partidos de octavos correspondientes
         // Cuartos 0: entre octavos 0 y 1 → fila 5
         // Cuartos 1: entre octavos 2 y 3 → fila 13
@@ -749,6 +781,7 @@ function actualizarBracketCompleto() {
         const startRow = localIndex * 8 + 5;
         const col = index < 2 ? 3 : 7;
         matchWrapper.style.gridArea = `${startRow} / ${col} / span 2 / span 1`;
+        matchWrapper.setAttribute('data-col', col.toString());
         
         const matchDiv = crearMatchCard('cuartos', index, partido);
         matchWrapper.appendChild(matchDiv);
@@ -762,12 +795,15 @@ function actualizarBracketCompleto() {
     semis.forEach((partido, index) => {
         const matchWrapper = document.createElement('div');
         matchWrapper.className = 'bracket-match-wrapper';
+        matchWrapper.setAttribute('data-fase', 'semis');
+        matchWrapper.setAttribute('data-index', index);
         // Centrar entre los dos partidos de cuartos correspondientes
         // Semis 0: entre cuartos 0 y 1 → fila 9
         // Semis 1: entre cuartos 2 y 3 → fila 9
         const startRow = 9;
         const col = index === 0 ? 4 : 6;
         matchWrapper.style.gridArea = `${startRow} / ${col} / span 2 / span 1`;
+        matchWrapper.setAttribute('data-col', col.toString());
         
         const matchDiv = crearMatchCard('semis', index, partido);
         matchWrapper.appendChild(matchDiv);
@@ -780,6 +816,9 @@ function actualizarBracketCompleto() {
     
     const matchWrapper = document.createElement('div');
     matchWrapper.className = 'bracket-match-wrapper';
+    matchWrapper.setAttribute('data-fase', 'final');
+    matchWrapper.setAttribute('data-index', '0');
+    matchWrapper.setAttribute('data-col', '5');
     // Centrar entre los dos partidos de semis
     matchWrapper.style.gridArea = `17 / 5 / span 2 / span 1`;
     
