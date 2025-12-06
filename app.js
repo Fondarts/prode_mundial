@@ -1,5 +1,8 @@
 // Inicialización
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    if (typeof inicializarTorneo === 'function') {
+        await inicializarTorneo();
+    }
     inicializarResultados();
     renderizarGrupos();
     configurarTabs();
@@ -29,7 +32,6 @@ function renderizarGrupos() {
     });
     
     // Asegurar que los selects tengan los event listeners correctos
-    // (aunque usamos event delegation, esto ayuda a debuggear)
     container.querySelectorAll('.playoff-select').forEach(select => {
         select.addEventListener('change', (e) => {
             e.stopPropagation();
@@ -191,6 +193,7 @@ function renderizarPartidos(grupo, grupoIndex) {
     
     return grupo.partidos.map((partido, partidoIndex) => {
         const resultado = partidos[partidoIndex] || { golesLocal: '', golesVisitante: '' };
+        
         // En los partidos, solo mostrar el nombre del equipo (usando la selección si existe)
         const equipoLocal = obtenerNombreEquipo(grupo, grupoIndex, partido.local);
         const equipoVisitante = obtenerNombreEquipo(grupo, grupoIndex, partido.visitante);
@@ -309,6 +312,13 @@ function configurarTabs() {
             if (tab === 'eliminatorias') {
                 actualizarBracketCompleto();
             }
+            
+            // Si se activa la pestaña de torneo, renderizarla
+            if (tab === 'torneo') {
+                if (typeof renderizarTorneo === 'function') {
+                    renderizarTorneo();
+                }
+            }
         });
     });
 }
@@ -321,6 +331,13 @@ function configurarBotones() {
             inicializarResultados();
             renderizarGrupos();
             actualizarEliminatorias();
+        }
+    });
+    
+    // Botón de enviar predicciones
+    document.getElementById('enviar-predicciones-btn')?.addEventListener('click', () => {
+        if (typeof mostrarDialogoEnviarPredicciones === 'function') {
+            mostrarDialogoEnviarPredicciones();
         }
     });
     

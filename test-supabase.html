@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Supabase</title>
+</head>
+<body>
+    <h1>Test de Conexión Supabase</h1>
+    <div id="resultado"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script>
+        async function testConexion() {
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = '<p>Probando conexión...</p>';
+            
+            try {
+                // Inicializar Supabase
+                if (typeof inicializarSupabase === 'function') {
+                    const inicializado = inicializarSupabase();
+                    if (!inicializado) {
+                        resultado.innerHTML = '<p style="color: red;">❌ Supabase no se pudo inicializar. Verifica las credenciales.</p>';
+                        return;
+                    }
+                }
+                
+                // Probar consulta simple
+                if (typeof usarSupabase === 'function' && usarSupabase()) {
+                    const { data, error } = await supabaseClient
+                        .from('torneos')
+                        .select('count')
+                        .limit(1);
+                    
+                    if (error) {
+                        resultado.innerHTML = `<p style="color: red;">❌ Error: ${error.message}</p>`;
+                    } else {
+                        resultado.innerHTML = '<p style="color: green;">✅ Conexión exitosa! Supabase está funcionando correctamente.</p>';
+                    }
+                } else {
+                    resultado.innerHTML = '<p style="color: orange;">⚠️ Supabase no está disponible. Verifica la configuración.</p>';
+                }
+            } catch (error) {
+                resultado.innerHTML = `<p style="color: red;">❌ Error: ${error.message}</p>`;
+            }
+        }
+        
+        testConexion();
+    </script>
+</body>
+</html>
+

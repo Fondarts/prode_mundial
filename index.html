@@ -16,11 +16,17 @@
         <div class="tabs">
             <button class="tab-btn active" data-tab="grupos">Grupos</button>
             <button class="tab-btn" data-tab="eliminatorias">Eliminatorias</button>
+            <button class="tab-btn" data-tab="torneo">Torneo</button>
         </div>
 
         <!-- Tab Grupos -->
         <div id="grupos" class="tab-content active">
             <div id="grupos-container"></div>
+            <div class="enviar-predicciones-container">
+                <button id="enviar-predicciones-btn" class="btn-enviar-predicciones">
+                    📤 Enviar Predicciones
+                </button>
+            </div>
         </div>
 
         <!-- Tab Eliminatorias -->
@@ -32,6 +38,14 @@
             <div id="bracket-completo-container" class="eliminatoria-container"></div>
         </div>
 
+        <!-- Tab Torneo -->
+        <div id="torneo" class="tab-content">
+            <h2>🏆 Torneo de Predicciones</h2>
+            <div id="torneo-container">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+
         <div class="actions">
             <button id="reset-btn" class="btn-secondary">Resetear Todo</button>
             <button id="export-btn" class="btn-secondary">Exportar Predicciones</button>
@@ -40,7 +54,31 @@
         </div>
     </div>
 
+    <!-- Modal personalizado -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-title"></h3>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modal-message"></p>
+                <input type="text" id="modal-input" class="modal-input" style="display: none;" placeholder="">
+            </div>
+            <div class="modal-footer">
+                <button id="modal-ok" class="modal-btn modal-btn-primary">OK</button>
+                <button id="modal-cancel" class="modal-btn modal-btn-secondary" style="display: none;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script src="data.js"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-service.js"></script>
+    <script src="torneo.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
