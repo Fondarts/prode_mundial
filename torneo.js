@@ -707,7 +707,7 @@ function mostrarPrediccionesTorneo(codigo) {
             <button class="modal-predicciones-cerrar" onclick="this.closest('.modal-predicciones-overlay').remove()">&times;</button>
         </div>
         <div class="modal-predicciones-body">
-            <p class="modal-predicciones-info">Estas son tus predicciones para este torneo. Los resultados están bloqueados y no se pueden modificar.</p>
+            <p class="modal-predicciones-info">Las predicciones no son modificables.</p>
             <div id="predicciones-container" class="predicciones-container-solo-lectura"></div>
         </div>
     `;

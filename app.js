@@ -215,27 +215,49 @@ function renderizarPartidos(grupo, grupoIndex) {
         const disabledAttr = yaJugado ? 'disabled readonly' : '';
         const readonlyClass = yaJugado ? 'partido-ya-jugado' : '';
         
+        // Obtener fecha y horario del partido
+        const fechaHorario = typeof obtenerFechaHorarioPartido === 'function' 
+            ? obtenerFechaHorarioPartido(grupoIndex, partidoIndex)
+            : { fecha: '', horario: '' };
+        
+        // Formatear fecha para mostrar
+        let fechaFormateada = '';
+        let diaSemana = '';
+        if (fechaHorario.fecha) {
+            const fechaObj = new Date(fechaHorario.fecha + 'T00:00:00');
+            const dias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+            diaSemana = dias[fechaObj.getDay()];
+            fechaFormateada = `${fechaObj.getDate()} ${meses[fechaObj.getMonth()]}`;
+        }
+        
         return `
             <div class="partido ${readonlyClass}">
-                <div class="equipo">${equipoLocal}</div>
-                <div class="resultado-input">
-                    <input type="number" min="0" max="20" 
-                           value="${resultado.golesLocal}" 
-                           data-grupo="${grupoIndex}" 
-                           data-partido="${partidoIndex}" 
-                           data-tipo="local"
-                           placeholder="0"
-                           ${disabledAttr}>
-                    <span class="separador">-</span>
-                    <input type="number" min="0" max="20" 
-                           value="${resultado.golesVisitante}" 
-                           data-grupo="${grupoIndex}" 
-                           data-partido="${partidoIndex}" 
-                           data-tipo="visitante"
-                           placeholder="0"
-                           ${disabledAttr}>
+                <div class="partido-fecha-horario">
+                    ${fechaHorario.fecha ? `<span class="fecha-partido">${diaSemana} ${fechaFormateada}</span>` : ''}
+                    ${fechaHorario.horario ? `<span class="horario-partido">${fechaHorario.horario}</span>` : ''}
                 </div>
-                <div class="equipo">${equipoVisitante}</div>
+                <div class="partido-equipos-resultado">
+                    <span class="equipo equipo-local">${equipoLocal}</span>
+                    <div class="resultado-input">
+                        <input type="number" min="0" max="20" 
+                               value="${resultado.golesLocal}" 
+                               data-grupo="${grupoIndex}" 
+                               data-partido="${partidoIndex}" 
+                               data-tipo="local"
+                               placeholder="0"
+                               ${disabledAttr}>
+                        <span class="separador">-</span>
+                        <input type="number" min="0" max="20" 
+                               value="${resultado.golesVisitante}" 
+                               data-grupo="${grupoIndex}" 
+                               data-partido="${partidoIndex}" 
+                               data-tipo="visitante"
+                               placeholder="0"
+                               ${disabledAttr}>
+                    </div>
+                    <span class="equipo equipo-visitante">${equipoVisitante}</span>
+                </div>
             </div>
         `;
     }).join('');
