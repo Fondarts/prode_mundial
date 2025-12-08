@@ -11,7 +11,6 @@ function cargarUsuarioActual() {
             usuarioActual = JSON.parse(usuarioGuardado);
             return usuarioActual;
         } catch (e) {
-            console.error('Error al cargar usuario:', e);
             return null;
         }
     }
@@ -81,7 +80,6 @@ async function registrarUsuarioSupabase(nombreUsuario, clave) {
         
         return { exito: true, usuario: { id: data.id, nombreUsuario: data.nombre_usuario } };
     } catch (error) {
-        console.error('Error al registrar usuario:', error);
         return { exito: false, mensaje: error.message || 'Error al registrar usuario' };
     }
 }
@@ -116,7 +114,6 @@ async function iniciarSesionSupabase(nombreUsuario, clave) {
             } 
         };
     } catch (error) {
-        console.error('Error al iniciar sesión:', error);
         return { exito: false, mensaje: error.message || 'Error al iniciar sesión' };
     }
 }
@@ -210,4 +207,5 @@ function obtenerUsuariosLocalStorage() {
 
 // Inicializar al cargar
 cargarUsuarioActual();
+
 

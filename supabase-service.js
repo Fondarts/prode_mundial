@@ -31,7 +31,6 @@ async function obtenerTorneosSupabase() {
         
         return torneos;
     } catch (error) {
-        console.error('Error al obtener torneos:', error);
         return null;
     }
 }
@@ -58,7 +57,6 @@ async function obtenerTorneoPorCodigoSupabase(codigo) {
             resultadosReales: data.resultados_reales || {}
         };
     } catch (error) {
-        console.error('Error al obtener torneo:', error);
         return null;
     }
 }
@@ -82,7 +80,6 @@ async function crearTorneoSupabase(codigo, nombre, nombreCreador) {
         if (error) throw error;
         return true;
     } catch (error) {
-        console.error('Error al crear torneo:', error);
         return false;
     }
 }
@@ -114,7 +111,6 @@ async function actualizarResultadosRealesSupabase(codigo, grupoIndex, partidoInd
         if (error) throw error;
         return true;
     } catch (error) {
-        console.error('Error al actualizar resultados reales:', error);
         return false;
     }
 }
@@ -154,7 +150,6 @@ async function obtenerParticipantesSupabase(codigo) {
             }
         }));
     } catch (error) {
-        console.error('Error al obtener participantes:', error);
         return null;
     }
 }
@@ -226,7 +221,6 @@ async function guardarParticipanteSupabase(codigo, nombre, predicciones, usuario
         
         return true;
     } catch (error) {
-        console.error('Error al guardar participante:', error);
         return false;
     }
 }
@@ -251,7 +245,6 @@ async function actualizarEstadisticasParticipanteSupabase(codigo, nombre, estadi
         if (error) throw error;
         return true;
     } catch (error) {
-        console.error('Error al actualizar estadísticas:', error);
         return false;
     }
 }
@@ -305,9 +298,7 @@ async function sincronizarLocalStorageASupabase() {
             }
         }
         
-        console.log('Sincronización completada');
     } catch (error) {
-        console.error('Error en sincronización:', error);
     }
 }
 
@@ -329,7 +320,6 @@ async function cargarDatosDesdeSupabase() {
         
         return torneosData;
     } catch (error) {
-        console.error('Error al cargar datos desde Supabase:', error);
         return null;
     }
 }

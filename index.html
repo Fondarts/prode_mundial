@@ -69,23 +69,11 @@
             </div>
         </div>
 
-        <div class="actions">
-            <div class="actions-left">
-                <button id="reset-btn" class="btn-secondary">Resetear Todo</button>
-                <button id="export-btn" class="btn-secondary">Exportar Predicciones</button>
-                <button id="import-btn" class="btn-secondary">Importar Predicciones</button>
-                <input type="file" id="import-file" accept=".json" style="display: none;">
-            </div>
-            <div class="actions-right">
-                <button id="actualizar-resultados-btn" class="btn-primary-api" title="Actualizar resultados desde la API">
-                    🔄 Actualizar Resultados
-                </button>
-                <label class="toggle-auto-update">
-                    <input type="checkbox" id="auto-update-checkbox">
-                    <span>Actualización Automática</span>
-                </label>
-            </div>
-        </div>
+        <!-- Input oculto para importar archivos (usado desde el menú) -->
+        <input type="file" id="import-file" accept=".json" style="display: none;">
+        
+        <!-- Checkbox oculto para sincronizar actualización automática (usado desde el menú) -->
+        <input type="checkbox" id="auto-update-checkbox" style="display: none;">
             </div>
         </main>
 

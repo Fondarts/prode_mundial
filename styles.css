@@ -114,7 +114,159 @@ header > div {
     border-radius: 20px;
 }
 
-.btn-cerrar-sesion, .btn-login, .btn-registro {
+.menu-usuario-container {
+    position: relative;
+}
+
+.btn-menu-usuario {
+    padding: 8px 12px;
+    border: 2px solid white;
+    border-radius: 20px;
+    background: transparent;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+.btn-menu-usuario:hover {
+    background: white;
+    color: #1e3c72;
+    transform: translateY(-2px);
+}
+
+.menu-usuario {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 220px;
+    max-width: 280px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.menu-usuario.menu-usuario-abierto {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.menu-item {
+    width: 100%;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.menu-item:hover {
+    background: #f0f0f0;
+    color: #1e3c72;
+}
+
+.menu-item-danger {
+    color: #dc3545;
+}
+
+.menu-item-danger:hover {
+    background: #fee;
+    color: #c82333;
+}
+
+.menu-separador {
+    height: 1px;
+    background: #e0e0e0;
+    margin: 4px 0;
+}
+
+.menu-item-toggle {
+    width: 100%;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #333;
+}
+
+.menu-item-toggle:hover {
+    background: #f0f0f0;
+}
+
+.menu-item-toggle input[type="checkbox"] {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+}
+
+.menu-item-submenu {
+    padding: 10px 16px;
+}
+
+.menu-item-label {
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #333;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.menu-item-idiomas {
+    display: flex;
+    gap: 8px;
+    flex-direction: column;
+}
+
+.menu-item-idioma {
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    color: #666;
+    font-size: 0.85em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.menu-item-idioma:hover {
+    border-color: #1e3c72;
+    color: #1e3c72;
+}
+
+.menu-item-idioma.activo {
+    background: #1e3c72;
+    color: white;
+    border-color: #1e3c72;
+}
+
+.btn-login, .btn-registro {
     padding: 8px 16px;
     border: 2px solid white;
     border-radius: 20px;
@@ -126,7 +278,7 @@ header > div {
     font-size: 0.9em;
 }
 
-.btn-cerrar-sesion:hover, .btn-login:hover, .btn-registro:hover {
+.btn-login:hover, .btn-registro:hover {
     background: white;
     color: #1e3c72;
     transform: translateY(-2px);
@@ -1685,14 +1837,15 @@ header h1 {
     
     .usuario-logueado,
     .usuario-no-logueado {
-        flex-direction: column;
+        flex-direction: row;
         width: 100%;
         gap: 8px;
+        justify-content: space-between;
+        align-items: center;
     }
     
     .btn-login,
-    .btn-registro,
-    .btn-cerrar-sesion {
+    .btn-registro {
         width: 100%;
         font-size: 0.85em;
         padding: 8px 12px;
@@ -1700,7 +1853,32 @@ header h1 {
     
     .usuario-nombre {
         font-size: 0.9em;
-        padding: 6px 12px;
+        padding: 0;
+        background: transparent;
+        border-radius: 0;
+        text-align: left;
+        flex: 1;
+    }
+    
+    .menu-usuario-container {
+        position: relative;
+    }
+    
+    .btn-menu-usuario {
+        width: 36px;
+        height: 36px;
+        font-size: 1em;
+        padding: 0;
+    }
+    
+    .menu-usuario {
+        right: 0;
+        min-width: 160px;
+    }
+    
+    .menu-item {
+        font-size: 0.85em;
+        padding: 10px 14px;
     }
     
     /* Tabs móvil */

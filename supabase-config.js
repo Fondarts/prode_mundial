@@ -11,10 +11,8 @@ let supabaseClient = null;
 function inicializarSupabase() {
     if (typeof supabase !== 'undefined' && SUPABASE_CONFIG.url !== 'TU_SUPABASE_URL') {
         supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
-        console.log('Supabase inicializado correctamente');
         return true;
     } else {
-        console.log('Supabase no configurado, usando localStorage');
         return false;
     }
 }

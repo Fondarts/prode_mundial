@@ -1,97 +1,183 @@
 // Datos del Mundial 2026
 // 12 grupos de 4 equipos cada uno
 
-// Calendario del Mundial 2026 - Fechas y horarios estimados
+// Calendario del Mundial 2026 - Horarios oficiales
 // El Mundial 2026 se jugará del 11 de junio al 19 de julio de 2026
-const CALENDARIO_MUNDIAL_2026 = {
-    // Fecha 1 de grupos: 11-15 de junio
-    '1': [
-        { fecha: '2026-06-11', horario: '17:00' }, // Jueves
-        { fecha: '2026-06-11', horario: '20:00' },
-        { fecha: '2026-06-12', horario: '14:00' }, // Viernes
-        { fecha: '2026-06-12', horario: '17:00' },
-        { fecha: '2026-06-12', horario: '20:00' },
-        { fecha: '2026-06-13', horario: '14:00' }, // Sábado
-        { fecha: '2026-06-13', horario: '17:00' },
-        { fecha: '2026-06-13', horario: '20:00' },
-        { fecha: '2026-06-14', horario: '14:00' }, // Domingo
-        { fecha: '2026-06-14', horario: '17:00' },
-        { fecha: '2026-06-14', horario: '20:00' },
-        { fecha: '2026-06-15', horario: '14:00' }, // Lunes
-        { fecha: '2026-06-15', horario: '17:00' },
-        { fecha: '2026-06-15', horario: '20:00' },
-        { fecha: '2026-06-15', horario: '23:00' },
-        { fecha: '2026-06-15', horario: '02:00' }  // Martes (horario siguiente día)
-    ],
-    // Fecha 2 de grupos: 16-20 de junio
-    '2': [
-        { fecha: '2026-06-16', horario: '14:00' }, // Martes
-        { fecha: '2026-06-16', horario: '17:00' },
-        { fecha: '2026-06-16', horario: '20:00' },
-        { fecha: '2026-06-17', horario: '14:00' }, // Miércoles
-        { fecha: '2026-06-17', horario: '17:00' },
-        { fecha: '2026-06-17', horario: '20:00' },
-        { fecha: '2026-06-18', horario: '14:00' }, // Jueves
-        { fecha: '2026-06-18', horario: '17:00' },
-        { fecha: '2026-06-18', horario: '20:00' },
-        { fecha: '2026-06-19', horario: '14:00' }, // Viernes
-        { fecha: '2026-06-19', horario: '17:00' },
-        { fecha: '2026-06-19', horario: '20:00' },
-        { fecha: '2026-06-20', horario: '14:00' }, // Sábado
-        { fecha: '2026-06-20', horario: '17:00' },
-        { fecha: '2026-06-20', horario: '20:00' },
-        { fecha: '2026-06-20', horario: '23:00' }
-    ],
-    // Fecha 3 de grupos: 21-25 de junio
-    '3': [
-        { fecha: '2026-06-21', horario: '14:00' }, // Domingo
-        { fecha: '2026-06-21', horario: '17:00' },
-        { fecha: '2026-06-21', horario: '20:00' },
-        { fecha: '2026-06-22', horario: '14:00' }, // Lunes
-        { fecha: '2026-06-22', horario: '17:00' },
-        { fecha: '2026-06-22', horario: '20:00' },
-        { fecha: '2026-06-23', horario: '14:00' }, // Martes
-        { fecha: '2026-06-23', horario: '17:00' },
-        { fecha: '2026-06-23', horario: '20:00' },
-        { fecha: '2026-06-24', horario: '14:00' }, // Miércoles
-        { fecha: '2026-06-24', horario: '17:00' },
-        { fecha: '2026-06-24', horario: '20:00' },
-        { fecha: '2026-06-25', horario: '14:00' }, // Jueves
-        { fecha: '2026-06-25', horario: '17:00' },
-        { fecha: '2026-06-25', horario: '20:00' },
-        { fecha: '2026-06-25', horario: '23:00' }
-    ]
+// NOTA: Los horarios almacenados aquí están en hora de Madrid (España) - UTC+2 en verano
+// Estos horarios se convierten automáticamente a la zona horaria local del usuario
+// Mapeo directo de partidos a horarios oficiales basado en equipos y fechas
+
+// Función para convertir horario desde Madrid (UTC+2 en verano) a la zona horaria del usuario
+function convertirHorarioAMadridPrecisa(fecha, horario) {
+    if (!fecha || !horario) return { fecha: '', horario: '' };
+    
+    try {
+        // Parsear fecha y horario
+        const [year, month, day] = fecha.split('-');
+        const [hours, minutes] = horario.split(':');
+        
+        // Crear fecha en Madrid (UTC+2 en verano)
+        // Usar formato ISO con offset explícito
+        const fechaMadridISO = `${year}-${month}-${day}T${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:00+02:00`;
+        const fechaMadrid = new Date(fechaMadridISO);
+        
+        // Obtener zona horaria del usuario
+        const usuarioTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        
+        // Formatear en la zona horaria del usuario
+        const fechaUsuarioStr = fechaMadrid.toLocaleString('en-US', {
+            timeZone: usuarioTimezone,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+        
+        // Parsear la fecha formateada
+        const [fechaPart, horaPart] = fechaUsuarioStr.split(', ');
+        const [mes, dia, año] = fechaPart.split('/');
+        const [horas, minutos] = horaPart.split(':');
+        
+        const fechaFormateada = `${año}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+        const horarioFormateado = `${horas.padStart(2, '0')}:${minutos.padStart(2, '0')}`;
+        
+        return { fecha: fechaFormateada, horario: horarioFormateado };
+    } catch (error) {
+        return { fecha: fecha, horario: horario };
+    }
+}
+// Estructura: [grupoIndex][partidoIndex] = { fecha, horario }
+const MAPEO_HORARIOS_PARTIDOS = {
+    // Grupo A
+    0: {
+        0: { fecha: '2026-06-11', horario: '20:00' }, // México vs Sudáfrica
+        1: { fecha: '2026-06-12', horario: '03:00' }, // Corea del Sur vs Playoff D
+        2: { fecha: '2026-06-17', horario: '02:00' }, // México vs Corea del Sur
+        3: { fecha: '2026-06-16', horario: '19:00' }, // Playoff D vs Sudáfrica
+        4: { fecha: '2026-06-21', horario: '04:00' }, // Playoff D vs México
+        5: { fecha: '2026-06-21', horario: '04:00' }  // Sudáfrica vs Corea del Sur
+    },
+    // Grupo B
+    1: {
+        0: { fecha: '2026-06-11', horario: '22:00' }, // Canadá vs Playoff B1
+        1: { fecha: '2026-06-11', horario: '19:00' }, // Catar vs Suiza
+        2: { fecha: '2026-06-16', horario: '22:00' }, // Canadá vs Catar
+        3: { fecha: '2026-06-16', horario: '19:00' }, // Suiza vs Playoff B1
+        4: { fecha: '2026-06-20', horario: '19:00' }, // Suiza vs Canadá
+        5: { fecha: '2026-06-20', horario: '19:00' }  // Playoff B1 vs Catar
+    },
+    // Grupo C
+    2: {
+        0: { fecha: '2026-06-12', horario: '01:00' }, // Brasil vs Marruecos
+        1: { fecha: '2026-06-12', horario: '04:00' }, // Haití vs Escocia
+        2: { fecha: '2026-06-17', horario: '04:00' }, // Brasil vs Haití
+        3: { fecha: '2026-06-17', horario: '01:00' }, // Escocia vs Marruecos
+        4: { fecha: '2026-06-21', horario: '01:00' }, // Escocia vs Brasil
+        5: { fecha: '2026-06-21', horario: '01:00' }  // Marruecos vs Haití
+    },
+    // Grupo D
+    3: {
+        0: { fecha: '2026-06-12', horario: '01:00' }, // USA vs Paraguay
+        1: { fecha: '2026-06-12', horario: '04:00' }, // Australia vs Playoff C
+        2: { fecha: '2026-06-16', horario: '19:00' }, // USA vs Australia
+        3: { fecha: '2026-06-17', horario: '04:00' }, // Playoff C vs Paraguay
+        4: { fecha: '2026-06-21', horario: '02:00' }, // Playoff C vs USA
+        5: { fecha: '2026-06-21', horario: '02:00' }  // Paraguay vs Australia
+    },
+    // Grupo E
+    4: {
+        0: { fecha: '2026-06-11', horario: '19:00' }, // Alemania vs Curazao
+        1: { fecha: '2026-06-12', horario: '02:00' }, // Costa de Marfil vs Ecuador
+        2: { fecha: '2026-06-16', horario: '23:00' }, // Alemania vs Costa de Marfil
+        3: { fecha: '2026-06-17', horario: '02:00' }, // Ecuador vs Curazao
+        4: { fecha: '2026-06-20', horario: '23:00' }, // Ecuador vs Alemania
+        5: { fecha: '2026-06-20', horario: '23:00' }  // Curazao vs Costa de Marfil
+    },
+    // Grupo F
+    5: {
+        0: { fecha: '2026-06-11', horario: '20:00' }, // Países Bajos vs Japón
+        1: { fecha: '2026-06-12', horario: '03:00' }, // Playoff B2 vs Túnez
+        2: { fecha: '2026-06-16', horario: '19:00' }, // Países Bajos vs Playoff B2
+        3: { fecha: '2026-06-17', horario: '05:00' }, // Túnez vs Japón
+        4: { fecha: '2026-06-21', horario: '01:00' }, // Túnez vs Países Bajos
+        5: { fecha: '2026-06-21', horario: '01:00' }  // Japón vs Playoff B2
+    },
+    // Grupo G
+    6: {
+        0: { fecha: '2026-06-11', horario: '19:00' }, // Bélgica vs Egipto
+        1: { fecha: '2026-06-12', horario: '01:00' }, // Irán vs Nueva Zelanda
+        2: { fecha: '2026-06-16', horario: '19:00' }, // Bélgica vs Irán
+        3: { fecha: '2026-06-17', horario: '01:00' }, // Nueva Zelanda vs Egipto
+        4: { fecha: '2026-06-21', horario: '03:00' }, // Nueva Zelanda vs Bélgica
+        5: { fecha: '2026-06-21', horario: '03:00' }  // Egipto vs Irán
+    },
+    // Grupo H
+    7: {
+        0: { fecha: '2026-06-11', horario: '21:00' }, // España vs Cabo Verde
+        1: { fecha: '2026-06-12', horario: '01:00' }, // Arabia Saudita vs Uruguay
+        2: { fecha: '2026-06-16', horario: '19:00' }, // España vs Arabia Saudita
+        3: { fecha: '2026-06-17', horario: '01:00' }, // Uruguay vs Cabo Verde
+        4: { fecha: '2026-06-21', horario: '01:00' }, // Uruguay vs España
+        5: { fecha: '2026-06-21', horario: '01:00' }  // Cabo Verde vs Arabia Saudita
+    },
+    // Grupo I
+    8: {
+        0: { fecha: '2026-06-11', horario: '20:00' }, // Francia vs Senegal
+        1: { fecha: '2026-06-12', horario: '01:00' }, // Playoff 2 vs Noruega
+        2: { fecha: '2026-06-16', horario: '22:00' }, // Francia vs Playoff 2
+        3: { fecha: '2026-06-17', horario: '03:00' }, // Noruega vs Senegal
+        4: { fecha: '2026-06-20', horario: '20:00' }, // Noruega vs Francia
+        5: { fecha: '2026-06-20', horario: '20:00' }  // Senegal vs Playoff 2
+    },
+    // Grupo J
+    9: {
+        0: { fecha: '2026-06-12', horario: '03:00' }, // Argentina vs Argelia
+        1: { fecha: '2026-06-12', horario: '04:00' }, // Austria vs Jordania
+        2: { fecha: '2026-06-16', horario: '19:00' }, // Argentina vs Austria
+        3: { fecha: '2026-06-17', horario: '03:00' }, // Jordania vs Argelia
+        4: { fecha: '2026-06-21', horario: '04:00' }, // Jordania vs Argentina
+        5: { fecha: '2026-06-21', horario: '04:00' }  // Argelia vs Austria
+    },
+    // Grupo K
+    10: {
+        0: { fecha: '2026-06-11', horario: '19:00' }, // Portugal vs Playoff 1
+        1: { fecha: '2026-06-12', horario: '03:00' }, // Uzbekistán vs Colombia
+        2: { fecha: '2026-06-16', horario: '19:00' }, // Portugal vs Uzbekistán
+        3: { fecha: '2026-06-17', horario: '03:00' }, // Colombia vs Playoff 1
+        4: { fecha: '2026-06-21', horario: '02:30' }, // Colombia vs Portugal
+        5: { fecha: '2026-06-21', horario: '02:30' }  // Playoff 1 vs Uzbekistán
+    },
+    // Grupo L
+    11: {
+        0: { fecha: '2026-06-11', horario: '20:00' }, // Inglaterra vs Croacia
+        1: { fecha: '2026-06-12', horario: '02:00' }, // Ghana vs Panamá
+        2: { fecha: '2026-06-16', horario: '21:00' }, // Inglaterra vs Ghana
+        3: { fecha: '2026-06-17', horario: '02:00' }, // Panamá vs Croacia
+        4: { fecha: '2026-06-20', horario: '20:00' }, // Panamá vs Inglaterra
+        5: { fecha: '2026-06-20', horario: '20:00' }  // Croacia vs Ghana
+    }
 };
 
 // Función para obtener fecha y horario de un partido
+// Convierte automáticamente desde hora de Madrid a la zona horaria del usuario
 function obtenerFechaHorarioPartido(grupoIndex, partidoIndex) {
     const grupo = GRUPOS_MUNDIAL_2026[grupoIndex];
     if (!grupo || !grupo.partidos[partidoIndex]) {
         return { fecha: '', horario: '' };
     }
     
-    const fechaGrupo = grupo.partidos[partidoIndex].fecha;
-    const calendarioFecha = CALENDARIO_MUNDIAL_2026[fechaGrupo.toString()];
-    
-    if (!calendarioFecha) {
+    // Obtener horario en hora de Madrid
+    let horarioMadrid = null;
+    if (MAPEO_HORARIOS_PARTIDOS[grupoIndex] && MAPEO_HORARIOS_PARTIDOS[grupoIndex][partidoIndex]) {
+        horarioMadrid = MAPEO_HORARIOS_PARTIDOS[grupoIndex][partidoIndex];
+    } else {
         return { fecha: '', horario: '' };
     }
     
-    // Calcular índice del partido dentro de la fecha del grupo (0 o 1, ya que hay 2 partidos por fecha)
-    // Los partidos están ordenados: fecha 1 (0,1), fecha 2 (2,3), fecha 3 (4,5)
-    const indiceEnFecha = partidoIndex % 2; // 0 o 1
-    
-    // Calcular índice global: cada grupo tiene 2 partidos por fecha
-    // Fecha 1: grupos 0-11, partidos 0-1 de cada grupo = índices 0-23
-    // Fecha 2: grupos 0-11, partidos 2-3 de cada grupo = índices 0-23
-    // Fecha 3: grupos 0-11, partidos 4-5 de cada grupo = índices 0-23
-    const indiceGlobal = grupoIndex * 2 + indiceEnFecha;
-    
-    if (indiceGlobal < calendarioFecha.length) {
-        return calendarioFecha[indiceGlobal];
-    }
-    
-    return { fecha: '', horario: '' };
+    // Convertir a la zona horaria del usuario
+    return convertirHorarioAMadridPrecisa(horarioMadrid.fecha, horarioMadrid.horario);
 }
 
 // Mapeo de playoffs a sus opciones
@@ -299,7 +385,6 @@ function inicializarResultados() {
                 });
             });
         } catch (e) {
-            console.error('Error al cargar resultados guardados:', e);
         }
     }
     
@@ -354,7 +439,6 @@ function cargarPartidosJugados() {
         try {
             partidosJugados = JSON.parse(guardado);
         } catch (e) {
-            console.error('Error al cargar partidos jugados:', e);
             partidosJugados = {};
         }
     }

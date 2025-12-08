@@ -86,3 +86,4 @@ El Mundial 2026 aún no ha comenzado, por lo que:
 - Los resultados estarán disponibles cuando comience el torneo
 - Por ahora, usa el modo de prueba para simular resultados
 
+

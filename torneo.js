@@ -53,7 +53,6 @@ async function usuarioYaTienePrediccion(codigo) {
                 if (yaTiene) return true;
             }
         } catch (error) {
-            console.error('Error al verificar en Supabase:', error);
         }
     }
     
@@ -99,7 +98,6 @@ async function inicializarTorneo() {
             const datosSupabase = await cargarDatosDesdeSupabase();
             if (datosSupabase) {
                 torneos = datosSupabase;
-                console.log('Datos cargados desde Supabase');
             } else {
                 // Si no hay datos en Supabase, sincronizar desde localStorage
                 await sincronizarLocalStorageASupabase();
@@ -110,7 +108,6 @@ async function inicializarTorneo() {
                 }
             }
         } catch (error) {
-            console.error('Error al cargar desde Supabase, usando localStorage:', error);
         }
     }
     
@@ -125,7 +122,6 @@ async function inicializarTorneo() {
                     torneos = datosCargados;
                 }
             } catch (e) {
-                console.error('Error al cargar datos del torneo:', e);
                 torneos = {};
             }
         }
@@ -164,9 +160,7 @@ async function guardarTorneos() {
     // Guardar en localStorage siempre (como backup)
     try {
         localStorage.setItem('mundial2026_torneos', JSON.stringify(torneos));
-        console.log('Torneos guardados en localStorage:', Object.keys(torneos).length, 'torneos');
     } catch (e) {
-        console.error('Error al guardar torneos en localStorage:', e);
     }
     
     // Si Supabase está disponible, también guardar ahí
@@ -196,7 +190,6 @@ async function crearTorneo(nombre, nombreCreador) {
     if (usarSupabase() && typeof crearTorneoSupabase === 'function') {
         const exito = await crearTorneoSupabase(codigo, nombre, nombreCreador);
         if (!exito) {
-            console.warn('No se pudo crear torneo en Supabase, usando localStorage');
         }
     }
     
@@ -279,7 +272,6 @@ async function enviarPredicciones(codigo, nombre, predicciones) {
     if (usarSupabase() && typeof guardarParticipanteSupabase === 'function') {
         const exito = await guardarParticipanteSupabase(codigo, nombre, predicciones, usuarioId);
         if (!exito) {
-            console.warn('No se pudo guardar participante en Supabase, usando localStorage');
         }
     }
     
@@ -340,7 +332,6 @@ async function guardarResultadoReal(codigo, grupoIndex, partidoIndex, golesLocal
     if (usarSupabase() && typeof actualizarResultadosRealesSupabase === 'function') {
         const exito = await actualizarResultadosRealesSupabase(codigo, grupoIndex, partidoIndex, golesLocal, golesVisitante);
         if (!exito) {
-            console.warn('No se pudo actualizar resultados en Supabase, usando localStorage');
         }
     }
     
@@ -456,20 +447,16 @@ function obtenerMisTorneos() {
     
     // Asegurar que torneos es un objeto válido
     if (!torneos || typeof torneos !== 'object') {
-        console.log('Torneos no es un objeto válido');
         return [];
     }
     
     const codigos = Object.keys(torneos);
-    console.log('Total de torneos encontrados:', codigos.length);
-    console.log('Mi nombre:', miNombre);
     
     codigos.forEach(codigo => {
         const torneo = torneos[codigo];
         if (torneo && torneo.participantes) {
             // Verificar si el usuario está en este torneo
             const estaEnTorneo = torneo.participantes.some(p => p && p.nombre === miNombre);
-            console.log(`Torneo ${codigo}: ${torneo.nombre}, participantes: ${torneo.participantes.length}, estoy en él: ${estaEnTorneo}`);
             
             if (estaEnTorneo) {
                 misTorneos.push({ codigo, ...torneo });
@@ -477,7 +464,6 @@ function obtenerMisTorneos() {
         }
     });
     
-    console.log('Torneos donde estoy:', misTorneos.length);
     
     // Ordenar por fecha de creación (más reciente primero)
     misTorneos.sort((a, b) => (b.fechaCreacion || 0) - (a.fechaCreacion || 0));
@@ -1274,7 +1260,6 @@ async function mostrarDialogoEnviarPredicciones() {
         
         miNombre = nombreParaTorneo.trim();
         localStorage.setItem('mundial2026_mi_nombre', miNombre);
-        console.log('Nombre guardado:', miNombre);
         
         // Crear nuevo torneo
         const nombreTorneo = await mostrarModal({

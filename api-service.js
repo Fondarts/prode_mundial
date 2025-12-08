@@ -52,7 +52,6 @@ async function obtenerResultadosFootballData(competitionId) {
         const data = await response.json();
         return procesarResultadosFootballData(data);
     } catch (error) {
-        console.error('Error al obtener resultados de Football-Data:', error);
         return null;
     }
 }
@@ -97,7 +96,6 @@ async function obtenerResultadosApiFootball(leagueId, season) {
     const config = API_CONFIG.apiFootball;
     
     if (!config.apiKey) {
-        console.error('API-Football: No se ha configurado la API key');
         return null;
     }
     
@@ -137,13 +135,11 @@ async function obtenerResultadosApiFootball(leagueId, season) {
         
         // Verificar si hay errores en la respuesta
         if (data.errors && data.errors.length > 0) {
-            console.error('API-Football errors:', data.errors);
             return null;
         }
         
         return procesarResultadosApiFootball(data);
     } catch (error) {
-        console.error('Error al obtener resultados de API-Football:', error);
         return null;
     }
 }
@@ -180,12 +176,10 @@ function procesarResultadosApiFootball(data) {
                     };
                 } else {
                     // Log para debugging - ver qué partidos no se encontraron
-                    console.log(`Partido no encontrado en grupos: ${local} vs ${visitante}`);
                 }
             }
         });
     } else {
-        console.warn('API-Football: Formato de respuesta inesperado', data);
     }
     
     return resultados;
@@ -250,7 +244,6 @@ async function actualizarResultadosDesdeAPI() {
     
     if (API_CONFIG.testMode) {
         // Modo de prueba: simular algunos resultados
-        console.log('Modo de prueba activado: simulando resultados...');
         resultadosAPI = simularResultados();
     } else {
         resultadosAPI = await obtenerResultadosAPI();
@@ -402,4 +395,9 @@ function detenerActualizacionAutomatica() {
         intervaloActualizacion = null;
     }
 }
+
+// Hacer funciones disponibles globalmente
+window.iniciarActualizacionAutomatica = iniciarActualizacionAutomatica;
+window.detenerActualizacionAutomatica = detenerActualizacionAutomatica;
+window.actualizarResultadosDesdeAPI = actualizarResultadosDesdeAPI;
 

@@ -1,26 +1,44 @@
 // Inicialización
-document.addEventListener('DOMContentLoaded', async () => {
-    if (typeof inicializarTorneo === 'function') {
-        await inicializarTorneo();
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    // PASO 1: Renderizar estado de autenticación INMEDIATAMENTE (SIN await, SIN async)
+    // Esto debe ser lo primero para que el usuario vea el estado de inmediato
     if (typeof renderizarEstadoAuth === 'function') {
         renderizarEstadoAuth();
     }
-    inicializarResultados();
     
-    renderizarGrupos();
+    // PASO 2: Configurar tabs y botones inmediatamente para que la página sea interactiva
     configurarTabs();
     configurarBotones();
+    
+    // PASO 3: Inicializar resultados y renderizar grupos (operaciones rápidas)
+    inicializarResultados();
+    renderizarGrupos();
     actualizarEliminatorias();
     
-    // Inicializar actualización automática si está activada
-    const autoUpdateGuardado = localStorage.getItem('mundial2026_auto_update');
-    if (autoUpdateGuardado === 'true' && typeof iniciarActualizacionAutomatica === 'function') {
-        if (typeof API_CONFIG !== 'undefined') {
-            API_CONFIG.autoUpdate = true;
+    // PASO 4: Operaciones pesadas de forma asíncrona sin bloquear
+    (async () => {
+        // Inicializar torneo de forma asíncrona sin bloquear
+        if (typeof inicializarTorneo === 'function') {
+            try {
+                await inicializarTorneo();
+                // Actualizar estado de auth después de inicializar torneo si es necesario
+                if (typeof renderizarEstadoAuth === 'function') {
+                    renderizarEstadoAuth();
+                }
+            } catch (error) {
+                // Si falla, al menos el estado de auth ya está renderizado
+            }
         }
-        iniciarActualizacionAutomatica();
-    }
+        
+        // Inicializar actualización automática si está activada
+        const autoUpdateGuardado = localStorage.getItem('mundial2026_auto_update');
+        if (autoUpdateGuardado === 'true' && typeof iniciarActualizacionAutomatica === 'function') {
+            if (typeof API_CONFIG !== 'undefined') {
+                API_CONFIG.autoUpdate = true;
+            }
+            iniciarActualizacionAutomatica();
+        }
+    })();
 });
 
 // Renderizar grupos
