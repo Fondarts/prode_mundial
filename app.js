@@ -206,13 +206,17 @@ function renderizarPartidos(grupo, grupoIndex) {
     
     return grupo.partidos.map((partido, partidoIndex) => {
         const resultado = partidos[partidoIndex] || { golesLocal: '', golesVisitante: '' };
+        const yaJugado = typeof partidoYaJugado === 'function' ? partidoYaJugado(grupoIndex, partidoIndex) : false;
         
         // En los partidos, solo mostrar el nombre del equipo (usando la selección si existe)
         const equipoLocal = obtenerNombreEquipo(grupo, grupoIndex, partido.local);
         const equipoVisitante = obtenerNombreEquipo(grupo, grupoIndex, partido.visitante);
         
+        const disabledAttr = yaJugado ? 'disabled readonly' : '';
+        const readonlyClass = yaJugado ? 'partido-ya-jugado' : '';
+        
         return `
-            <div class="partido">
+            <div class="partido ${readonlyClass}">
                 <div class="equipo">${equipoLocal}</div>
                 <div class="resultado-input">
                     <input type="number" min="0" max="20" 
@@ -220,14 +224,16 @@ function renderizarPartidos(grupo, grupoIndex) {
                            data-grupo="${grupoIndex}" 
                            data-partido="${partidoIndex}" 
                            data-tipo="local"
-                           placeholder="0">
+                           placeholder="0"
+                           ${disabledAttr}>
                     <span class="separador">-</span>
                     <input type="number" min="0" max="20" 
                            value="${resultado.golesVisitante}" 
                            data-grupo="${grupoIndex}" 
                            data-partido="${partidoIndex}" 
                            data-tipo="visitante"
-                           placeholder="0">
+                           placeholder="0"
+                           ${disabledAttr}>
                 </div>
                 <div class="equipo">${equipoVisitante}</div>
             </div>
@@ -239,8 +245,16 @@ function renderizarPartidos(grupo, grupoIndex) {
 document.addEventListener('input', (e) => {
     // Para grupos
     if (e.target.hasAttribute('data-grupo')) {
+        // Verificar si el partido ya se jugó
         const grupoIndex = parseInt(e.target.getAttribute('data-grupo'));
         const partidoIndex = parseInt(e.target.getAttribute('data-partido'));
+        
+        if (typeof partidoYaJugado === 'function' && partidoYaJugado(grupoIndex, partidoIndex)) {
+            e.preventDefault();
+            e.target.blur();
+            return;
+        }
+        
         const tipo = e.target.getAttribute('data-tipo');
         
         if (!resultados[grupoIndex]) {
@@ -265,6 +279,14 @@ document.addEventListener('input', (e) => {
     if (e.target.hasAttribute('data-eliminatoria')) {
         const fase = e.target.getAttribute('data-eliminatoria');
         const partidoIndex = parseInt(e.target.getAttribute('data-partido'));
+        
+        // Verificar si el partido ya se jugó
+        if (typeof partidoEliminatoriaYaJugado === 'function' && partidoEliminatoriaYaJugado(fase, partidoIndex)) {
+            e.preventDefault();
+            e.target.blur();
+            return;
+        }
+        
         const tipo = e.target.getAttribute('data-tipo');
         
         if (!resultados[fase]) {
@@ -859,8 +881,13 @@ function crearMatchCard(fase, index, partido) {
     const localInfo = (localPosicion && localGrupo) ? `${localPosicion} ${localGrupo}` : '';
     const visitanteInfo = (visitantePosicion && visitanteGrupo) ? `${visitantePosicion} ${visitanteGrupo}` : '';
     
+    // Verificar si el partido ya se jugó
+    const yaJugado = typeof partidoEliminatoriaYaJugado === 'function' ? partidoEliminatoriaYaJugado(fase, index) : false;
+    const disabledAttr = yaJugado ? 'disabled readonly' : '';
+    const readonlyClass = yaJugado ? 'partido-ya-jugado' : '';
+    
     matchDiv.innerHTML = `
-        <div class="bracket-team ${ganadorLocal ? 'ganador' : ''} ${esPorDefinirLocal ? 'por-definir' : ''}">
+        <div class="bracket-team ${ganadorLocal ? 'ganador' : ''} ${esPorDefinirLocal ? 'por-definir' : ''} ${readonlyClass}">
             <div class="bracket-team-info">
                 <span class="bracket-team-nombre">${equipoLocalNombre}</span>
                 ${localInfo ? `<span class="bracket-team-posicion">${localInfo}</span>` : ''}
@@ -872,10 +899,11 @@ function crearMatchCard(fase, index, partido) {
                        data-partido="${index}" 
                        data-equipo="0" 
                        data-tipo="local"
-                       placeholder="0">
+                       placeholder="0"
+                       ${disabledAttr}>
             </div>
         </div>
-        <div class="bracket-team ${ganadorVisitante ? 'ganador' : ''} ${esPorDefinirVisitante ? 'por-definir' : ''}">
+        <div class="bracket-team ${ganadorVisitante ? 'ganador' : ''} ${esPorDefinirVisitante ? 'por-definir' : ''} ${readonlyClass}">
             <div class="bracket-team-info">
                 <span class="bracket-team-nombre">${equipoVisitanteNombre}</span>
                 ${visitanteInfo ? `<span class="bracket-team-posicion">${visitanteInfo}</span>` : ''}
@@ -887,7 +915,8 @@ function crearMatchCard(fase, index, partido) {
                        data-partido="${index}" 
                        data-equipo="1" 
                        data-tipo="visitante"
-                       placeholder="0">
+                       placeholder="0"
+                       ${disabledAttr}>
             </div>
         </div>
     `;
@@ -1095,4 +1124,121 @@ function llenarResultadosDummy() {
 
 // Hacer la función disponible globalmente para ejecutarla desde la consola
 window.llenarResultadosDummy = llenarResultadosDummy;
+
+// Función para cargar resultados reales desde Supabase
+async function cargarResultadosDesdeSupabase() {
+    if (!usarSupabase()) {
+        console.warn('⚠️ Supabase no está configurado');
+        return;
+    }
+
+    try {
+        // Obtener todos los torneos de Supabase
+        const { data: torneosSupabase, error: errorTorneos } = await supabaseClient
+            .from('torneos')
+            .select('codigo, resultados_reales');
+
+        if (errorTorneos) {
+            throw errorTorneos;
+        }
+
+        if (!torneosSupabase || torneosSupabase.length === 0) {
+            console.log('ℹ️ No se encontraron torneos en Supabase');
+            return;
+        }
+
+        // Combinar resultados reales de todos los torneos
+        // Si hay múltiples torneos, usar el primero o combinar todos
+        let resultadosCombinados = {};
+        
+        torneosSupabase.forEach(torneo => {
+            const resultadosReales = torneo.resultados_reales || {};
+            
+            // Combinar resultados de este torneo con los existentes
+            Object.keys(resultadosReales).forEach(grupoIndex => {
+                const grupoIdx = parseInt(grupoIndex);
+                if (!resultadosCombinados[grupoIdx]) {
+                    resultadosCombinados[grupoIdx] = {
+                        partidos: [],
+                        posiciones: [],
+                        playoffSelecciones: {}
+                    };
+                }
+                
+                const resultadosGrupo = resultadosReales[grupoIndex];
+                Object.keys(resultadosGrupo).forEach(partidoIndex => {
+                    const partidoIdx = parseInt(partidoIndex);
+                    const resultado = resultadosGrupo[partidoIndex];
+                    
+                    if (!resultadosCombinados[grupoIdx].partidos[partidoIdx]) {
+                        resultadosCombinados[grupoIdx].partidos[partidoIdx] = {
+                            golesLocal: '',
+                            golesVisitante: ''
+                        };
+                    }
+                    
+                    // Solo actualizar si hay resultado real
+                    if (resultado && (resultado.golesLocal !== undefined || resultado.golesVisitante !== undefined)) {
+                        resultadosCombinados[grupoIdx].partidos[partidoIdx].golesLocal = 
+                            resultado.golesLocal !== undefined ? resultado.golesLocal.toString() : '';
+                        resultadosCombinados[grupoIdx].partidos[partidoIdx].golesVisitante = 
+                            resultado.golesVisitante !== undefined ? resultado.golesVisitante.toString() : '';
+                        
+                        // Marcar el partido como jugado
+                        if (typeof marcarPartidoJugado === 'function') {
+                            marcarPartidoJugado(grupoIdx, partidoIdx);
+                        }
+                    }
+                });
+            });
+        });
+
+        // Actualizar la variable resultados con los datos de Supabase
+        Object.keys(resultadosCombinados).forEach(grupoIndex => {
+            const grupoIdx = parseInt(grupoIndex);
+            if (!resultados[grupoIdx]) {
+                resultados[grupoIdx] = {
+                    partidos: [],
+                    posiciones: [],
+                    playoffSelecciones: {}
+                };
+            }
+            
+            // Combinar partidos
+            resultadosCombinados[grupoIdx].partidos.forEach((partido, partidoIndex) => {
+                if (partido && (partido.golesLocal !== '' || partido.golesVisitante !== '')) {
+                    if (!resultados[grupoIdx].partidos[partidoIndex]) {
+                        resultados[grupoIdx].partidos[partidoIndex] = { golesLocal: '', golesVisitante: '' };
+                    }
+                    resultados[grupoIdx].partidos[partidoIndex].golesLocal = partido.golesLocal;
+                    resultados[grupoIdx].partidos[partidoIndex].golesVisitante = partido.golesVisitante;
+                }
+            });
+        });
+
+        // Guardar resultados en localStorage
+        guardarResultados();
+        
+        // Actualizar la interfaz
+        renderizarGrupos();
+        actualizarEliminatorias();
+        
+        console.log('✅ Resultados reales cargados desde Supabase');
+        
+    } catch (error) {
+        console.error('❌ Error al cargar resultados desde Supabase:', error);
+    }
+}
+
+// Hacer la función disponible globalmente
+window.cargarResultadosDesdeSupabase = cargarResultadosDesdeSupabase;
+
+// Cargar resultados desde Supabase al inicializar la aplicación
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(async () => {
+        if (usarSupabase()) {
+            await cargarResultadosDesdeSupabase();
+        }
+    }, 1500); // Esperar 1.5 segundos para que todo esté inicializado
+});
 

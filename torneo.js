@@ -719,7 +719,8 @@ function mostrarPrediccionesTorneo(codigo) {
     
     // Renderizar predicciones en modo solo lectura
     const container = document.getElementById('predicciones-container');
-    renderizarPrediccionesSoloLectura(container, predicciones);
+    const resultadosReales = torneo.resultadosReales || {};
+    renderizarPrediccionesSoloLectura(container, predicciones, resultadosReales);
     
     // Cerrar al hacer click fuera
     overlay.addEventListener('click', (e) => {
@@ -730,13 +731,14 @@ function mostrarPrediccionesTorneo(codigo) {
 }
 
 // Función para renderizar predicciones en modo solo lectura
-function renderizarPrediccionesSoloLectura(container, predicciones) {
+function renderizarPrediccionesSoloLectura(container, predicciones, resultadosReales) {
     if (!container || typeof GRUPOS_MUNDIAL_2026 === 'undefined') return;
     
     container.innerHTML = '';
     
     GRUPOS_MUNDIAL_2026.forEach((grupo, grupoIndex) => {
         const prediccionesGrupo = predicciones[grupoIndex] || {};
+        const resultadosGrupo = resultadosReales[grupoIndex] || {};
         
         const grupoDiv = document.createElement('div');
         grupoDiv.className = 'grupo-solo-lectura';
@@ -746,7 +748,7 @@ function renderizarPrediccionesSoloLectura(container, predicciones) {
             ${renderizarTablaPosicionesSoloLectura(grupo, grupoIndex, prediccionesGrupo)}
             <div class="partidos-solo-lectura">
                 <h4>Partidos</h4>
-                ${renderizarPartidosSoloLectura(grupo, grupoIndex, prediccionesGrupo)}
+                ${renderizarPartidosSoloLectura(grupo, grupoIndex, prediccionesGrupo, resultadosGrupo)}
             </div>
         `;
         
@@ -841,12 +843,49 @@ function renderizarTablaPosicionesSoloLectura(grupo, grupoIndex, prediccionesGru
     `;
 }
 
-// Función para renderizar partidos en solo lectura
-function renderizarPartidosSoloLectura(grupo, grupoIndex, prediccionesGrupo) {
+// Función para renderizar partidos en solo lectura con predicciones y resultados reales
+function renderizarPartidosSoloLectura(grupo, grupoIndex, prediccionesGrupo, resultadosGrupo) {
     return grupo.partidos.map((partido, partidoIndex) => {
         const prediccion = prediccionesGrupo[partidoIndex];
-        const golesLocal = prediccion ? (prediccion.golesLocal || '0') : '0';
-        const golesVisitante = prediccion ? (prediccion.golesVisitante || '0') : '0';
+        const resultadoReal = resultadosGrupo[partidoIndex];
+        
+        // Predicción del usuario
+        const predGolesLocal = prediccion ? (prediccion.golesLocal || '') : '';
+        const predGolesVisitante = prediccion ? (prediccion.golesVisitante || '') : '';
+        
+        // Resultado real (si existe)
+        const realGolesLocal = resultadoReal ? (resultadoReal.golesLocal || '') : '';
+        const realGolesVisitante = resultadoReal ? (resultadoReal.golesVisitante || '') : '';
+        
+        const tieneResultadoReal = resultadoReal && (realGolesLocal !== '' || realGolesVisitante !== '');
+        
+        // Calcular puntos si hay resultado real
+        let puntos = 0;
+        let clasePuntos = '';
+        if (tieneResultadoReal && prediccion) {
+            const predLocal = parseInt(predGolesLocal) || 0;
+            const predVisitante = parseInt(predGolesVisitante) || 0;
+            const realLocal = parseInt(realGolesLocal) || 0;
+            const realVisitante = parseInt(realGolesVisitante) || 0;
+            
+            // Resultado exacto (5 puntos)
+            if (predLocal === realLocal && predVisitante === realVisitante) {
+                puntos = 5;
+                clasePuntos = 'puntos-exacto';
+            }
+            // Resultado acertado (3 puntos)
+            else if ((predLocal > predVisitante && realLocal > realVisitante) ||
+                     (predLocal < predVisitante && realLocal < realVisitante) ||
+                     (predLocal === predVisitante && realLocal === realVisitante)) {
+                puntos = 3;
+                clasePuntos = 'puntos-acertado';
+            }
+            // Sin puntos
+            else {
+                puntos = 0;
+                clasePuntos = 'puntos-error';
+            }
+        }
         
         const equipoLocal = typeof obtenerNombreEquipo === 'function' 
             ? obtenerNombreEquipo(grupo, grupoIndex, partido.local)
@@ -856,14 +895,35 @@ function renderizarPartidosSoloLectura(grupo, grupoIndex, prediccionesGrupo) {
             : grupo.equipos[partido.visitante];
         
         return `
-            <div class="partido-solo-lectura">
-                <span class="equipo-nombre">${equipoLocal}</span>
-                <div class="resultado-input-solo-lectura">
-                    <input type="text" value="${golesLocal}" readonly class="input-solo-lectura">
-                    <span class="separador">-</span>
-                    <input type="text" value="${golesVisitante}" readonly class="input-solo-lectura">
+            <div class="partido-solo-lectura ${clasePuntos}">
+                <div class="partido-comparacion-header">
+                    <span class="equipos-nombres">${equipoLocal} vs ${equipoVisitante}</span>
+                    ${tieneResultadoReal ? `<span class="puntos-badge ${clasePuntos}">${puntos} pts</span>` : ''}
                 </div>
-                <span class="equipo-nombre">${equipoVisitante}</span>
+                <div class="resultado-comparacion">
+                    <div class="resultado-prediccion">
+                        <span class="resultado-label">Tu predicción</span>
+                        <div class="resultado-input-solo-lectura">
+                            <input type="text" value="${predGolesLocal || '-'}" readonly class="input-solo-lectura input-prediccion">
+                            <span class="separador">-</span>
+                            <input type="text" value="${predGolesVisitante || '-'}" readonly class="input-solo-lectura input-prediccion">
+                        </div>
+                    </div>
+                    ${tieneResultadoReal ? `
+                    <div class="resultado-real">
+                        <span class="resultado-label">Resultado real</span>
+                        <div class="resultado-input-solo-lectura">
+                            <input type="text" value="${realGolesLocal || '-'}" readonly class="input-solo-lectura input-real">
+                            <span class="separador">-</span>
+                            <input type="text" value="${realGolesVisitante || '-'}" readonly class="input-solo-lectura input-real">
+                        </div>
+                    </div>
+                    ` : `
+                    <div class="resultado-real">
+                        <span class="resultado-label resultado-pendiente">Pendiente</span>
+                    </div>
+                    `}
+                </div>
             </div>
         `;
     }).join('');
