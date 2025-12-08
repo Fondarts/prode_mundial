@@ -660,15 +660,6 @@ function mostrarInfoCiudad(ciudadKey) {
             modal.style.display = 'none';
         }
     };
-            
-            // Si se activa la pestaña de torneo, renderizarla
-            if (tab === 'torneo') {
-                if (typeof renderizarTorneo === 'function') {
-                    renderizarTorneo();
-                }
-            }
-        });
-    });
 }
 
 // Configurar botones
