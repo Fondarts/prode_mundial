@@ -1833,7 +1833,7 @@ header h1 {
 }
 
 /* Responsive: Ocultar banners en pantallas pequeñas */
-@media (max-width: 1200px) {
+@media (max-width: 1024px) {
     .banner-ad {
         display: none;
     }
