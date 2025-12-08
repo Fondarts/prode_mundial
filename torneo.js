@@ -260,18 +260,28 @@ async function enviarPredicciones(codigo, nombre, predicciones) {
         return { exito: false, mensaje: 'Torneo no encontrado' };
     }
     
+    const usuarioId = obtenerIdUsuarioUnico();
+    
     // Verificar si el usuario ya tiene una predicción en este torneo
     const yaTiene = await usuarioYaTienePrediccion(codigo);
-    if (yaTiene) {
-        return { exito: false, mensaje: 'Ya has enviado una predicción para este torneo. Solo puedes enviar una predicción por torneo, incluso si usas un nick diferente.' };
-    }
     
-    const usuarioId = obtenerIdUsuarioUnico();
+    // Si ya tiene predicción, verificar si se puede actualizar
+    if (yaTiene) {
+        const fechaActual = new Date();
+        const FECHA_LIMITE_MODIFICACION = new Date('2026-06-08T00:00:00'); // 8 de junio a las 00:00 = después del 7
+        
+        // Si estamos después del 7 de junio, no permitir actualizar
+        if (fechaActual >= FECHA_LIMITE_MODIFICACION) {
+            return { exito: false, mensaje: 'Ya has enviado una predicción para este torneo. Las predicciones no se pueden modificar después del 7 de junio.' };
+        }
+        // Si estamos antes del 8 de junio (hasta el 7 inclusive), permitir actualizar
+    }
     
     // Guardar en Supabase si está disponible
     if (usarSupabase() && typeof guardarParticipanteSupabase === 'function') {
-        const exito = await guardarParticipanteSupabase(codigo, nombre, predicciones, usuarioId);
+        const exito = await guardarParticipanteSupabase(codigo, nombre, predicciones, usuarioId, yaTiene);
         if (!exito) {
+            // Si falla en Supabase pero no es por restricción de usuario, continuar con localStorage
         }
     }
     
@@ -293,7 +303,7 @@ async function enviarPredicciones(codigo, nombre, predicciones) {
         }
     }
     
-    // Guardar predicciones
+    // Guardar predicciones (actualizar si ya existía, crear si es nuevo)
     participante.predicciones = predicciones;
     await guardarTorneos();
     await calcularPuntosTorneo(codigo);
@@ -306,7 +316,7 @@ async function enviarPredicciones(codigo, nombre, predicciones) {
         }
     }
     
-    return { exito: true };
+    return { exito: true, mensaje: yaTiene ? 'Predicción actualizada correctamente' : 'Predicción enviada correctamente' };
 }
 
 // Guardar resultado real (para el creador del torneo)
@@ -836,40 +846,58 @@ function renderizarPartidosSoloLectura(grupo, grupoIndex, prediccionesGrupo, res
         const resultadoReal = resultadosGrupo[partidoIndex];
         
         // Predicción del usuario
-        const predGolesLocal = prediccion ? (prediccion.golesLocal || '') : '';
-        const predGolesVisitante = prediccion ? (prediccion.golesVisitante || '') : '';
+        // Si no hay predicción o el valor es vacío/null/undefined, usar "0" como valor por defecto
+        // IMPORTANTE: "0" es el valor por defecto cuando no hay predicción
+        const predGolesLocal = prediccion && (prediccion.golesLocal === 0 || prediccion.golesLocal === '0' || (prediccion.golesLocal !== '' && prediccion.golesLocal !== null && prediccion.golesLocal !== undefined))
+            ? String(prediccion.golesLocal)
+            : '0';
+        const predGolesVisitante = prediccion && (prediccion.golesVisitante === 0 || prediccion.golesVisitante === '0' || (prediccion.golesVisitante !== '' && prediccion.golesVisitante !== null && prediccion.golesVisitante !== undefined))
+            ? String(prediccion.golesVisitante)
+            : '0';
         
         // Resultado real (si existe)
-        const realGolesLocal = resultadoReal ? (resultadoReal.golesLocal || '') : '';
-        const realGolesVisitante = resultadoReal ? (resultadoReal.golesVisitante || '') : '';
+        // Para resultados reales, si no existe, mostrar "-" (no "0")
+        const realGolesLocal = resultadoReal && (resultadoReal.golesLocal === 0 || resultadoReal.golesLocal === '0' || (resultadoReal.golesLocal !== '' && resultadoReal.golesLocal !== null && resultadoReal.golesLocal !== undefined))
+            ? String(resultadoReal.golesLocal)
+            : '';
+        const realGolesVisitante = resultadoReal && (resultadoReal.golesVisitante === 0 || resultadoReal.golesVisitante === '0' || (resultadoReal.golesVisitante !== '' && resultadoReal.golesVisitante !== null && resultadoReal.golesVisitante !== undefined))
+            ? String(resultadoReal.golesVisitante)
+            : '';
         
         const tieneResultadoReal = resultadoReal && (realGolesLocal !== '' || realGolesVisitante !== '');
         
         // Calcular puntos si hay resultado real
         let puntos = 0;
         let clasePuntos = '';
-        if (tieneResultadoReal && prediccion) {
-            const predLocal = parseInt(predGolesLocal) || 0;
-            const predVisitante = parseInt(predGolesVisitante) || 0;
-            const realLocal = parseInt(realGolesLocal) || 0;
-            const realVisitante = parseInt(realGolesVisitante) || 0;
+        // Solo calcular puntos si hay predicción válida (no vacía)
+        // Una predicción es válida si ambos valores están presentes (incluso si son "0")
+        const tienePrediccionValida = prediccion && predGolesLocal !== '' && predGolesVisitante !== '';
+        if (tieneResultadoReal && tienePrediccionValida) {
+            const predLocal = predGolesLocal !== '' ? parseInt(predGolesLocal) : null;
+            const predVisitante = predGolesVisitante !== '' ? parseInt(predGolesVisitante) : null;
+            const realLocal = realGolesLocal !== '' ? parseInt(realGolesLocal) : 0;
+            const realVisitante = realGolesVisitante !== '' ? parseInt(realGolesVisitante) : 0;
             
-            // Resultado exacto (5 puntos)
-            if (predLocal === realLocal && predVisitante === realVisitante) {
-                puntos = 5;
-                clasePuntos = 'puntos-exacto';
-            }
-            // Resultado acertado (3 puntos)
-            else if ((predLocal > predVisitante && realLocal > realVisitante) ||
-                     (predLocal < predVisitante && realLocal < realVisitante) ||
-                     (predLocal === predVisitante && realLocal === realVisitante)) {
-                puntos = 3;
-                clasePuntos = 'puntos-acertado';
-            }
-            // Sin puntos
-            else {
-                puntos = 0;
-                clasePuntos = 'puntos-error';
+            // Si no hay predicción completa, no calcular puntos
+            // Nota: predLocal y predVisitante pueden ser 0 (cero válido) o null (sin valor)
+            if (predLocal !== null && predVisitante !== null) {
+                // Resultado exacto (5 puntos)
+                if (predLocal === realLocal && predVisitante === realVisitante) {
+                    puntos = 5;
+                    clasePuntos = 'puntos-exacto';
+                }
+                // Resultado acertado (3 puntos)
+                else if ((predLocal > predVisitante && realLocal > realVisitante) ||
+                         (predLocal < predVisitante && realLocal < realVisitante) ||
+                         (predLocal === predVisitante && realLocal === realVisitante)) {
+                    puntos = 3;
+                    clasePuntos = 'puntos-acertado';
+                }
+                // Sin puntos
+                else {
+                    puntos = 0;
+                    clasePuntos = 'puntos-error';
+                }
             }
         }
         
@@ -890,9 +918,9 @@ function renderizarPartidosSoloLectura(grupo, grupoIndex, prediccionesGrupo, res
                     <div class="resultado-prediccion">
                         <span class="resultado-label">Tu predicción</span>
                         <div class="resultado-input-solo-lectura">
-                            <input type="text" value="${predGolesLocal || '-'}" readonly class="input-solo-lectura input-prediccion">
+                            <input type="text" value="${predGolesLocal}" readonly class="input-solo-lectura input-prediccion">
                             <span class="separador">-</span>
-                            <input type="text" value="${predGolesVisitante || '-'}" readonly class="input-solo-lectura input-prediccion">
+                            <input type="text" value="${predGolesVisitante}" readonly class="input-solo-lectura input-prediccion">
                         </div>
                     </div>
                     ${tieneResultadoReal ? `
@@ -1135,51 +1163,98 @@ async function mostrarDialogoEnviarPredicciones() {
         
         // Verificar si ya tiene una predicción en este torneo ANTES de pedir el nick
         const yaTienePrediccion = await usuarioYaTienePrediccion(codigoLimpio);
-        if (yaTienePrediccion) {
-            await mostrarModal({
-                titulo: 'Ya Participaste',
-                mensaje: 'Ya has enviado una predicción para este torneo. Solo puedes enviar una predicción por torneo, incluso si usas un nick diferente.',
-                cancelar: false
-            });
-            return;
-        }
-        
-        // SEGUNDO: Pedir nombre/nick para este torneo
         let nombreParaTorneo = '';
-        const usuarioLogueado = typeof obtenerUsuarioActual === 'function' ? obtenerUsuarioActual() : null;
         
-        if (usuarioLogueado) {
-            // Usuario logueado: pedir nick opcional
-            const nickOpcional = await mostrarModal({
-                titulo: 'Nick para el Torneo',
-                mensaje: `Estás logueado como: ${usuarioLogueado.nombreUsuario}\n\nIngresa un nick opcional para este torneo (o deja vacío para usar tu nombre de usuario):`,
-                input: true,
-                placeholder: 'Nick opcional',
-                maxLength: 30,
-                cancelar: true
-            });
+        if (yaTienePrediccion) {
+            const fechaActual = new Date();
+            const FECHA_LIMITE_MODIFICACION = new Date('2026-06-08T00:00:00'); // 8 de junio a las 00:00 = después del 7
             
-            if (nickOpcional === false) return;
-            
-            nombreParaTorneo = nickOpcional && nickOpcional.trim() !== '' 
-                ? nickOpcional.trim() 
-                : usuarioLogueado.nombreUsuario;
-        } else {
-            // Modo invitado: pedir nombre
-            const nombre = await mostrarModal({
-                titulo: 'Nick para el Torneo',
-                mensaje: 'Ingresa tu nombre para participar en este torneo:',
-                input: true,
-                placeholder: 'Tu nombre',
-                maxLength: 30,
-                cancelar: true
-            });
-            
-            if (!nombre || nombre === false || nombre.trim() === '') {
+            // Si estamos después del 7 de junio, no permitir actualizar
+            if (fechaActual >= FECHA_LIMITE_MODIFICACION) {
+                await mostrarModal({
+                    titulo: 'Ya Participaste',
+                    mensaje: 'Ya has enviado una predicción para este torneo. Las predicciones no se pueden modificar después del 7 de junio.',
+                    cancelar: false
+                });
                 return;
             }
             
-            nombreParaTorneo = nombre.trim();
+            // Si estamos antes del 8 de junio, obtener el nombre existente del participante
+            const usuarioId = obtenerIdUsuarioUnico();
+            let participanteExistente = null;
+            
+            // Buscar en torneos locales
+            if (torneos[codigoLimpio]) {
+                participanteExistente = torneos[codigoLimpio].participantes.find(p => {
+                    if (p.usuarioId && p.usuarioId === usuarioId) return true;
+                    if (typeof obtenerUsuarioActual === 'function') {
+                        const usuario = obtenerUsuarioActual();
+                        if (usuario && usuario.nombreUsuario && p.nombre === usuario.nombreUsuario) return true;
+                    }
+                    return false;
+                });
+            }
+            
+            // Si no se encuentra localmente, buscar en Supabase
+            if (!participanteExistente && usarSupabase() && typeof obtenerParticipantesSupabase === 'function') {
+                const participantes = await obtenerParticipantesSupabase(codigoLimpio);
+                if (participantes) {
+                    participanteExistente = participantes.find(p => {
+                        if (p.usuarioId && p.usuarioId === usuarioId) return true;
+                        if (typeof obtenerUsuarioActual === 'function') {
+                            const usuario = obtenerUsuarioActual();
+                            if (usuario && usuario.nombreUsuario && p.nombre === usuario.nombreUsuario) return true;
+                        }
+                        return false;
+                    });
+                }
+            }
+            
+            // Usar el nombre existente del participante
+            if (participanteExistente && participanteExistente.nombre) {
+                nombreParaTorneo = participanteExistente.nombre;
+            } else {
+                // Si no se encuentra, usar el nombre del usuario logueado o el guardado
+                const usuarioLogueado = typeof obtenerUsuarioActual === 'function' ? obtenerUsuarioActual() : null;
+                nombreParaTorneo = usuarioLogueado ? usuarioLogueado.nombreUsuario : miNombre;
+            }
+        } else {
+            // Si no tiene predicción, pedir nombre/nick para este torneo
+            const usuarioLogueado = typeof obtenerUsuarioActual === 'function' ? obtenerUsuarioActual() : null;
+            
+            if (usuarioLogueado) {
+                // Usuario logueado: pedir nick opcional
+                const nickOpcional = await mostrarModal({
+                    titulo: 'Nick para el Torneo',
+                    mensaje: `Estás logueado como: ${usuarioLogueado.nombreUsuario}\n\nIngresa un nick opcional para este torneo (o deja vacío para usar tu nombre de usuario):`,
+                    input: true,
+                    placeholder: 'Nick opcional',
+                    maxLength: 30,
+                    cancelar: true
+                });
+                
+                if (nickOpcional === false) return;
+                
+                nombreParaTorneo = nickOpcional && nickOpcional.trim() !== '' 
+                    ? nickOpcional.trim() 
+                    : usuarioLogueado.nombreUsuario;
+            } else {
+                // Modo invitado: pedir nombre
+                const nombre = await mostrarModal({
+                    titulo: 'Nick para el Torneo',
+                    mensaje: 'Ingresa tu nombre para participar en este torneo:',
+                    input: true,
+                    placeholder: 'Tu nombre',
+                    maxLength: 30,
+                    cancelar: true
+                });
+                
+                if (!nombre || nombre === false || nombre.trim() === '') {
+                    return;
+                }
+                
+                nombreParaTorneo = nombre.trim();
+            }
         }
         
         if (!nombreParaTorneo || nombreParaTorneo.trim() === '') {
@@ -1202,9 +1277,12 @@ async function mostrarDialogoEnviarPredicciones() {
             return;
         }
         
+        const esActualizacion = resultado && resultado.mensaje && resultado.mensaje.includes('actualizada');
         await mostrarModal({
-            titulo: '¡Predicciones Enviadas!',
-            mensaje: `Te has unido al torneo ${codigoLimpio} como "${miNombre}"`,
+            titulo: esActualizacion ? '¡Predicción Actualizada!' : '¡Predicciones Enviadas!',
+            mensaje: esActualizacion 
+                ? `Tu predicción ha sido actualizada correctamente en el torneo ${codigoLimpio}`
+                : `Te has unido al torneo ${codigoLimpio} como "${miNombre}"`,
             cancelar: false
         });
         

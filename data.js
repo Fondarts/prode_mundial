@@ -444,3 +444,59 @@ function cargarPartidosJugados() {
     }
 }
 
+// Fecha límite para modificar predicciones: 7 de junio de 2026 (inclusive)
+const FECHA_LIMITE_MODIFICACION = new Date('2026-06-08T00:00:00'); // 8 de junio a las 00:00 = después del 7
+
+// Verificar si se puede modificar una predicción
+function sePuedeModificarPrediccion(grupoIndex, partidoIndex, tienePrediccionExistente) {
+    const fechaActual = new Date();
+    
+    // Si estamos antes del 8 de junio (hasta el 7 inclusive), permitir modificar cualquier predicción
+    if (fechaActual < FECHA_LIMITE_MODIFICACION) {
+        return true;
+    }
+    
+    // Después del 7 de junio:
+    // - Si ya tiene predicción, no se puede modificar
+    if (tienePrediccionExistente) {
+        return false;
+    }
+    
+    // - Si no tiene predicción, verificar si el partido aún no ha empezado
+    if (typeof obtenerFechaHorarioPartido === 'function') {
+        const fechaHorario = obtenerFechaHorarioPartido(grupoIndex, partidoIndex);
+        if (fechaHorario && fechaHorario.fecha) {
+            // Comparar fecha del partido con fecha actual
+            const fechaPartido = new Date(fechaHorario.fecha + 'T00:00:00');
+            const ahora = new Date();
+            
+            // Si el partido aún no ha empezado, permitir hacer la predicción
+            return fechaPartido > ahora;
+        }
+    }
+    
+    // Por defecto, no permitir modificar después del 7 de junio
+    return false;
+}
+
+// Verificar si se puede modificar una predicción de eliminatoria
+function sePuedeModificarPrediccionEliminatoria(fase, partidoIndex, tienePrediccionExistente) {
+    const fechaActual = new Date();
+    
+    // Si estamos antes del 8 de junio (hasta el 7 inclusive), permitir modificar cualquier predicción
+    if (fechaActual < FECHA_LIMITE_MODIFICACION) {
+        return true;
+    }
+    
+    // Después del 7 de junio:
+    // - Si ya tiene predicción, no se puede modificar
+    if (tienePrediccionExistente) {
+        return false;
+    }
+    
+    // Para eliminatorias, necesitaríamos la fecha del partido
+    // Por ahora, permitir hacer nuevas predicciones si no hay una existente
+    // (esto se puede mejorar cuando tengamos las fechas de las eliminatorias)
+    return !tienePrediccionExistente;
+}
+

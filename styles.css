@@ -266,6 +266,51 @@ header > div {
     border-color: #1e3c72;
 }
 
+/* Skeleton screens */
+.skeleton-grupo {
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+.skeleton-text {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+    border-radius: 4px;
+}
+
+.skeleton-table td {
+    padding: 8px 4px;
+}
+
+.skeleton-partido {
+    padding: 8px;
+    margin-bottom: 6px;
+    background: #f9f9f9;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+@keyframes skeleton-loading {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
 .btn-login, .btn-registro {
     padding: 8px 16px;
     border: 2px solid white;
@@ -606,6 +651,18 @@ header h1 {
     border-radius: 4px;
     font-size: 0.85em;
     font-weight: bold;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.resultado-input input.input-invalido {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+    background-color: #fff5f5;
+}
+
+.resultado-input input:focus.input-invalido {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.35);
 }
 
 .resultado-input input:focus {

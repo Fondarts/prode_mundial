@@ -155,7 +155,7 @@ async function obtenerParticipantesSupabase(codigo) {
 }
 
 // Agregar o actualizar participante
-async function guardarParticipanteSupabase(codigo, nombre, predicciones, usuarioId = null) {
+async function guardarParticipanteSupabase(codigo, nombre, predicciones, usuarioId = null, permitirActualizacion = false) {
     if (!usarSupabase()) return false;
     
     try {
@@ -173,8 +173,22 @@ async function guardarParticipanteSupabase(codigo, nombre, predicciones, usuario
                 .maybeSingle();
             
             if (participanteExistentePorUsuario) {
-                // Ya existe una predicción de este usuario en este torneo
-                return false;
+                // Si ya existe y no se permite actualización, retornar false
+                if (!permitirActualizacion) {
+                    return false;
+                }
+                // Si se permite actualización, actualizar la predicción existente
+                const { error } = await supabaseClient
+                    .from('participantes')
+                    .update({
+                        predicciones: predicciones,
+                        nombre: nombre, // Actualizar nombre por si cambió
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', participanteExistentePorUsuario.id);
+                
+                if (error) throw error;
+                return true;
             }
         }
         

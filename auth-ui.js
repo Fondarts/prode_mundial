@@ -36,6 +36,11 @@ function renderizarEstadoAuth() {
                             <span>⚡ Actualización Automática</span>
                         </label>
                         <div class="menu-separador"></div>
+                        <label class="menu-item-toggle">
+                            <input type="checkbox" id="supabase-toggle-checkbox" ${localStorage.getItem('mundial2026_supabase_desconectado') === 'true' ? '' : 'checked'}>
+                            <span>${localStorage.getItem('mundial2026_supabase_desconectado') === 'true' ? '🔴 Supabase Desconectado' : '🟢 Supabase Conectado'}</span>
+                        </label>
+                        <div class="menu-separador"></div>
                         <div class="menu-item-submenu">
                             <span class="menu-item-label">🌐 Idioma</span>
                             <div class="menu-item-idiomas">
@@ -71,7 +76,15 @@ function renderizarEstadoAuth() {
             menu.classList.remove('menu-usuario-abierto');
             if (confirm('¿Estás seguro de que quieres borrar todas las predicciones? Esta acción no se puede deshacer.')) {
                 if (typeof resultados !== 'undefined') {
+                    // Borrar resultados y partidos jugados
                     localStorage.removeItem('mundial2026_resultados');
+                    localStorage.removeItem('mundial2026_partidos_jugados');
+                    
+                    // Reinicializar partidos jugados si existe la función
+                    if (typeof partidosJugados !== 'undefined') {
+                        partidosJugados = {};
+                    }
+                    
                     if (typeof inicializarResultados === 'function') {
                         inicializarResultados();
                     }
@@ -89,7 +102,12 @@ function renderizarEstadoAuth() {
         document.getElementById('exportar-predicciones-btn')?.addEventListener('click', () => {
             menu.classList.remove('menu-usuario-abierto');
             if (typeof resultados !== 'undefined') {
-                const dataStr = JSON.stringify(resultados, null, 2);
+                // Usar función de conversión si está disponible, sino usar formato original
+                let datosExportar = resultados;
+                if (typeof convertirResultadosALegible === 'function') {
+                    datosExportar = convertirResultadosALegible(resultados);
+                }
+                const dataStr = JSON.stringify(datosExportar, null, 2);
                 const dataBlob = new Blob([dataStr], { type: 'application/json' });
                 const url = URL.createObjectURL(dataBlob);
                 const link = document.createElement('a');
@@ -223,6 +241,55 @@ function renderizarEstadoAuth() {
                 }
             });
         }
+        
+        // Toggle de Supabase (desconectar para pruebas)
+        const supabaseToggle = document.getElementById('supabase-toggle-checkbox');
+        const supabaseToggleLabel = supabaseToggle?.parentElement?.querySelector('span');
+        
+        supabaseToggle?.addEventListener('change', (e) => {
+            const desconectado = !e.target.checked;
+            localStorage.setItem('mundial2026_supabase_desconectado', desconectado ? 'true' : 'false');
+            
+            // Si se desconecta, limpiar partidos jugados que vinieron de Supabase
+            if (desconectado) {
+                // Limpiar partidos jugados
+                if (typeof partidosJugados !== 'undefined') {
+                    partidosJugados = {};
+                    localStorage.removeItem('mundial2026_partidos_jugados');
+                }
+                
+                // Actualizar la interfaz para reflejar que los partidos ya no están jugados
+                if (typeof renderizarGrupos === 'function') {
+                    renderizarGrupos();
+                }
+                if (typeof actualizarEliminatorias === 'function') {
+                    actualizarEliminatorias();
+                }
+            }
+            
+            // Actualizar texto del label
+            if (supabaseToggleLabel) {
+                supabaseToggleLabel.textContent = desconectado ? '🔴 Supabase Desconectado' : '🟢 Supabase Conectado';
+            }
+            
+            // Mostrar mensaje informativo
+            if (typeof mostrarModal === 'function') {
+                mostrarModal({
+                    titulo: desconectado ? 'Supabase Desconectado' : 'Supabase Conectado',
+                    mensaje: desconectado 
+                        ? 'Los resultados ya no se sincronizarán con Supabase. Los cambios se guardarán solo localmente. Los partidos marcados como jugados desde Supabase han sido limpiados. Útil para pruebas.'
+                        : 'Los resultados ahora se sincronizarán con Supabase.',
+                    cancelar: false
+                });
+            } else {
+                alert(desconectado 
+                    ? 'Supabase desconectado. Los cambios se guardarán solo localmente. Los partidos marcados como jugados han sido limpiados.'
+                    : 'Supabase conectado. Los cambios se sincronizarán con Supabase.');
+            }
+            
+            // Cerrar menú
+            menu.classList.remove('menu-usuario-abierto');
+        });
         
         // Selección de idioma
         document.querySelectorAll('.menu-item-idioma').forEach(btn => {

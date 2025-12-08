@@ -19,6 +19,11 @@ function inicializarSupabase() {
 
 // Verificar si Supabase está disponible
 function usarSupabase() {
+    // Verificar si está desconectado manualmente para pruebas
+    const desconectado = localStorage.getItem('mundial2026_supabase_desconectado') === 'true';
+    if (desconectado) {
+        return false;
+    }
     return supabaseClient !== null && typeof supabaseClient !== 'undefined';
 }
 

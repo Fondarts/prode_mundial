@@ -238,15 +238,32 @@ async function obtenerResultadosAPI() {
     }
 }
 
+// Caché de resultados de API
+let cacheResultadosAPI = null;
+let cacheTimestamp = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+
 // Función para actualizar resultados en la aplicación
 async function actualizarResultadosDesdeAPI() {
     let resultadosAPI;
     
-    if (API_CONFIG.testMode) {
-        // Modo de prueba: simular algunos resultados
-        resultadosAPI = simularResultados();
+    // Verificar caché
+    const ahora = Date.now();
+    if (cacheResultadosAPI && cacheTimestamp && (ahora - cacheTimestamp) < CACHE_DURATION) {
+        resultadosAPI = cacheResultadosAPI;
     } else {
-        resultadosAPI = await obtenerResultadosAPI();
+        if (API_CONFIG.testMode) {
+            // Modo de prueba: simular algunos resultados
+            resultadosAPI = simularResultados();
+        } else {
+            resultadosAPI = await obtenerResultadosAPI();
+        }
+        
+        // Guardar en caché
+        if (resultadosAPI && Object.keys(resultadosAPI).length > 0) {
+            cacheResultadosAPI = resultadosAPI;
+            cacheTimestamp = ahora;
+        }
     }
     
     if (!resultadosAPI || Object.keys(resultadosAPI).length === 0) {

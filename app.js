@@ -10,12 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
     configurarTabs();
     configurarBotones();
     
-    // PASO 3: Inicializar resultados y renderizar grupos (operaciones rápidas)
+    // PASO 3: Mostrar skeleton mientras carga
+    if (typeof renderizarSkeletonGrupos === 'function') {
+        renderizarSkeletonGrupos();
+    }
+    
+    // PASO 4: Inicializar resultados y renderizar grupos (operaciones rápidas)
     inicializarResultados();
     renderizarGrupos();
     actualizarEliminatorias();
     
-    // PASO 4: Operaciones pesadas de forma asíncrona sin bloquear
+    // PASO 5: Operaciones pesadas de forma asíncrona sin bloquear
     (async () => {
         // Inicializar torneo de forma asíncrona sin bloquear
         if (typeof inicializarTorneo === 'function') {
@@ -41,9 +46,57 @@ document.addEventListener('DOMContentLoaded', () => {
     })();
 });
 
+// Renderizar skeleton screen para grupos
+function renderizarSkeletonGrupos() {
+    const container = document.getElementById('grupos-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    for (let i = 0; i < 12; i++) {
+        const grupoDiv = document.createElement('div');
+        grupoDiv.className = 'grupo skeleton-grupo';
+        grupoDiv.innerHTML = `
+            <h3 class="skeleton-text" style="width: 120px; height: 24px; margin-bottom: 15px; margin: 0 auto 15px;"></h3>
+            <table class="tabla-posiciones skeleton-table">
+                <thead>
+                    <tr>
+                        <th></th><th></th><th></th><th></th><th></th><th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${Array(4).fill(0).map(() => `
+                        <tr>
+                            <td><div class="skeleton-text" style="width: 80%; height: 16px; margin: 0 auto;"></div></td>
+                            <td><div class="skeleton-text" style="width: 60%; height: 16px; margin: 0 auto;"></div></td>
+                            <td><div class="skeleton-text" style="width: 60%; height: 16px; margin: 0 auto;"></div></td>
+                            <td><div class="skeleton-text" style="width: 60%; height: 16px; margin: 0 auto;"></div></td>
+                            <td><div class="skeleton-text" style="width: 60%; height: 16px; margin: 0 auto;"></div></td>
+                            <td><div class="skeleton-text" style="width: 60%; height: 16px; margin: 0 auto;"></div></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <div class="partidos">
+                <h4 class="skeleton-text" style="width: 100px; height: 20px; margin-bottom: 10px;"></h4>
+                ${Array(6).fill(0).map(() => `
+                    <div class="partido skeleton-partido">
+                        <div class="skeleton-text" style="width: 40%; height: 16px;"></div>
+                        <div class="skeleton-text" style="width: 60px; height: 32px; margin: 8px auto;"></div>
+                        <div class="skeleton-text" style="width: 40%; height: 16px;"></div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        container.appendChild(grupoDiv);
+    }
+}
+
 // Renderizar grupos
 function renderizarGrupos() {
     const container = document.getElementById('grupos-container');
+    if (!container) return;
+    
     container.innerHTML = '';
 
     GRUPOS_MUNDIAL_2026.forEach((grupo, grupoIndex) => {
@@ -223,15 +276,32 @@ function renderizarPartidos(grupo, grupoIndex) {
     const partidos = resultados[grupoIndex]?.partidos || [];
     
     return grupo.partidos.map((partido, partidoIndex) => {
-        const resultado = partidos[partidoIndex] || { golesLocal: '', golesVisitante: '' };
+        // Si no hay resultado, usar "0" como valor por defecto
+        const resultado = partidos[partidoIndex] || { golesLocal: '0', golesVisitante: '0' };
+        // Si los valores están vacíos, usar "0" como valor por defecto
+        if (resultado.golesLocal === '' || resultado.golesLocal === null || resultado.golesLocal === undefined) {
+            resultado.golesLocal = '0';
+        }
+        if (resultado.golesVisitante === '' || resultado.golesVisitante === null || resultado.golesVisitante === undefined) {
+            resultado.golesVisitante = '0';
+        }
         const yaJugado = typeof partidoYaJugado === 'function' ? partidoYaJugado(grupoIndex, partidoIndex) : false;
+        
+        // Verificar si tiene predicción existente
+        const tienePrediccion = resultado && (resultado.golesLocal !== '' || resultado.golesVisitante !== '');
+        
+        // Verificar si se puede modificar la predicción según las reglas de fecha
+        const puedeModificar = typeof sePuedeModificarPrediccion === 'function' 
+            ? sePuedeModificarPrediccion(grupoIndex, partidoIndex, tienePrediccion)
+            : true;
         
         // En los partidos, solo mostrar el nombre del equipo (usando la selección si existe)
         const equipoLocal = obtenerNombreEquipo(grupo, grupoIndex, partido.local);
         const equipoVisitante = obtenerNombreEquipo(grupo, grupoIndex, partido.visitante);
         
-        const disabledAttr = yaJugado ? 'disabled readonly' : '';
-        const readonlyClass = yaJugado ? 'partido-ya-jugado' : '';
+        // Deshabilitar si ya se jugó O si no se puede modificar según las reglas de fecha
+        const disabledAttr = (yaJugado || !puedeModificar) ? 'disabled readonly' : '';
+        const readonlyClass = (yaJugado || !puedeModificar) ? 'partido-ya-jugado' : '';
         
         // Obtener fecha y horario del partido
         const fechaHorario = typeof obtenerFechaHorarioPartido === 'function' 
@@ -281,8 +351,94 @@ function renderizarPartidos(grupo, grupoIndex) {
     }).join('');
 }
 
+// Función para validar input en tiempo real
+function validarInputResultado(input) {
+    const valor = input.value.trim();
+    
+    // Permitir vacío mientras se escribe
+    if (valor === '') {
+        input.classList.remove('input-invalido');
+        return true;
+    }
+    
+    // Solo permitir números
+    if (!/^\d+$/.test(valor)) {
+        input.classList.add('input-invalido');
+        return false;
+    }
+    
+    const num = parseInt(valor);
+    
+    // Validar rango 0-20
+    if (num < 0 || num > 20) {
+        input.classList.add('input-invalido');
+        return false;
+    }
+    
+    input.classList.remove('input-invalido');
+    return true;
+}
+
+// Convertir resultados a formato legible con nombres de países
+function convertirResultadosALegible(resultados) {
+    const predicciones = {
+        version: '1.0',
+        fechaExportacion: new Date().toISOString(),
+        grupos: {},
+        eliminatorias: {}
+    };
+    
+    // Procesar grupos
+    Object.keys(resultados).forEach(key => {
+        const grupoIndex = parseInt(key);
+        if (!isNaN(grupoIndex) && grupoIndex >= 0 && grupoIndex < 12) {
+            const grupo = GRUPOS_MUNDIAL_2026[grupoIndex];
+            if (grupo) {
+                const grupoData = resultados[key];
+                const partidosLegibles = [];
+                
+                grupo.partidos.forEach((partido, partidoIndex) => {
+                    const resultado = grupoData.partidos?.[partidoIndex] || {};
+                    const equipoLocal = grupo.equipos[partido.local];
+                    const equipoVisitante = grupo.equipos[partido.visitante];
+                    
+                    partidosLegibles.push({
+                        partido: partidoIndex + 1,
+                        fecha: partido.fecha,
+                        local: equipoLocal,
+                        visitante: equipoVisitante,
+                        resultado: {
+                            golesLocal: resultado.golesLocal || '',
+                            golesVisitante: resultado.golesVisitante || ''
+                        }
+                    });
+                });
+                
+                predicciones.grupos[grupo.nombre] = {
+                    partidos: partidosLegibles,
+                    posiciones: grupoData.posiciones || [],
+                    playoffSelecciones: grupoData.playoffSelecciones || {}
+                };
+            }
+        } else {
+            // Es una fase de eliminatorias
+            predicciones.eliminatorias[key] = resultados[key];
+        }
+    });
+    
+    return predicciones;
+}
+
 // Event listeners para inputs de resultados y selects de playoffs
 document.addEventListener('input', (e) => {
+    // Validar inputs numéricos en tiempo real
+    if (e.target.type === 'number' && (e.target.hasAttribute('data-grupo') || e.target.hasAttribute('data-eliminatoria'))) {
+        if (!validarInputResultado(e.target)) {
+            // Si es inválido, no procesar el cambio
+            return;
+        }
+    }
+    
     // Para grupos
     if (e.target.hasAttribute('data-grupo')) {
         // Verificar si el partido ya se jugó
@@ -292,6 +448,26 @@ document.addEventListener('input', (e) => {
         if (typeof partidoYaJugado === 'function' && partidoYaJugado(grupoIndex, partidoIndex)) {
             e.preventDefault();
             e.target.blur();
+            return;
+        }
+        
+        // Verificar si se puede modificar según las reglas de fecha
+        const resultadoActual = resultados[grupoIndex]?.partidos?.[partidoIndex] || { golesLocal: '', golesVisitante: '' };
+        const tienePrediccion = resultadoActual.golesLocal !== '' || resultadoActual.golesVisitante !== '';
+        
+        if (typeof sePuedeModificarPrediccion === 'function' && !sePuedeModificarPrediccion(grupoIndex, partidoIndex, tienePrediccion)) {
+            e.preventDefault();
+            e.target.blur();
+            // Mostrar mensaje informativo
+            if (typeof mostrarModal === 'function') {
+                mostrarModal({
+                    titulo: 'Predicción no modificable',
+                    mensaje: 'Las predicciones existentes no se pueden modificar después del 7 de junio. Solo puedes hacer nuevas predicciones de partidos que aún no han empezado.',
+                    cancelar: false
+                });
+            } else {
+                alert('Las predicciones existentes no se pueden modificar después del 7 de junio.');
+            }
             return;
         }
         
@@ -324,6 +500,26 @@ document.addEventListener('input', (e) => {
         if (typeof partidoEliminatoriaYaJugado === 'function' && partidoEliminatoriaYaJugado(fase, partidoIndex)) {
             e.preventDefault();
             e.target.blur();
+            return;
+        }
+        
+        // Verificar si se puede modificar según las reglas de fecha
+        const resultadoActual = resultados[fase]?.[partidoIndex] || { golesLocal: '', golesVisitante: '' };
+        const tienePrediccion = resultadoActual.golesLocal !== '' || resultadoActual.golesVisitante !== '';
+        
+        if (typeof sePuedeModificarPrediccionEliminatoria === 'function' && !sePuedeModificarPrediccionEliminatoria(fase, partidoIndex, tienePrediccion)) {
+            e.preventDefault();
+            e.target.blur();
+            // Mostrar mensaje informativo
+            if (typeof mostrarModal === 'function') {
+                mostrarModal({
+                    titulo: 'Predicción no modificable',
+                    mensaje: 'Las predicciones existentes no se pueden modificar después del 7 de junio. Solo puedes hacer nuevas predicciones de partidos que aún no han empezado.',
+                    cancelar: false
+                });
+            } else {
+                alert('Las predicciones existentes no se pueden modificar después del 7 de junio.');
+            }
             return;
         }
         
@@ -400,14 +596,19 @@ function configurarTabs() {
 
 // Configurar botones
 function configurarBotones() {
-    document.getElementById('reset-btn').addEventListener('click', () => {
-        if (confirm('¿Estás seguro de que quieres resetear todas las predicciones?')) {
-            localStorage.removeItem('mundial2026_resultados');
-            inicializarResultados();
-            renderizarGrupos();
-            actualizarEliminatorias();
-        }
-    });
+    // El botón reset-btn ya no existe en el HTML (está en el menú de usuario)
+    // Este código se mantiene por compatibilidad pero el botón ya no existe
+    const resetBtn = document.getElementById('reset-btn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            if (confirm('¿Estás seguro de que quieres resetear todas las predicciones?')) {
+                localStorage.removeItem('mundial2026_resultados');
+                inicializarResultados();
+                renderizarGrupos();
+                actualizarEliminatorias();
+            }
+        });
+    }
     
     // Botón de enviar predicciones
     document.getElementById('enviar-predicciones-btn')?.addEventListener('click', () => {
@@ -416,8 +617,14 @@ function configurarBotones() {
         }
     });
     
-    document.getElementById('export-btn').addEventListener('click', () => {
-        const dataStr = JSON.stringify(resultados, null, 2);
+    // El botón de exportar ahora está en el menú de usuario (auth-ui.js)
+    // Este código se mantiene por compatibilidad pero el botón ya no existe en el HTML
+    document.getElementById('export-btn')?.addEventListener('click', () => {
+        let datosExportar = resultados;
+        if (typeof convertirResultadosALegible === 'function') {
+            datosExportar = convertirResultadosALegible(resultados);
+        }
+        const dataStr = JSON.stringify(datosExportar, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
@@ -426,28 +633,36 @@ function configurarBotones() {
         link.click();
     });
     
-    document.getElementById('import-btn').addEventListener('click', () => {
-        document.getElementById('import-file').click();
+    // El botón import-btn ahora está en el menú de usuario (auth-ui.js)
+    // Este código se mantiene por compatibilidad pero el botón ya no existe en el HTML
+    document.getElementById('import-btn')?.addEventListener('click', () => {
+        document.getElementById('import-file')?.click();
     });
     
-    document.getElementById('import-file').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    resultados = JSON.parse(event.target.result);
-                    guardarResultados();
-                    renderizarGrupos();
-                    actualizarEliminatorias();
-                    alert('Predicciones importadas correctamente');
-                } catch (error) {
-                    alert('Error al importar el archivo');
-                }
-            };
-            reader.readAsText(file);
-        }
-    });
+    // El input import-file todavía existe (oculto) y se usa desde el menú
+    const importFile = document.getElementById('import-file');
+    if (importFile) {
+        importFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        resultados = JSON.parse(event.target.result);
+                        guardarResultados();
+                        renderizarGrupos();
+                        actualizarEliminatorias();
+                        alert('Predicciones importadas correctamente');
+                    } catch (error) {
+                        alert('Error al importar el archivo');
+                    }
+                };
+                reader.readAsText(file);
+            }
+            // Resetear el input para permitir importar el mismo archivo de nuevo
+            e.target.value = '';
+        });
+    }
     
     // Botón de actualizar resultados desde API
     const actualizarBtn = document.getElementById('actualizar-resultados-btn');
@@ -496,7 +711,6 @@ function configurarBotones() {
                     }
                 }
             } catch (error) {
-                console.error('Error al actualizar resultados:', error);
                 if (typeof mostrarModal === 'function') {
                     await mostrarModal({
                         titulo: 'Error',
@@ -763,11 +977,7 @@ function actualizarBracketCompleto() {
     // Asegurar que no haya más de 16
     dieciseisavos = dieciseisavos.slice(0, 16);
     
-    console.log('Dieciseisavos partidos a crear:', dieciseisavos.length); // Debug
-    console.log('partidosDieciseisavos original:', partidosDieciseisavos.length); // Debug
-    
     dieciseisavos.forEach((partido, index) => {
-        console.log(`Creando partido ${index} de dieciseisavos`); // Debug
         const matchWrapper = document.createElement('div');
         matchWrapper.className = 'bracket-match-wrapper';
         matchWrapper.setAttribute('data-fase', 'dieciseisavos');
@@ -794,8 +1004,6 @@ function actualizarBracketCompleto() {
         matchWrapper.appendChild(matchDiv);
         bracketDiv.appendChild(matchWrapper);
     });
-    
-    console.log('Total partidos dieciseisavos creados:', bracketDiv.querySelectorAll('[data-fase="dieciseisavos"]').length); // Debug
     
     // Octavos (8 partidos): 4 a la izquierda (col 2), 4 a la derecha (col 8)
     const octavos = partidosOctavos.length > 0 ? partidosOctavos : 
@@ -897,12 +1105,18 @@ function crearMatchCard(fase, index, partido) {
     const matchDiv = document.createElement('div');
     matchDiv.className = 'bracket-match';
     
-    const resultado = resultados[fase]?.[index] || { golesLocal: '', golesVisitante: '' };
-    // Tratar valores vacíos como 0 para la visualización
-    const golesLocal = (resultado.golesLocal !== '' && resultado.golesLocal !== undefined && resultado.golesLocal !== null) 
-        ? (parseInt(resultado.golesLocal) || 0) : 0;
-    const golesVisitante = (resultado.golesVisitante !== '' && resultado.golesVisitante !== undefined && resultado.golesVisitante !== null) 
-        ? (parseInt(resultado.golesVisitante) || 0) : 0;
+    // Si no hay resultado, usar "0" como valor por defecto
+    const resultado = resultados[fase]?.[index] || { golesLocal: '0', golesVisitante: '0' };
+    // Si los valores están vacíos, usar "0" como valor por defecto
+    const golesLocalStr = (resultado.golesLocal === '' || resultado.golesLocal === null || resultado.golesLocal === undefined) 
+        ? '0' 
+        : String(resultado.golesLocal);
+    const golesVisitanteStr = (resultado.golesVisitante === '' || resultado.golesVisitante === null || resultado.golesVisitante === undefined) 
+        ? '0' 
+        : String(resultado.golesVisitante);
+    // Tratar valores para la visualización
+    const golesLocal = parseInt(golesLocalStr) || 0;
+    const golesVisitante = parseInt(golesVisitanteStr) || 0;
     
     const ganadorLocal = golesLocal > golesVisitante;
     const ganadorVisitante = golesVisitante > golesLocal;
@@ -923,8 +1137,18 @@ function crearMatchCard(fase, index, partido) {
     
     // Verificar si el partido ya se jugó
     const yaJugado = typeof partidoEliminatoriaYaJugado === 'function' ? partidoEliminatoriaYaJugado(fase, index) : false;
-    const disabledAttr = yaJugado ? 'disabled readonly' : '';
-    const readonlyClass = yaJugado ? 'partido-ya-jugado' : '';
+    
+    // Verificar si tiene predicción existente
+    const tienePrediccion = resultado && (resultado.golesLocal !== '' || resultado.golesVisitante !== '');
+    
+    // Verificar si se puede modificar la predicción según las reglas de fecha
+    const puedeModificar = typeof sePuedeModificarPrediccionEliminatoria === 'function' 
+        ? sePuedeModificarPrediccionEliminatoria(fase, index, tienePrediccion)
+        : true;
+    
+    // Deshabilitar si ya se jugó O si no se puede modificar según las reglas de fecha
+    const disabledAttr = (yaJugado || !puedeModificar) ? 'disabled readonly' : '';
+    const readonlyClass = (yaJugado || !puedeModificar) ? 'partido-ya-jugado' : '';
     
     matchDiv.innerHTML = `
         <div class="bracket-team ${ganadorLocal ? 'ganador' : ''} ${esPorDefinirLocal ? 'por-definir' : ''} ${readonlyClass}">
@@ -934,7 +1158,7 @@ function crearMatchCard(fase, index, partido) {
             </div>
             <div class="bracket-resultado">
                 <input type="number" min="0" max="20" 
-                       value="${resultado.golesLocal}" 
+                       value="${golesLocalStr}" 
                        data-eliminatoria="${fase}" 
                        data-partido="${index}" 
                        data-equipo="0" 
@@ -950,7 +1174,7 @@ function crearMatchCard(fase, index, partido) {
             </div>
             <div class="bracket-resultado">
                 <input type="number" min="0" max="20" 
-                       value="${resultado.golesVisitante}" 
+                       value="${golesVisitanteStr}" 
                        data-eliminatoria="${fase}" 
                        data-partido="${index}" 
                        data-equipo="1" 
@@ -1158,7 +1382,6 @@ function llenarResultadosDummy() {
     renderizarGrupos();
     actualizarEliminatorias();
     
-    console.log('✅ Todos los resultados han sido llenados con datos dummy');
     alert('✅ Todos los resultados han sido llenados con datos dummy');
 }
 
@@ -1168,7 +1391,6 @@ window.llenarResultadosDummy = llenarResultadosDummy;
 // Función para cargar resultados reales desde Supabase
 async function cargarResultadosDesdeSupabase() {
     if (!usarSupabase()) {
-        console.warn('⚠️ Supabase no está configurado');
         return;
     }
 
@@ -1183,7 +1405,6 @@ async function cargarResultadosDesdeSupabase() {
         }
 
         if (!torneosSupabase || torneosSupabase.length === 0) {
-            console.log('ℹ️ No se encontraron torneos en Supabase');
             return;
         }
 
@@ -1263,10 +1484,8 @@ async function cargarResultadosDesdeSupabase() {
         renderizarGrupos();
         actualizarEliminatorias();
         
-        console.log('✅ Resultados reales cargados desde Supabase');
         
     } catch (error) {
-        console.error('❌ Error al cargar resultados desde Supabase:', error);
     }
 }
 
