@@ -583,6 +583,83 @@ function configurarTabs() {
             if (tab === 'eliminatorias') {
                 actualizarBracketCompleto();
             }
+        });
+    });
+    
+    // Configurar enlaces de ciudades
+    configurarEnlacesCiudades();
+}
+
+function configurarEnlacesCiudades() {
+    document.querySelectorAll('.ciudad-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const ciudadKey = link.dataset.ciudad;
+            mostrarInfoCiudad(ciudadKey);
+        });
+    });
+}
+
+function mostrarInfoCiudad(ciudadKey) {
+    const ciudad = obtenerInfoCiudad(ciudadKey);
+    if (!ciudad) return;
+    
+    const modal = document.getElementById('modal-ciudad-overlay');
+    const title = document.getElementById('modal-ciudad-title');
+    const body = document.getElementById('modal-ciudad-body');
+    
+    title.textContent = `${ciudad.bandera} ${ciudad.nombre}, ${ciudad.pais}`;
+    
+    let html = `
+        <div style="margin-bottom: 25px;">
+            <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.3em;">🏙️ Información de la Ciudad</h3>
+            <p style="line-height: 1.8; color: #475569; margin-bottom: 10px;">${ciudad.ciudadInfo.descripcion}</p>
+            <p style="line-height: 1.8; color: #475569; margin-bottom: 5px;"><strong>Población:</strong> ${ciudad.ciudadInfo.poblacion}</p>
+            <p style="line-height: 1.8; color: #475569;"><strong>Clima:</strong> ${ciudad.ciudadInfo.clima}</p>
+        </div>
+        
+        <div style="margin-bottom: 25px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+            <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.3em;">🏟️ Estadio</h3>
+            <h4 style="color: #2a5298; margin-bottom: 10px; font-size: 1.1em;">${ciudad.estadio.nombre}</h4>
+            <p style="line-height: 1.8; color: #475569; margin-bottom: 8px;"><strong>Capacidad:</strong> ${ciudad.estadio.capacidad}</p>
+            <p style="line-height: 1.8; color: #475569; margin-bottom: 8px;"><strong>Inauguración:</strong> ${ciudad.estadio.inauguracion}</p>
+            <p style="line-height: 1.8; color: #475569; margin-bottom: 8px;"><strong>Características:</strong> ${ciudad.estadio.caracteristicas}</p>
+            <p style="line-height: 1.8; color: #475569;"><strong>Dirección:</strong> ${ciudad.estadio.direccion}</p>
+        </div>
+        
+        <div>
+            <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.3em;">⚽ Partidos Programados</h3>
+            <div style="display: grid; gap: 12px;">
+    `;
+    
+    ciudad.partidos.forEach(partido => {
+        const fechaFormateada = formatearFecha(partido.fecha);
+        html += `
+            <div style="padding: 15px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 5px;">
+                <p style="margin: 0; color: #1565c0; font-weight: 600; margin-bottom: 5px;">${fechaFormateada}</p>
+                <p style="margin: 0; color: #475569;"><strong>${partido.fase}:</strong> ${partido.descripcion}</p>
+            </div>
+        `;
+    });
+    
+    html += `
+            </div>
+        </div>
+    `;
+    
+    body.innerHTML = html;
+    modal.style.display = 'flex';
+    
+    // Cerrar modal
+    document.getElementById('modal-ciudad-close').onclick = () => {
+        modal.style.display = 'none';
+    };
+    
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    };
             
             // Si se activa la pestaña de torneo, renderizarla
             if (tab === 'torneo') {
