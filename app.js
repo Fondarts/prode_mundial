@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderizarEstadoAuth();
     }
     inicializarResultados();
+    
     renderizarGrupos();
     configurarTabs();
     configurarBotones();
@@ -957,4 +958,141 @@ function obtenerGanadores(fase, partidosFase) {
     
     return ganadores;
 }
+
+// Función para llenar todos los resultados con datos dummy
+function llenarResultadosDummy() {
+    // Función auxiliar para generar un resultado aleatorio realista
+    function generarResultado() {
+        // Resultados más comunes en fútbol: 0-0, 1-0, 1-1, 2-0, 2-1, 3-0, 3-1, etc.
+        const resultadosComunes = [
+            { local: 0, visitante: 0 },
+            { local: 1, visitante: 0 },
+            { local: 0, visitante: 1 },
+            { local: 1, visitante: 1 },
+            { local: 2, visitante: 0 },
+            { local: 0, visitante: 2 },
+            { local: 2, visitante: 1 },
+            { local: 1, visitante: 2 },
+            { local: 2, visitante: 2 },
+            { local: 3, visitante: 0 },
+            { local: 0, visitante: 3 },
+            { local: 3, visitante: 1 },
+            { local: 1, visitante: 3 },
+            { local: 3, visitante: 2 },
+            { local: 2, visitante: 3 },
+            { local: 4, visitante: 0 },
+            { local: 0, visitante: 4 },
+            { local: 4, visitante: 1 },
+            { local: 1, visitante: 4 },
+            { local: 2, visitante: 4 },
+            { local: 4, visitante: 2 }
+        ];
+        
+        const resultado = resultadosComunes[Math.floor(Math.random() * resultadosComunes.length)];
+        return {
+            golesLocal: resultado.local.toString(),
+            golesVisitante: resultado.visitante.toString()
+        };
+    }
+    
+    // Llenar resultados de grupos
+    GRUPOS_MUNDIAL_2026.forEach((grupo, grupoIndex) => {
+        if (!resultados[grupoIndex]) {
+            resultados[grupoIndex] = {
+                partidos: [],
+                posiciones: [],
+                playoffSelecciones: {}
+            };
+        }
+        
+        grupo.partidos.forEach((partido, partidoIndex) => {
+            if (!resultados[grupoIndex].partidos[partidoIndex]) {
+                resultados[grupoIndex].partidos[partidoIndex] = { golesLocal: '', golesVisitante: '' };
+            }
+            
+            const resultado = generarResultado();
+            resultados[grupoIndex].partidos[partidoIndex].golesLocal = resultado.golesLocal;
+            resultados[grupoIndex].partidos[partidoIndex].golesVisitante = resultado.golesVisitante;
+        });
+    });
+    
+    // Llenar resultados de eliminatorias
+    const fases = ['dieciseisavos', 'octavos', 'cuartos', 'semis', 'final'];
+    
+    // Dieciseisavos: 16 partidos
+    for (let i = 0; i < 16; i++) {
+        if (!resultados['dieciseisavos']) {
+            resultados['dieciseisavos'] = {};
+        }
+        if (!resultados['dieciseisavos'][i]) {
+            resultados['dieciseisavos'][i] = { golesLocal: '', golesVisitante: '' };
+        }
+        const resultado = generarResultado();
+        resultados['dieciseisavos'][i].golesLocal = resultado.golesLocal;
+        resultados['dieciseisavos'][i].golesVisitante = resultado.golesVisitante;
+    }
+    
+    // Octavos: 8 partidos
+    for (let i = 0; i < 8; i++) {
+        if (!resultados['octavos']) {
+            resultados['octavos'] = {};
+        }
+        if (!resultados['octavos'][i]) {
+            resultados['octavos'][i] = { golesLocal: '', golesVisitante: '' };
+        }
+        const resultado = generarResultado();
+        resultados['octavos'][i].golesLocal = resultado.golesLocal;
+        resultados['octavos'][i].golesVisitante = resultado.golesVisitante;
+    }
+    
+    // Cuartos: 4 partidos
+    for (let i = 0; i < 4; i++) {
+        if (!resultados['cuartos']) {
+            resultados['cuartos'] = {};
+        }
+        if (!resultados['cuartos'][i]) {
+            resultados['cuartos'][i] = { golesLocal: '', golesVisitante: '' };
+        }
+        const resultado = generarResultado();
+        resultados['cuartos'][i].golesLocal = resultado.golesLocal;
+        resultados['cuartos'][i].golesVisitante = resultado.golesVisitante;
+    }
+    
+    // Semis: 2 partidos
+    for (let i = 0; i < 2; i++) {
+        if (!resultados['semis']) {
+            resultados['semis'] = {};
+        }
+        if (!resultados['semis'][i]) {
+            resultados['semis'][i] = { golesLocal: '', golesVisitante: '' };
+        }
+        const resultado = generarResultado();
+        resultados['semis'][i].golesLocal = resultado.golesLocal;
+        resultados['semis'][i].golesVisitante = resultado.golesVisitante;
+    }
+    
+    // Final: 1 partido
+    if (!resultados['final']) {
+        resultados['final'] = {};
+    }
+    if (!resultados['final'][0]) {
+        resultados['final'][0] = { golesLocal: '', golesVisitante: '' };
+    }
+    const resultadoFinal = generarResultado();
+    resultados['final'][0].golesLocal = resultadoFinal.golesLocal;
+    resultados['final'][0].golesVisitante = resultadoFinal.golesVisitante;
+    
+    // Guardar resultados
+    guardarResultados();
+    
+    // Actualizar la interfaz
+    renderizarGrupos();
+    actualizarEliminatorias();
+    
+    console.log('✅ Todos los resultados han sido llenados con datos dummy');
+    alert('✅ Todos los resultados han sido llenados con datos dummy');
+}
+
+// Hacer la función disponible globalmente para ejecutarla desde la consola
+window.llenarResultadosDummy = llenarResultadosDummy;
 
