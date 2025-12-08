@@ -25,7 +25,7 @@ body {
 }
 
 /* Banners laterales */
-.banner-ad {
+.sidebar-content {
     width: 160px;
     min-width: 160px;
     position: sticky;
@@ -1834,7 +1834,7 @@ header h1 {
 
 /* Responsive: Ocultar banners en pantallas pequeñas */
 @media (max-width: 1024px) {
-    .banner-ad {
+    .sidebar-content {
         display: none;
     }
     
