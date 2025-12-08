@@ -1652,18 +1652,18 @@ header h1 {
     }
     
     .grupo h3 {
-        font-size: 1.1em;
+        font-size: 1.4em;
         margin-bottom: 10px;
     }
     
     .tabla-posiciones {
-        font-size: 0.75em;
+        font-size: 0.9em;
     }
     
     .tabla-posiciones th,
     .tabla-posiciones td {
-        padding: 6px 3px;
-        font-size: 0.75em;
+        padding: 8px 4px;
+        font-size: 0.9em;
     }
     
     .partido {
