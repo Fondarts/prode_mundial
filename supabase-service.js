@@ -65,6 +65,37 @@ async function obtenerTorneoPorCodigoSupabase(codigo) {
     }
 }
 
+// Buscar torneo privado por contraseña
+async function buscarTorneoPorClaveSupabase(clave) {
+    if (!usarSupabase()) return null;
+    
+    try {
+        const { data, error } = await supabaseClient
+            .from('torneos')
+            .select('*')
+            .eq('clave', clave)
+            .eq('es_privado', true)
+            .maybeSingle();
+        
+        if (error) throw error;
+        
+        if (!data) return null;
+        
+        return {
+            id: data.id,
+            codigo: data.codigo,
+            nombre: data.nombre,
+            creadoPor: data.creado_por,
+            fechaCreacion: new Date(data.fecha_creacion).getTime(),
+            resultadosReales: data.resultados_reales || {},
+            esPrivado: true,
+            clave: data.clave
+        };
+    } catch (error) {
+        return null;
+    }
+}
+
 // Crear nuevo torneo
 async function crearTorneoSupabase(codigo, nombre, nombreCreador, esPrivado = false, clave = null) {
     if (!usarSupabase()) return false;

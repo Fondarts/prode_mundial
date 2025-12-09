@@ -168,12 +168,27 @@ async function guardarTorneos() {
     // Esta función mantiene localStorage como backup
 }
 
-// Generar código de 6 dígitos
+// Generar código de 6 dígitos para torneos abiertos
 function generarCodigoTorneo() {
     let codigo;
     do {
         codigo = Math.floor(100000 + Math.random() * 900000).toString();
     } while (torneos[codigo]); // Asegurar que sea único
+    return codigo;
+}
+
+// Generar código único basado en contraseña para torneos privados
+function generarCodigoTorneoPrivado(clave, nombre, creador) {
+    // Crear un hash simple basado en la contraseña, nombre y creador
+    const str = `${clave}_${nombre}_${creador}_${Date.now()}`;
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convertir a entero de 32 bits
+    }
+    // Convertir a código de 6 dígitos positivo
+    const codigo = Math.abs(hash % 900000 + 100000).toString();
     return codigo;
 }
 
@@ -184,7 +199,20 @@ async function crearTorneo(nombre, nombreCreador, esPrivado = false, clave = nul
         torneos = {};
     }
     
-    const codigo = generarCodigoTorneo();
+    // Para torneos privados, generar código basado en la contraseña
+    // Para torneos abiertos, generar código aleatorio
+    let codigo;
+    if (esPrivado && clave) {
+        codigo = generarCodigoTorneoPrivado(clave, nombre, nombreCreador);
+        // Asegurar que sea único (si existe, agregar timestamp)
+        let intentos = 0;
+        while (torneos[codigo] && intentos < 10) {
+            codigo = generarCodigoTorneoPrivado(clave, nombre, nombreCreador);
+            intentos++;
+        }
+    } else {
+        codigo = generarCodigoTorneo();
+    }
     
     // Crear en Supabase si está disponible
     if (usarSupabase() && typeof crearTorneoSupabase === 'function') {
@@ -1923,7 +1951,12 @@ async function mostrarDialogoEnviarPredicciones() {
             return;
         }
         
-        let mensajeTorneo = `¡Torneo creado exitosamente!\n\nCódigo del torneo: ${codigo}\n\nComparte este código con tus amigos para que se unan.`;
+        let mensajeTorneo = '';
+        if (esPrivado) {
+            mensajeTorneo = `¡Torneo privado creado exitosamente!\n\nContraseña del torneo: ${clave}\n\nComparte esta contraseña con tus amigos para que se unan.`;
+        } else {
+            mensajeTorneo = `¡Torneo creado exitosamente!\n\nCódigo del torneo: ${codigo}\n\nComparte este código con tus amigos para que se unan.`;
+        }
         
         // Si hubo error en Supabase, agregarlo al mensaje
         if (resultado && resultado.errorSupabase) {
