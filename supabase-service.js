@@ -163,32 +163,38 @@ async function guardarParticipanteSupabase(codigo, nombre, predicciones, usuario
         const torneo = await obtenerTorneoPorCodigoSupabase(codigo);
         if (!torneo) return false;
         
-        // Si se proporciona usuarioId, verificar si ya existe una predicción de ese usuario
-        if (usuarioId) {
-            const { data: participanteExistentePorUsuario } = await supabaseClient
-                .from('participantes')
-                .select('id, nombre')
-                .eq('torneo_id', torneo.id)
-                .eq('usuario_id', usuarioId)
-                .maybeSingle();
-            
-            if (participanteExistentePorUsuario) {
-                // Si ya existe y no se permite actualización, retornar false
-                if (!permitirActualizacion) {
-                    return false;
-                }
-                // Si se permite actualización, actualizar la predicción existente
-                const { error } = await supabaseClient
+        // Si se proporciona usuarioId válido, verificar si ya existe una predicción de ese usuario
+        if (usuarioId && usuarioId.trim() !== '') {
+            try {
+                const { data: participanteExistentePorUsuario, error: errorConsulta } = await supabaseClient
                     .from('participantes')
-                    .update({
-                        predicciones: predicciones,
-                        nombre: nombre, // Actualizar nombre por si cambió
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('id', participanteExistentePorUsuario.id);
+                    .select('id, nombre')
+                    .eq('torneo_id', torneo.id)
+                    .eq('usuario_id', usuarioId)
+                    .maybeSingle();
                 
-                if (error) throw error;
-                return true;
+                if (errorConsulta) {
+                    // Si hay error en la consulta, continuar con el flujo normal
+                } else if (participanteExistentePorUsuario) {
+                    // Si ya existe y no se permite actualización, retornar false
+                    if (!permitirActualizacion) {
+                        return false;
+                    }
+                    // Si se permite actualización, actualizar la predicción existente
+                    const { error } = await supabaseClient
+                        .from('participantes')
+                        .update({
+                            predicciones: predicciones,
+                            nombre: nombre, // Actualizar nombre por si cambió
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', participanteExistentePorUsuario.id);
+                    
+                    if (error) throw error;
+                    return true;
+                }
+            } catch (error) {
+                // Si hay error, continuar con el flujo normal (verificar por nombre)
             }
         }
         
@@ -202,13 +208,19 @@ async function guardarParticipanteSupabase(codigo, nombre, predicciones, usuario
         
         if (participanteExistente) {
             // Actualizar
+            const datosActualizar = {
+                predicciones: predicciones,
+                updated_at: new Date().toISOString()
+            };
+            
+            // Solo actualizar usuario_id si es válido
+            if (usuarioId && usuarioId.trim() !== '') {
+                datosActualizar.usuario_id = usuarioId;
+            }
+            
             const { error } = await supabaseClient
                 .from('participantes')
-                .update({
-                    predicciones: predicciones,
-                    usuario_id: usuarioId,
-                    updated_at: new Date().toISOString()
-                })
+                .update(datosActualizar)
                 .eq('id', participanteExistente.id);
             
             if (error) throw error;
