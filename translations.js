@@ -170,7 +170,31 @@ const translations = {
         importarPredicciones: "Importar Predicciones",
         idioma: "Idioma",
         español: "Español",
-        english: "English"
+        english: "English",
+        
+        // Modales torneo
+        crearNuevo: "Crear Nuevo",
+        unirseExistente: "Unirse a Existente",
+        nombreRequerido: "Nombre Requerido",
+        nombreTorneoObligatorio: "El nombre del torneo es obligatorio. Por favor ingresa un nombre.",
+        tipoTorneo: "Tipo de Torneo",
+        queTipoTorneo: "¿Qué tipo de torneo quieres crear?",
+        torneoAbierto: "Torneo Abierto",
+        torneoPrivado: "Torneo Privado",
+        confirmarContraseña: "Confirma la contraseña:",
+        contraseñasNoCoinciden: "Las contraseñas no coinciden.",
+        yaParticipaste: "Ya Participaste",
+        noSeEncontroTorneoCodigo: "No se encontró un torneo con ese código",
+        ingresarNickname: "Ingresa un nickname para este torneo:",
+        nickname: "Nickname",
+        prediccionEnviadaCorrectamente: "Predicción enviada correctamente",
+        prediccionActualizadaCorrectamente: "Predicción actualizada correctamente",
+        noSePudieronEnviarPredicciones: "No se pudieron enviar las predicciones",
+        cargando: "Cargando...",
+        creadoPor: "Creado por:",
+        enviarPredicciones: "Enviar Predicciones",
+        quieresCrearUnirte: "¿Quieres crear un nuevo torneo o unirte a uno existente?",
+        desconocido: "Desconocido"
     },
     en: {
         // Header
@@ -335,7 +359,34 @@ const translations = {
         importarPredicciones: "Import Predictions",
         idioma: "Language",
         español: "Español",
-        english: "English"
+        english: "English",
+        
+        // Modales torneo
+        crearNuevo: "Create New",
+        unirseExistente: "Join Existing",
+        nombreRequerido: "Name Required",
+        nombreTorneoObligatorio: "Tournament name is required.",
+        tipoTorneo: "What type of tournament do you want to create?",
+        torneoAbierto: "Open Tournament",
+        torneoPrivado: "Private Tournament",
+        confirmarContraseña: "Confirm password:",
+        contraseñasNoCoinciden: "Passwords do not match.",
+        yaParticipaste: "Already Participated",
+        noSeEncontroTorneoCodigo: "No tournament found with that code",
+        ingresarNickname: "Enter a nickname for this tournament:",
+        nickname: "Nickname",
+        prediccionEnviadaCorrectamente: "Prediction sent successfully",
+        prediccionActualizadaCorrectamente: "Prediction updated successfully",
+        noSePudieronEnviarPredicciones: "Could not send predictions",
+        cargando: "Loading...",
+        creadoPor: "Created by:",
+        
+        // Grupos y partidos
+        partidos: "Matches",
+        tuPrediccion: "YOUR PREDICTION",
+        pendiente: "PENDING",
+        jugado: "PLAYED",
+        vs: "vs"
     }
 };
 

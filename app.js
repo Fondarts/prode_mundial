@@ -115,7 +115,7 @@ function renderizarGrupos() {
             <h3>${grupo.nombre}</h3>
             ${renderizarTablaPosiciones(grupo, grupoIndex)}
             <div class="partidos">
-                <h4 style="margin-bottom: 10px; color: #666;">Partidos</h4>
+                <h4 style="margin-bottom: 10px; color: #666;">${typeof t === 'function' ? t('partidos') : 'Partidos'}</h4>
                 ${renderizarPartidos(grupo, grupoIndex)}
             </div>
         `;

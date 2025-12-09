@@ -1442,13 +1442,13 @@ async function mostrarListaTorneos() {
         
         const renderizarTorneos = (listaTorneos, esPrivado = false) => {
             if (listaTorneos.length === 0) {
-                return '<p style="color: #999; text-align: center; padding: 20px;">No hay torneos en esta categoría</p>';
+                return `<p style="color: #999; text-align: center; padding: 20px;">${typeof t === 'function' ? t('noHayTorneos') : 'No hay torneos en esta categoría'}</p>`;
             }
             return listaTorneos.map(torneo => `
                 <div class="torneo-item-lista" data-codigo="${torneo.codigo}" style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s; background: #f9fafb; margin-bottom: 8px;">
                     <h3 style="margin: 0 0 6px 0; color: #1e3a8a; font-size: 1em; font-weight: 600;">${torneo.nombre}</h3>
-                    <p style="margin: 3px 0; color: #666; font-size: 0.85em;">Creado por: <strong>${torneo.creadoPor}</strong></p>
-                    <p style="margin: 3px 0; color: #666; font-size: 0.85em;">👥 Participantes: <strong>${torneo.participantes}</strong></p>
+                    <p style="margin: 3px 0; color: #666; font-size: 0.85em;">${typeof t === 'function' ? t('creadoPor') : 'Creado por'}: <strong>${torneo.creadoPor || (typeof t === 'function' ? t('desconocido') : 'Desconocido')}</strong></p>
+                    <p style="margin: 3px 0; color: #666; font-size: 0.85em;">👥 ${typeof t === 'function' ? t('participantes') : 'Participantes'}: <strong>${torneo.participantes}</strong></p>
                 </div>
             `).join('');
         };
@@ -1459,11 +1459,11 @@ async function mostrarListaTorneos() {
                 <button id="cerrar-lista-torneos" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">&times;</button>
             </div>
             <div style="padding: 20px; display: flex; flex-direction: column; flex: 1; overflow: hidden;">
-                <input type="text" id="buscador-torneos" placeholder="🔍 Buscar torneo por nombre o código..." style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1em; margin-bottom: 20px; box-sizing: border-box;">
+                <input type="text" id="buscador-torneos" placeholder="${typeof t === 'function' ? t('buscarTorneo') : '🔍 Buscar torneo por nombre o código...'}" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1em; margin-bottom: 20px; box-sizing: border-box;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; overflow-y: auto; flex: 1;">
                     <div>
                         <h3 style="margin: 0 0 15px 0; color: #1e3a8a; font-size: 1.2em; border-bottom: 2px solid #1e3a8a; padding-bottom: 8px;">
-                            🌍 Torneos Abiertos
+                            ${typeof t === 'function' ? t('torneosAbiertos') : '🌍 Torneos Abiertos'}
                             <span style="font-size: 0.8em; color: #666; font-weight: normal;">(${torneosAbiertos.length})</span>
                         </h3>
                         <div id="lista-abiertos" style="max-height: calc(85vh - 250px); overflow-y: auto;">
@@ -1472,7 +1472,7 @@ async function mostrarListaTorneos() {
                     </div>
                     <div>
                         <h3 style="margin: 0 0 15px 0; color: #1e3a8a; font-size: 1.2em; border-bottom: 2px solid #1e3a8a; padding-bottom: 8px;">
-                            🔒 Torneos de Amigos
+                            ${typeof t === 'function' ? t('torneosPrivados') : '🔒 Torneos de Amigos'}
                             <span style="font-size: 0.8em; color: #666; font-weight: normal;">(${torneosPrivados.length})</span>
                         </h3>
                         <div id="lista-privados" style="max-height: calc(85vh - 250px); overflow-y: auto;">
@@ -1673,11 +1673,11 @@ async function mostrarDialogoEnviarPredicciones() {
     
     // SEGUNDO: Preguntar si crear o unirse a un torneo
     const crearNuevo = await mostrarModal({
-        titulo: 'Enviar Predicciones',
-        mensaje: '¿Quieres crear un nuevo torneo o unirte a uno existente?',
+        titulo: typeof t === 'function' ? t('enviarPredicciones') : 'Enviar Predicciones',
+        mensaje: typeof t === 'function' ? t('quieresCrearUnirte') : '¿Quieres crear un nuevo torneo o unirte a uno existente?',
         cancelar: true,
         okTexto: 'Crear Nuevo',
-        cancelarTexto: 'Unirse a Existente'
+        cancelarTexto: typeof t === 'function' ? t('unirseExistente') : 'Unirse a Existente'
     });
     
     if (crearNuevo === false && crearNuevo !== null) {
@@ -1693,11 +1693,11 @@ async function mostrarDialogoEnviarPredicciones() {
         if (torneoSeleccionado.esPrivado) {
             // Torneo Privado - Solo pedir contraseña (sin código)
             const claveIngresada = await mostrarModal({
-                titulo: 'Torneo Privado',
-                mensaje: `Este es un torneo privado.\n\nIngresa la contraseña del torneo "${torneoSeleccionado.nombre}":`,
+                titulo: typeof t === 'function' ? t('torneoPrivado') : 'Torneo Privado',
+                mensaje: `${typeof t === 'function' ? t('ingresarContraseñaTorneo') : 'Este es un torneo privado.\n\nIngresa la contraseña del torneo'} "${torneoSeleccionado.nombre}":`,
                 input: true,
                 inputType: 'password',
-                placeholder: 'Contraseña',
+                placeholder: typeof t === 'function' ? t('contraseña') : 'Contraseña',
                 maxLength: 50,
                 cancelar: true
             });
@@ -1707,8 +1707,8 @@ async function mostrarDialogoEnviarPredicciones() {
             // Verificar contraseña
             if (claveIngresada.trim() !== torneoSeleccionado.clave) {
                 await mostrarModal({
-                    titulo: 'Contraseña Incorrecta',
-                    mensaje: 'La contraseña ingresada no es correcta.',
+                    titulo: typeof t === 'function' ? t('contraseñaIncorrecta') : 'Contraseña Incorrecta',
+                    mensaje: typeof t === 'function' ? t('contraseñaNoCorrecta') : 'La contraseña ingresada no es correcta.',
                     cancelar: false
                 });
                 return;
@@ -1724,8 +1724,8 @@ async function mostrarDialogoEnviarPredicciones() {
         const torneo = await obtenerTorneoPorCodigoSupabase(codigoLimpio);
         if (!torneo && !torneos[codigoLimpio]) {
             await mostrarModal({
-                titulo: 'Error',
-                mensaje: 'No se encontró un torneo con ese código',
+                titulo: typeof t === 'function' ? t('error') : 'Error',
+                mensaje: typeof t === 'function' ? t('noSeEncontroTorneoCodigo') : 'No se encontró un torneo con ese código',
                 cancelar: false
             });
             return;
@@ -1742,8 +1742,8 @@ async function mostrarDialogoEnviarPredicciones() {
             // Si estamos después del 7 de junio, no permitir actualizar
             if (fechaActual >= FECHA_LIMITE_MODIFICACION) {
                 await mostrarModal({
-                    titulo: 'Ya Participaste',
-                    mensaje: 'Ya has enviado una predicción para este torneo. Las predicciones no se pueden modificar después del 7 de junio.',
+                    titulo: typeof t === 'function' ? t('yaParticipaste') : 'Ya Participaste',
+                    mensaje: typeof t === 'function' ? t('yaHasEnviadoPrediccion') : 'Ya has enviado una predicción para este torneo. Las predicciones no se pueden modificar después del 7 de junio.',
                     cancelar: false
                 });
                 return;
@@ -1936,8 +1936,8 @@ async function mostrarDialogoEnviarPredicciones() {
             // Validar que el nombre no esté vacío
             if (!nombreTorneo || nombreTorneo.trim() === '') {
                 await mostrarModal({
-                    titulo: 'Nombre Requerido',
-                    mensaje: 'El nombre del torneo es obligatorio. Por favor ingresa un nombre.',
+                    titulo: typeof t === 'function' ? t('nombreRequerido') : 'Nombre Requerido',
+                    mensaje: typeof t === 'function' ? t('nombreTorneoObligatorio') : 'El nombre del torneo es obligatorio. Por favor ingresa un nombre.',
                     cancelar: false
                 });
                 nombreValido = false;
@@ -1950,11 +1950,11 @@ async function mostrarDialogoEnviarPredicciones() {
         
         // Preguntar si es privado o abierto
         const tipoTorneo = await mostrarModal({
-            titulo: 'Tipo de Torneo',
-            mensaje: '¿Qué tipo de torneo quieres crear?',
+            titulo: typeof t === 'function' ? t('tipoTorneo') : 'Tipo de Torneo',
+            mensaje: typeof t === 'function' ? t('queTipoTorneo') : '¿Qué tipo de torneo quieres crear?',
             cancelar: true,
-            okTexto: 'Torneo Abierto',
-            cancelarTexto: 'Torneo Privado'
+            okTexto: typeof t === 'function' ? t('torneoAbierto') : 'Torneo Abierto',
+            cancelarTexto: typeof t === 'function' ? t('torneoPrivado') : 'Torneo Privado'
         });
         
         if (tipoTorneo === null) return; // Usuario canceló
