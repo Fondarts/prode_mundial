@@ -455,24 +455,26 @@ async function calcularPuntosTorneo(codigo) {
 async function obtenerMisTorneos() {
     const misTorneos = [];
     
-    // Si Supabase no está disponible, retornar vacío
-    if (!usarSupabase() || typeof obtenerTorneosSupabase !== 'function') {
-        return [];
-    }
-    
-    // Obtener nombre del usuario desde usuario logueado o localStorage
+    // VERIFICAR PRIMERO: Solo mostrar torneos si el usuario está logueado
+    let usuarioLogueado = false;
     let nombreUsuario = '';
+    
     if (typeof obtenerUsuarioActual === 'function') {
         const usuario = obtenerUsuarioActual();
         if (usuario && usuario.nombreUsuario) {
+            usuarioLogueado = true;
             nombreUsuario = usuario.nombreUsuario;
         }
     }
     
-    // También obtener el nombre guardado como fallback
-    const nombreGuardado = localStorage.getItem('mundial2026_mi_nombre');
-    if (!nombreUsuario && nombreGuardado) {
-        nombreUsuario = nombreGuardado;
+    // Si no está logueado, retornar vacío inmediatamente
+    if (!usuarioLogueado) {
+        return [];
+    }
+    
+    // Si Supabase no está disponible, retornar vacío
+    if (!usarSupabase() || typeof obtenerTorneosSupabase !== 'function') {
+        return [];
     }
     
     // Obtener usuarioId para búsqueda
