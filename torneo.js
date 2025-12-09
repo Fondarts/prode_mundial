@@ -1208,6 +1208,121 @@ function mostrarModal(opciones) {
     });
 }
 
+// Función para mostrar lista de torneos disponibles
+async function mostrarListaTorneos() {
+    return new Promise(async (resolve) => {
+        // Cargar torneos desde Supabase
+        let todosLosTorneos = {};
+        
+        if (usarSupabase() && typeof obtenerTorneosSupabase === 'function') {
+            const torneosSupabase = await obtenerTorneosSupabase();
+            if (torneosSupabase) {
+                todosLosTorneos = torneosSupabase;
+            }
+        }
+        
+        // También incluir torneos locales si existen
+        if (torneos && typeof torneos === 'object') {
+            Object.assign(todosLosTorneos, torneos);
+        }
+        
+        // Convertir a array y ordenar por fecha de creación
+        const listaTorneos = Object.entries(todosLosTorneos).map(([codigo, datos]) => ({
+            codigo,
+            nombre: datos.nombre || `Torneo ${codigo}`,
+            creadoPor: datos.creadoPor || 'Desconocido',
+            fechaCreacion: datos.fechaCreacion || 0,
+            participantes: datos.participantes ? datos.participantes.length : 0
+        })).sort((a, b) => b.fechaCreacion - a.fechaCreacion);
+        
+        if (listaTorneos.length === 0) {
+            await mostrarModal({
+                titulo: 'Sin Torneos',
+                mensaje: 'No hay torneos disponibles en este momento.',
+                cancelar: false
+            });
+            resolve(false);
+            return;
+        }
+        
+        // Crear overlay y modal
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; display: flex; align-items: center; justify-content: center;';
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal-torneos-lista';
+        modal.style.cssText = 'background: white; border-radius: 8px; padding: 0; max-width: 600px; width: 90%; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.3);';
+        
+        modal.innerHTML = `
+            <div style="background: #1e3a8a; color: white; padding: 20px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0; font-size: 1.5em;">Seleccionar Torneo</h2>
+                <button id="cerrar-lista-torneos" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+            <div style="padding: 20px; overflow-y: auto; flex: 1;">
+                <p style="margin-top: 0; color: #666; margin-bottom: 15px;">Selecciona un torneo de la lista:</p>
+                <div id="lista-torneos-container" style="display: flex; flex-direction: column; gap: 10px;">
+                    ${listaTorneos.map(torneo => `
+                        <div class="torneo-item-lista" data-codigo="${torneo.codigo}" style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 15px; cursor: pointer; transition: all 0.2s; background: #f9fafb;">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div style="flex: 1;">
+                                    <h3 style="margin: 0 0 8px 0; color: #1e3a8a; font-size: 1.1em;">${torneo.nombre}</h3>
+                                    <p style="margin: 4px 0; color: #666; font-size: 0.9em;">Creado por: <strong>${torneo.creadoPor}</strong></p>
+                                    <p style="margin: 4px 0; color: #666; font-size: 0.9em;">Código: <strong style="font-family: monospace;">${torneo.codigo}</strong></p>
+                                    <p style="margin: 4px 0; color: #666; font-size: 0.9em;">Participantes: <strong>${torneo.participantes}</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+        
+        // Event listeners
+        const cerrarBtn = document.getElementById('cerrar-lista-torneos');
+        const itemsTorneos = modal.querySelectorAll('.torneo-item-lista');
+        
+        const cerrar = () => {
+            document.body.removeChild(overlay);
+            resolve(false);
+        };
+        
+        cerrarBtn.addEventListener('click', cerrar);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                cerrar();
+            }
+        });
+        
+        itemsTorneos.forEach(item => {
+            item.addEventListener('click', () => {
+                const codigo = item.dataset.codigo;
+                const torneo = listaTorneos.find(t => t.codigo === codigo);
+                document.body.removeChild(overlay);
+                resolve(torneo);
+            });
+            
+            // Efecto hover
+            item.addEventListener('mouseenter', () => {
+                item.style.borderColor = '#1e3a8a';
+                item.style.background = '#eff6ff';
+                item.style.transform = 'translateY(-2px)';
+                item.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                item.style.borderColor = '#e5e7eb';
+                item.style.background = '#f9fafb';
+                item.style.transform = 'translateY(0)';
+                item.style.boxShadow = 'none';
+            });
+        });
+    });
+}
+
 // Función para mostrar diálogo de envío de predicciones
 async function mostrarDialogoEnviarPredicciones() {
     // PRIMERO: Verificar si el usuario está logueado
