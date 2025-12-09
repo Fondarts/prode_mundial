@@ -281,7 +281,9 @@ async function enviarPredicciones(codigo, nombre, predicciones) {
     if (usarSupabase() && typeof guardarParticipanteSupabase === 'function') {
         const exito = await guardarParticipanteSupabase(codigo, nombre, predicciones, usuarioId, yaTiene);
         if (!exito) {
-            // Si falla en Supabase pero no es por restricción de usuario, continuar con localStorage
+            // Si falla en Supabase, mostrar error pero continuar con localStorage
+            console.error('Error al guardar participante en Supabase. Continuando con localStorage...');
+            // No retornar error aquí para permitir que se guarde en localStorage como fallback
         }
     }
     

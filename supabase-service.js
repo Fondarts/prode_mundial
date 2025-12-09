@@ -244,15 +244,20 @@ async function guardarParticipanteSupabase(codigo, nombre, predicciones, usuario
                 datosInsertar.usuario_id = usuarioId;
             }
             
-            const { error } = await supabaseClient
+            const { data, error } = await supabaseClient
                 .from('participantes')
-                .insert(datosInsertar);
+                .insert(datosInsertar)
+                .select();
             
-            if (error) throw error;
+            if (error) {
+                console.error('Error al insertar participante en Supabase:', error);
+                throw error;
+            }
         }
         
         return true;
     } catch (error) {
+        console.error('Error en guardarParticipanteSupabase:', error);
         return false;
     }
 }
