@@ -907,21 +907,23 @@ function cargarPrediccionEnPaginaPrincipal(predicciones) {
                 };
             }
             
-            // Cargar partidos
-            if (prediccionesGrupo.partidos) {
-                prediccionesGrupo.partidos.forEach((partido, partidoIndex) => {
-                    if (partido && (partido.golesLocal !== '' || partido.golesVisitante !== '')) {
+            // Cargar partidos (las predicciones se acceden directamente como prediccionesGrupo[partidoIndex])
+            Object.keys(prediccionesGrupo).forEach(partidoIndexStr => {
+                const partidoIndex = parseInt(partidoIndexStr);
+                if (!isNaN(partidoIndex) && partidoIndex >= 0) {
+                    const prediccion = prediccionesGrupo[partidoIndex];
+                    if (prediccion && (prediccion.golesLocal !== '' || prediccion.golesVisitante !== '' || prediccion.golesLocal === 0 || prediccion.golesVisitante === 0)) {
                         if (!resultados[grupoIndex].partidos[partidoIndex]) {
                             resultados[grupoIndex].partidos[partidoIndex] = {
                                 golesLocal: '',
                                 golesVisitante: ''
                             };
                         }
-                        resultados[grupoIndex].partidos[partidoIndex].golesLocal = partido.golesLocal || '';
-                        resultados[grupoIndex].partidos[partidoIndex].golesVisitante = partido.golesVisitante || '';
+                        resultados[grupoIndex].partidos[partidoIndex].golesLocal = prediccion.golesLocal !== undefined && prediccion.golesLocal !== null ? String(prediccion.golesLocal) : '';
+                        resultados[grupoIndex].partidos[partidoIndex].golesVisitante = prediccion.golesVisitante !== undefined && prediccion.golesVisitante !== null ? String(prediccion.golesVisitante) : '';
                     }
-                });
-            }
+                }
+            });
             
             // Cargar posiciones si existen
             if (prediccionesGrupo.posiciones && Array.isArray(prediccionesGrupo.posiciones)) {
