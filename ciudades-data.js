@@ -8,7 +8,7 @@ const CIUDADES_MUNDIAL_2026 = {
         ciudadInfo: {
             descripcion: 'Toronto es la ciudad más grande de Canadá y capital de la provincia de Ontario. Es conocida por su diversidad cultural, su arquitectura moderna y su vibrante escena artística.',
             poblacion: 'Aproximadamente 2.9 millones de habitantes',
-            clima: 'Veranos cálidos e inviernos fríos'
+            clima: 'Temperatura media: 22-26°C (junio-julio)'
         },
         estadio: {
             nombre: 'BMO Field',
@@ -32,7 +32,7 @@ const CIUDADES_MUNDIAL_2026 = {
         ciudadInfo: {
             descripcion: 'Vancouver es una ciudad costera en la provincia de Columbia Británica, conocida por su belleza natural, su puerto y su calidad de vida.',
             poblacion: 'Aproximadamente 675,000 habitantes',
-            clima: 'Clima oceánico templado'
+            clima: 'Temperatura media: 18-22°C (junio-julio)'
         },
         estadio: {
             nombre: 'BC Place',
@@ -56,7 +56,7 @@ const CIUDADES_MUNDIAL_2026 = {
         ciudadInfo: {
             descripcion: 'Ciudad de México es la capital y ciudad más grande de México. Es un centro cultural, económico y político de gran importancia en América Latina.',
             poblacion: 'Aproximadamente 9.2 millones de habitantes',
-            clima: 'Clima templado de altura'
+            clima: 'Temperatura media: 18-22°C (junio-julio)'
         },
         estadio: {
             nombre: 'Estadio Azteca',
@@ -80,7 +80,7 @@ const CIUDADES_MUNDIAL_2026 = {
         ciudadInfo: {
             descripcion: 'Guadalajara es la segunda ciudad más grande de México y capital del estado de Jalisco. Es conocida como la cuna del mariachi y el tequila.',
             poblacion: 'Aproximadamente 1.5 millones de habitantes',
-            clima: 'Clima templado'
+            clima: 'Temperatura media: 24-28°C (junio-julio)'
         },
         estadio: {
             nombre: 'Estadio Akron',
@@ -104,7 +104,7 @@ const CIUDADES_MUNDIAL_2026 = {
         ciudadInfo: {
             descripcion: 'Monterrey es la capital del estado de Nuevo León y un importante centro industrial y empresarial de México.',
             poblacion: 'Aproximadamente 1.1 millones de habitantes',
-            clima: 'Clima semiárido'
+            clima: 'Temperatura media: 32-36°C (junio-julio)'
         },
         estadio: {
             nombre: 'Estadio BBVA',
@@ -128,7 +128,7 @@ const CIUDADES_MUNDIAL_2026 = {
         ciudadInfo: {
             descripcion: 'Atlanta es la capital y ciudad más poblada del estado de Georgia. Es un importante centro de negocios, cultura y entretenimiento en el sureste de Estados Unidos.',
             poblacion: 'Aproximadamente 498,000 habitantes (área metropolitana: 6 millones)',
-            clima: 'Clima subtropical húmedo'
+            clima: 'Temperatura media: 28-32°C (junio-julio)'
         },
         estadio: {
             nombre: 'Mercedes-Benz Stadium',
@@ -155,7 +155,7 @@ const CIUDADES_MUNDIAL_2026 = {
         ciudadInfo: {
             descripcion: 'Boston es la capital y ciudad más grande de Massachusetts. Es una de las ciudades más antiguas de Estados Unidos, rica en historia y cultura.',
             poblacion: 'Aproximadamente 695,000 habitantes (área metropolitana: 4.9 millones)',
-            clima: 'Clima continental húmedo'
+            clima: 'Temperatura media: 22-26°C (junio-julio)'
         },
         estadio: {
             nombre: 'Gillette Stadium',
@@ -180,7 +180,7 @@ const CIUDADES_MUNDIAL_2026 = {
         ciudadInfo: {
             descripcion: 'Dallas es una importante ciudad en el estado de Texas, conocida por su economía diversificada, su cultura y su rica historia.',
             poblacion: 'Aproximadamente 1.3 millones de habitantes (área metropolitana: 7.6 millones)',
-            clima: 'Clima subtropical húmedo'
+            clima: 'Temperatura media: 30-34°C (junio-julio)'
         },
         estadio: {
             nombre: 'AT&T Stadium',
@@ -206,7 +206,7 @@ const CIUDADES_MUNDIAL_2026 = {
         ciudadInfo: {
             descripcion: 'Houston es la ciudad más grande de Texas y la cuarta más grande de Estados Unidos. Es un importante centro de energía, aeronáutica y tecnología.',
             poblacion: 'Aproximadamente 2.3 millones de habitantes (área metropolitana: 7.1 millones)',
-            clima: 'Clima subtropical húmedo'
+            clima: 'Temperatura media: 30-34°C (junio-julio)'
         },
         estadio: {
             nombre: 'NRG Stadium',
@@ -214,7 +214,7 @@ const CIUDADES_MUNDIAL_2026 = {
             inauguracion: '2002',
             caracteristicas: 'Estadio con techo retráctil, sede de los Houston Texans (NFL)',
             direccion: '1 NRG Parkway, Houston, TX 77054, Estados Unidos',
-            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
+            imagen: './fotos/NRG Stadium.webp'
         },
         partidos: [
             { fecha: '2026-06-13', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -231,7 +231,7 @@ const CIUDADES_MUNDIAL_2026 = {
         ciudadInfo: {
             descripcion: 'Kansas City es una ciudad ubicada en la frontera entre Missouri y Kansas, conocida por su música jazz, su barbacoa y su arquitectura.',
             poblacion: 'Aproximadamente 508,000 habitantes (área metropolitana: 2.2 millones)',
-            clima: 'Clima continental húmedo'
+            clima: 'Temperatura media: 26-30°C (junio-julio)'
         },
         estadio: {
             nombre: 'Arrowhead Stadium',
@@ -239,7 +239,7 @@ const CIUDADES_MUNDIAL_2026 = {
             inauguracion: '1972',
             caracteristicas: 'Sede de los Kansas City Chiefs (NFL) y Kansas City Current (NWSL)',
             direccion: '1 Arrowhead Drive, Kansas City, MO 64129, Estados Unidos',
-            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
+            imagen: './fotos/Arrowhead Stadium.webp'
         },
         partidos: [
             { fecha: '2026-06-14', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -256,7 +256,7 @@ const CIUDADES_MUNDIAL_2026 = {
         ciudadInfo: {
             descripcion: 'Los Ángeles es la segunda ciudad más grande de Estados Unidos, conocida por su industria del entretenimiento, su diversidad cultural y su clima mediterráneo.',
             poblacion: 'Aproximadamente 4 millones de habitantes (área metropolitana: 13 millones)',
-            clima: 'Clima mediterráneo'
+            clima: 'Temperatura media: 22-26°C (junio-julio)'
         },
         estadio: {
             nombre: 'SoFi Stadium',
@@ -264,7 +264,7 @@ const CIUDADES_MUNDIAL_2026 = {
             inauguracion: '2020',
             caracteristicas: 'Estadio ultramoderno con techo translúcido, sede de los Los Angeles Rams y Chargers (NFL)',
             direccion: '1001 Stadium Drive, Inglewood, CA 90301, Estados Unidos',
-            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
+            imagen: './fotos/SoFi_Stadium_(51126606022).webp'
         },
         partidos: [
             { fecha: '2026-06-12', fase: 'Fase de Grupos', descripcion: 'Partido inaugural de EE.UU.' },
@@ -282,7 +282,7 @@ const CIUDADES_MUNDIAL_2026 = {
         ciudadInfo: {
             descripcion: 'Miami es una ciudad costera en el sureste de Florida, conocida por su cultura latina, sus playas, su vida nocturna y su arquitectura Art Deco.',
             poblacion: 'Aproximadamente 442,000 habitantes (área metropolitana: 6.1 millones)',
-            clima: 'Clima tropical monzónico'
+            clima: 'Temperatura media: 28-32°C (junio-julio)'
         },
         estadio: {
             nombre: 'Hard Rock Stadium',
@@ -290,7 +290,7 @@ const CIUDADES_MUNDIAL_2026 = {
             inauguracion: '1987',
             caracteristicas: 'Sede de los Miami Dolphins (NFL) y Miami Hurricanes (NCAA)',
             direccion: '347 Don Shula Drive, Miami Gardens, FL 33056, Estados Unidos',
-            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
+            imagen: './fotos/Hard_Rock_Stadium.webp'
         },
         partidos: [
             { fecha: '2026-06-13', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -307,7 +307,7 @@ const CIUDADES_MUNDIAL_2026 = {
         ciudadInfo: {
             descripcion: 'Nueva York es la ciudad más poblada de Estados Unidos y un importante centro global de comercio, finanzas, cultura y entretenimiento.',
             poblacion: 'Aproximadamente 8.3 millones de habitantes (área metropolitana: 20 millones)',
-            clima: 'Clima continental húmedo'
+            clima: 'Temperatura media: 24-28°C (junio-julio)'
         },
         estadio: {
             nombre: 'MetLife Stadium',
@@ -315,7 +315,7 @@ const CIUDADES_MUNDIAL_2026 = {
             inauguracion: '2010',
             caracteristicas: 'Sede de los New York Giants y New York Jets (NFL)',
             direccion: '1 MetLife Stadium Drive, East Rutherford, NJ 07073, Estados Unidos',
-            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
+            imagen: './fotos/42f2f10a-bf5c-4ea3-a5eb-a0b84e458c74.3.webp'
         },
         partidos: [
             { fecha: '2026-06-14', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -334,7 +334,7 @@ const CIUDADES_MUNDIAL_2026 = {
         ciudadInfo: {
             descripcion: 'Filadelfia es la ciudad más grande de Pensilvania y una de las ciudades más históricamente significativas de Estados Unidos, siendo el lugar donde se firmó la Declaración de Independencia.',
             poblacion: 'Aproximadamente 1.6 millones de habitantes (área metropolitana: 6 millones)',
-            clima: 'Clima continental húmedo'
+            clima: 'Temperatura media: 26-30°C (junio-julio)'
         },
         estadio: {
             nombre: 'Lincoln Financial Field',
@@ -342,7 +342,7 @@ const CIUDADES_MUNDIAL_2026 = {
             inauguracion: '2003',
             caracteristicas: 'Sede de los Philadelphia Eagles (NFL) y Temple Owls (NCAA)',
             direccion: '1 Lincoln Financial Field Way, Philadelphia, PA 19148, Estados Unidos',
-            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
+            imagen: './fotos/lincoln_financial_field_36.webp'
         },
         partidos: [
             { fecha: '2026-06-15', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -358,7 +358,7 @@ const CIUDADES_MUNDIAL_2026 = {
         ciudadInfo: {
             descripcion: 'San Francisco es una ciudad en el norte de California, conocida por su arquitectura victoriana, sus colinas, el Golden Gate Bridge y su cultura tecnológica.',
             poblacion: 'Aproximadamente 873,000 habitantes (área metropolitana: 4.7 millones)',
-            clima: 'Clima mediterráneo'
+            clima: 'Temperatura media: 18-22°C (junio-julio)'
         },
         estadio: {
             nombre: 'Levi\'s Stadium',
@@ -366,7 +366,7 @@ const CIUDADES_MUNDIAL_2026 = {
             inauguracion: '2014',
             caracteristicas: 'Sede de los San Francisco 49ers (NFL), estadio con tecnología de punta',
             direccion: '4900 Marie P DeBartolo Way, Santa Clara, CA 95054, Estados Unidos',
-            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
+            imagen: './fotos/matchday-at-the-levis-stadium-in-santa-clara-usa.webp'
         },
         partidos: [
             { fecha: '2026-06-12', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -382,7 +382,7 @@ const CIUDADES_MUNDIAL_2026 = {
         ciudadInfo: {
             descripcion: 'Seattle es la ciudad más grande del estado de Washington, conocida por su industria tecnológica, su música, su café y su proximidad a la naturaleza.',
             poblacion: 'Aproximadamente 737,000 habitantes (área metropolitana: 4 millones)',
-            clima: 'Clima oceánico templado'
+            clima: 'Temperatura media: 20-24°C (junio-julio)'
         },
         estadio: {
             nombre: 'Lumen Field',
@@ -390,7 +390,7 @@ const CIUDADES_MUNDIAL_2026 = {
             inauguracion: '2002',
             caracteristicas: 'Sede de los Seattle Seahawks (NFL) y Seattle Sounders (MLS)',
             direccion: '800 Occidental Ave S, Seattle, WA 98134, Estados Unidos',
-            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
+            imagen: './fotos/Qwest_Field_North.webp'
         },
         partidos: [
             { fecha: '2026-06-13', fase: 'Fase de Grupos', descripcion: 'Segundo partido del grupo de EE.UU.' },
