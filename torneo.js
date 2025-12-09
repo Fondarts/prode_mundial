@@ -848,7 +848,11 @@ function mostrarPrediccionesTorneo(codigo) {
             <button class="modal-predicciones-cerrar" onclick="this.closest('.modal-predicciones-overlay').remove()">&times;</button>
         </div>
         <div class="modal-predicciones-body">
-            <p class="modal-predicciones-info">Las predicciones no son modificables.</p>
+            <div style="margin-bottom: 20px; display: flex; gap: 10px; justify-content: center;">
+                <button id="btn-cargar-prediccion" class="btn-cargar-prediccion" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                    📥 Cargar Predicción
+                </button>
+            </div>
             <div id="predicciones-container" class="predicciones-container-solo-lectura"></div>
         </div>
     `;
@@ -863,12 +867,129 @@ function mostrarPrediccionesTorneo(codigo) {
     const resultadosReales = torneo.resultadosReales || {};
     renderizarPrediccionesSoloLectura(container, predicciones, resultadosReales);
     
+    // Configurar botón de cargar predicción
+    const btnCargar = document.getElementById('btn-cargar-prediccion');
+    if (btnCargar) {
+        btnCargar.addEventListener('click', () => {
+            cargarPrediccionEnPaginaPrincipal(predicciones);
+            overlay.remove();
+        });
+    }
+    
     // Cerrar al hacer click fuera
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay) {
             overlay.remove();
         }
     });
+}
+
+// Función para cargar predicciones en la página principal
+function cargarPrediccionEnPaginaPrincipal(predicciones) {
+    if (!predicciones || typeof resultados === 'undefined') {
+        return;
+    }
+    
+    // Cargar predicciones de grupos
+    Object.keys(predicciones).forEach(key => {
+        const grupoIndex = parseInt(key);
+        if (!isNaN(grupoIndex) && grupoIndex >= 0 && grupoIndex < 12) {
+            // Es un grupo
+            const prediccionesGrupo = predicciones[grupoIndex];
+            if (!prediccionesGrupo) return;
+            
+            // Inicializar el grupo si no existe
+            if (!resultados[grupoIndex]) {
+                resultados[grupoIndex] = {
+                    partidos: [],
+                    posiciones: [],
+                    playoffSelecciones: {}
+                };
+            }
+            
+            // Cargar partidos
+            if (prediccionesGrupo.partidos) {
+                prediccionesGrupo.partidos.forEach((partido, partidoIndex) => {
+                    if (partido && (partido.golesLocal !== '' || partido.golesVisitante !== '')) {
+                        if (!resultados[grupoIndex].partidos[partidoIndex]) {
+                            resultados[grupoIndex].partidos[partidoIndex] = {
+                                golesLocal: '',
+                                golesVisitante: ''
+                            };
+                        }
+                        resultados[grupoIndex].partidos[partidoIndex].golesLocal = partido.golesLocal || '';
+                        resultados[grupoIndex].partidos[partidoIndex].golesVisitante = partido.golesVisitante || '';
+                    }
+                });
+            }
+            
+            // Cargar posiciones si existen
+            if (prediccionesGrupo.posiciones && Array.isArray(prediccionesGrupo.posiciones)) {
+                resultados[grupoIndex].posiciones = prediccionesGrupo.posiciones;
+            }
+            
+            // Cargar selecciones de playoff si existen
+            if (prediccionesGrupo.playoffSelecciones) {
+                resultados[grupoIndex].playoffSelecciones = prediccionesGrupo.playoffSelecciones;
+            }
+        } else {
+            // Es una fase de eliminatorias
+            const prediccionesEliminatoria = predicciones[key];
+            if (prediccionesEliminatoria) {
+                if (!resultados[key]) {
+                    resultados[key] = {};
+                }
+                
+                // Cargar partidos de eliminatorias
+                Object.keys(prediccionesEliminatoria).forEach(partidoIndexStr => {
+                    const partidoIndex = parseInt(partidoIndexStr);
+                    if (!isNaN(partidoIndex)) {
+                        const partido = prediccionesEliminatoria[partidoIndex];
+                        if (partido && (partido.golesLocal !== '' || partido.golesVisitante !== '')) {
+                            if (!resultados[key][partidoIndex]) {
+                                resultados[key][partidoIndex] = {
+                                    golesLocal: '',
+                                    golesVisitante: ''
+                                };
+                            }
+                            resultados[key][partidoIndex].golesLocal = partido.golesLocal || '';
+                            resultados[key][partidoIndex].golesVisitante = partido.golesVisitante || '';
+                        }
+                    }
+                });
+            }
+        }
+    });
+    
+    // Guardar resultados en localStorage
+    if (typeof guardarResultados === 'function') {
+        guardarResultados();
+    }
+    
+    // Cambiar a la pestaña de Grupos
+    const tabGrupos = document.querySelector('.tab-btn[data-tab="grupos"]');
+    if (tabGrupos) {
+        tabGrupos.click();
+    }
+    
+    // Renderizar grupos con las predicciones cargadas
+    if (typeof renderizarGrupos === 'function') {
+        renderizarGrupos();
+    }
+    
+    // Actualizar eliminatorias
+    if (typeof actualizarEliminatorias === 'function') {
+        actualizarEliminatorias();
+    }
+    
+    // Mostrar mensaje de confirmación
+    if (typeof mostrarModal === 'function') {
+        mostrarModal({
+            titulo: 'Predicción Cargada',
+            mensaje: 'Las predicciones se han cargado correctamente en la página principal.',
+            cancelar: false
+        });
+    }
 }
 
 // Función para renderizar predicciones en modo solo lectura
