@@ -35,25 +35,32 @@
    - Ve a la pestaña **Advanced DNS** (DNS Avanzado)
    - En la sección **Host Records** (Registros de Host)
 
-4. **Agrega los registros que Vercel te indicó**
+4. **Elimina los registros existentes (IMPORTANTE)**
+   - Si ves registros como `parkingpage.namecheap.com` o URL Redirects, **elimínalos primero**
+   - Haz clic en el ícono de papelera (🗑️) al lado de cada registro antiguo
+   - Estos registros pueden interferir con la configuración de Vercel
+
+5. **Agrega los registros que Vercel te indicó**
 
    **Para el dominio principal (sin www):**
-   - **Tipo**: A Record
-   - **Host**: `@` o deja en blanco
+   - Haz clic en **ADD NEW RECORD** (botón rojo con +)
+   - **Tipo**: Selecciona **A Record**
+   - **Host**: Escribe `@` o déjalo en blanco
    - **Value**: La IP que Vercel te dio (ej: `76.76.21.21`)
-   - **TTL**: Automatic (o 30 min)
-   - Haz clic en el checkmark para guardar
+   - **TTL**: Selecciona **30 min** o **Automatic**
+   - Haz clic en el checkmark (✓) para guardar
 
    **Para el subdominio www (opcional pero recomendado):**
-   - **Tipo**: CNAME Record
-   - **Host**: `www`
+   - Haz clic en **ADD NEW RECORD** nuevamente
+   - **Tipo**: Selecciona **CNAME Record**
+   - **Host**: Escribe `www`
    - **Value**: `cname.vercel-dns.com` (o el que Vercel te indique)
-   - **TTL**: Automatic (o 30 min)
-   - Haz clic en el checkmark para guardar
+   - **TTL**: Selecciona **30 min** o **Automatic**
+   - Haz clic en el checkmark (✓) para guardar
 
-5. **Elimina registros antiguos (si los hay)**
-   - Si hay registros A o CNAME antiguos que no uses, elimínalos
-   - Solo deja los que agregaste para Vercel
+6. **Verifica que solo tengas estos registros**
+   - Deberías tener solo 2 registros: uno A Record para `@` y uno CNAME para `www`
+   - Si hay otros registros que no reconoces, puedes dejarlos o eliminarlos según necesites
 
 ## Paso 3: Verificar en Vercel
 
