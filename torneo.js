@@ -317,13 +317,21 @@ async function enviarPredicciones(codigo, nombre, predicciones) {
     
     // Actualizar estadísticas en Supabase
     if (usarSupabase() && typeof actualizarEstadisticasParticipanteSupabase === 'function') {
-        const participanteActualizado = torneos[codigo].participantes.find(p => p.nombre === nombre);
-        if (participanteActualizado && participanteActualizado.estadisticas) {
-            await actualizarEstadisticasParticipanteSupabase(codigo, nombre, participanteActualizado.estadisticas);
+        try {
+            const participanteActualizado = torneos[codigo].participantes.find(p => p.nombre === nombre);
+            if (participanteActualizado && participanteActualizado.estadisticas) {
+                await actualizarEstadisticasParticipanteSupabase(codigo, nombre, participanteActualizado.estadisticas);
+            }
+        } catch (error) {
+            console.error('Error al actualizar estadísticas en Supabase:', error);
         }
     }
     
-    return { exito: true, mensaje: yaTiene ? 'Predicción actualizada correctamente' : 'Predicción enviada correctamente' };
+    // Si hubo error en Supabase pero se guardó localmente, informar al usuario
+    const mensaje = yaTiene ? 'Predicción actualizada correctamente' : 'Predicción enviada correctamente';
+    const mensajeCompleto = errorSupabase ? `${mensaje}. Nota: ${errorSupabase}` : mensaje;
+    
+    return { exito: true, mensaje: mensajeCompleto, errorSupabase: errorSupabase };
 }
 
 // Guardar resultado real (para el creador del torneo)
@@ -1376,11 +1384,19 @@ async function mostrarDialogoEnviarPredicciones() {
         }
         
         const esActualizacion = resultado && resultado.mensaje && resultado.mensaje.includes('actualizada');
+        const titulo = esActualizacion ? '¡Predicción Actualizada!' : '¡Predicciones Enviadas!';
+        let mensaje = esActualizacion 
+            ? `Tu predicción ha sido actualizada correctamente en el torneo ${codigoLimpio}`
+            : `Te has unido al torneo ${codigoLimpio} como "${miNombre}"`;
+        
+        // Si hubo error en Supabase, agregarlo al mensaje
+        if (resultado && resultado.errorSupabase) {
+            mensaje += `\n\n⚠️ ${resultado.errorSupabase}`;
+        }
+        
         await mostrarModal({
-            titulo: esActualizacion ? '¡Predicción Actualizada!' : '¡Predicciones Enviadas!',
-            mensaje: esActualizacion 
-                ? `Tu predicción ha sido actualizada correctamente en el torneo ${codigoLimpio}`
-                : `Te has unido al torneo ${codigoLimpio} como "${miNombre}"`,
+            titulo: titulo,
+            mensaje: mensaje,
             cancelar: false
         });
         
