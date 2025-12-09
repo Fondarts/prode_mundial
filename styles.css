@@ -1835,8 +1835,8 @@ header h1 {
 
 /* Responsive: Ocultar banners progresivamente según el ancho de pantalla */
 
-/* Ocultar la barra izquierda entre 768px y 900px (solo barra derecha visible) */
-@media (min-width: 768px) and (max-width: 900px) {
+/* Ocultar la barra izquierda entre 698px y 900px (solo barra derecha visible) */
+@media (min-width: 698px) and (max-width: 900px) {
     .sidebar-content.sidebar-left {
         display: none !important;
         width: 0 !important;
@@ -1844,8 +1844,8 @@ header h1 {
     }
 }
 
-/* En móvil (< 768px), asegurar que no haya publicidad (ambas ocultas) */
-@media (max-width: 767px) {
+/* En móvil (< 698px), asegurar que no haya publicidad (ambas ocultas) */
+@media (max-width: 697px) {
     .sidebar-content {
         display: none !important;
         width: 0 !important;
