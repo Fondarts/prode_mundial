@@ -1538,6 +1538,31 @@ async function mostrarDialogoEnviarPredicciones() {
             }
         }
         
+        // Verificar si es privado y pedir contraseña si es necesario
+        if (torneoSeleccionado.esPrivado) {
+            const claveIngresada = await mostrarModal({
+                titulo: 'Torneo Privado',
+                mensaje: `Este es un torneo privado.\n\nIngresa la contraseña del torneo "${torneoSeleccionado.nombre}":`,
+                input: true,
+                inputType: 'password',
+                placeholder: 'Contraseña',
+                maxLength: 50,
+                cancelar: true
+            });
+            
+            if (!claveIngresada || claveIngresada === false) return;
+            
+            // Verificar contraseña
+            if (claveIngresada.trim() !== torneoSeleccionado.clave) {
+                await mostrarModal({
+                    titulo: 'Contraseña Incorrecta',
+                    mensaje: 'La contraseña ingresada no es correcta.',
+                    cancelar: false
+                });
+                return;
+            }
+        }
+        
         // Ahora pedir el código del torneo seleccionado
         const codigo = await mostrarModal({
             titulo: 'Unirse a Torneo',
