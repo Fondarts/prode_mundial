@@ -64,8 +64,8 @@
         <header>
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
                 <div>
-                    <h1>⚽ Fixture Interactivo Mundial 2026</h1>
-                    <p class="subtitle">Predice los resultados y visualiza los cruces</p>
+                    <h1 data-i18n="title">⚽ Fixture Interactivo Mundial 2026</h1>
+                    <p class="subtitle" data-i18n="subtitle">Predice los resultados y visualiza los cruces</p>
                 </div>
                 <div id="auth-status" class="auth-status">
                     <!-- Se llenará dinámicamente -->
@@ -74,17 +74,17 @@
         </header>
 
         <div class="tabs">
-            <button class="tab-btn active" data-tab="grupos">Grupos</button>
-            <button class="tab-btn" data-tab="eliminatorias">Eliminatorias</button>
-            <button class="tab-btn" data-tab="torneo">Torneo</button>
-            <button class="tab-btn" data-tab="informacion">Información</button>
+            <button class="tab-btn active" data-tab="grupos" data-i18n="grupos">Grupos</button>
+            <button class="tab-btn" data-tab="eliminatorias" data-i18n="eliminatorias">Eliminatorias</button>
+            <button class="tab-btn" data-tab="torneo" data-i18n="torneo">Torneo</button>
+            <button class="tab-btn" data-tab="informacion" data-i18n="informacion">Información</button>
         </div>
 
         <!-- Tab Grupos -->
         <div id="grupos" class="tab-content active">
             <div id="grupos-container"></div>
             <div class="enviar-predicciones-container">
-                <button id="enviar-predicciones-btn" class="btn-enviar-predicciones">
+                <button id="enviar-predicciones-btn" class="btn-enviar-predicciones" data-i18n="enviarPredicciones">
                     📤 Enviar Predicciones
                 </button>
             </div>
@@ -92,8 +92,8 @@
 
         <!-- Tab Eliminatorias -->
         <div id="eliminatorias" class="tab-content">
-            <h2>Eliminatorias</h2>
-            <p style="text-align: center; color: #475569; margin-bottom: 20px; font-size: 0.95em;">
+            <h2 data-i18n="eliminatoriasTitle">Eliminatorias</h2>
+            <p style="text-align: center; color: #475569; margin-bottom: 20px; font-size: 0.95em;" data-i18n="eliminatoriasDescription">
                 Ingresa los resultados para ver los cruces y predecir el torneo completo
             </p>
             <div id="bracket-completo-container" class="eliminatoria-container"></div>
@@ -338,14 +338,17 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="modal-ok" class="modal-btn modal-btn-primary">OK</button>
-                <button id="modal-cancel" class="modal-btn modal-btn-secondary" style="display: none;">Cancelar</button>
+                <button id="modal-ok" class="modal-btn modal-btn-primary" data-i18n="aceptar">OK</button>
+                <button id="modal-cancel" class="modal-btn modal-btn-secondary" style="display: none;" data-i18n="cancelar">Cancelar</button>
             </div>
         </div>
     </div>
 
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Translations -->
+    <script src="translations.js"></script>
     
     <script src="ciudades-data.js"></script>
     <script src="data.js"></script>

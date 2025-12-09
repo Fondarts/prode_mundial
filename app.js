@@ -1,5 +1,13 @@
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
+    // PASO 0: Traducir página
+    if (typeof translatePage === 'function') {
+        translatePage();
+        // Actualizar lang del HTML
+        const lang = typeof getCurrentLanguage === 'function' ? getCurrentLanguage() : 'es';
+        document.documentElement.lang = lang;
+    }
+    
     // PASO 1: Renderizar estado de autenticación INMEDIATAMENTE (SIN await, SIN async)
     // Esto debe ser lo primero para que el usuario vea el estado de inmediato
     if (typeof renderizarEstadoAuth === 'function') {

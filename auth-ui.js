@@ -19,7 +19,7 @@ function renderizarEstadoAuth() {
         
         authStatus.innerHTML = `
             <div class="usuario-logueado">
-                <span class="usuario-nombre">Bienvenido ${usuario.nombreUsuario}</span>
+                <span class="usuario-nombre">${typeof t === 'function' ? t('bienvenido') : 'Bienvenido'} ${usuario.nombreUsuario}</span>
                 <div class="menu-usuario-container">
                     <button id="menu-usuario-btn" class="btn-menu-usuario" aria-label="Menú de usuario">
                         ⚙️
@@ -295,7 +295,11 @@ function renderizarEstadoAuth() {
         document.querySelectorAll('.menu-item-idioma').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const idioma = e.target.dataset.idioma;
-                localStorage.setItem('idioma', idioma);
+                if (typeof setLanguage === 'function') {
+                    setLanguage(idioma);
+                } else {
+                    localStorage.setItem('idioma', idioma);
+                }
                 document.querySelectorAll('.menu-item-idioma').forEach(b => b.classList.remove('activo'));
                 e.target.classList.add('activo');
                 // Recargar página para aplicar idioma
@@ -314,8 +318,8 @@ function renderizarEstadoAuth() {
     } else {
         authStatus.innerHTML = `
             <div class="usuario-no-logueado">
-                <button id="login-btn" class="btn-login">Iniciar Sesión</button>
-                <button id="registro-btn" class="btn-registro">Registrarse</button>
+                <button id="login-btn" class="btn-login" data-i18n="iniciarSesion">Iniciar Sesión</button>
+                <button id="registro-btn" class="btn-registro" data-i18n="registrarse">Registrarse</button>
             </div>
         `;
         
@@ -342,10 +346,10 @@ function renderizarEstadoAuth() {
 // Mostrar diálogo de login
 async function mostrarDialogoLogin() {
     const nombreUsuario = await mostrarModal({
-        titulo: 'Iniciar Sesión',
-        mensaje: 'Ingresa tu nombre de usuario:',
+        titulo: typeof t === 'function' ? t('iniciarSesion') : 'Iniciar Sesión',
+        mensaje: typeof t === 'function' ? t('ingresarNombreUsuario') : 'Ingresa tu nombre de usuario:',
         input: true,
-        placeholder: 'Nombre de usuario',
+        placeholder: typeof t === 'function' ? t('nombreUsuario') : 'Nombre de usuario',
         maxLength: 30,
         cancelar: true
     });
@@ -353,11 +357,11 @@ async function mostrarDialogoLogin() {
     if (!nombreUsuario || nombreUsuario === false) return;
     
     const clave = await mostrarModal({
-        titulo: 'Iniciar Sesión',
-        mensaje: 'Ingresa tu clave (5 números):',
+        titulo: typeof t === 'function' ? t('iniciarSesion') : 'Iniciar Sesión',
+        mensaje: typeof t === 'function' ? t('ingresarClave') : 'Ingresa tu clave (5 números):',
         input: true,
         inputType: 'password',
-        placeholder: '00000',
+        placeholder: typeof t === 'function' ? t('clave5Numeros') : '00000',
         maxLength: 5,
         cancelar: true
     });
@@ -372,15 +376,15 @@ async function mostrarDialogoLogin() {
                 guardarUsuarioActual(resultado.usuario);
             }
             await mostrarModal({
-                titulo: '¡Bienvenido!',
-                mensaje: `Has iniciado sesión como: ${resultado.usuario.nombreUsuario}`,
+                titulo: typeof t === 'function' ? t('bienvenidoUsuario') : '¡Bienvenido!',
+                mensaje: `${typeof t === 'function' ? t('hasIniciadoSesionComo') : 'Has iniciado sesión como:'} ${resultado.usuario.nombreUsuario}`,
                 cancelar: false
             });
             return true;
         } else {
             await mostrarModal({
-                titulo: 'Error',
-                mensaje: resultado.mensaje || 'Error al iniciar sesión',
+                titulo: typeof t === 'function' ? t('error') : 'Error',
+                mensaje: resultado.mensaje || (typeof t === 'function' ? t('errorIniciarSesion') : 'Error al iniciar sesión'),
                 cancelar: false
             });
             return false;
@@ -392,10 +396,10 @@ async function mostrarDialogoLogin() {
 // Mostrar diálogo de registro
 async function mostrarDialogoRegistro() {
     const nombreUsuario = await mostrarModal({
-        titulo: 'Registrarse',
-        mensaje: 'Elige un nombre de usuario único (mínimo 3 caracteres):',
+        titulo: typeof t === 'function' ? t('registrarse') : 'Registrarse',
+        mensaje: typeof t === 'function' ? t('elegirNombreUsuario') : 'Elige un nombre de usuario único (mínimo 3 caracteres):',
         input: true,
-        placeholder: 'Nombre de usuario',
+        placeholder: typeof t === 'function' ? t('nombreUsuario') : 'Nombre de usuario',
         maxLength: 30,
         cancelar: true
     });
@@ -403,11 +407,11 @@ async function mostrarDialogoRegistro() {
     if (!nombreUsuario || nombreUsuario === false) return;
     
     const clave = await mostrarModal({
-        titulo: 'Registrarse',
-        mensaje: 'Elige una clave de 5 números:',
+        titulo: typeof t === 'function' ? t('registrarse') : 'Registrarse',
+        mensaje: typeof t === 'function' ? t('elegirClave') : 'Elige una clave de 5 números:',
         input: true,
         inputType: 'password',
-        placeholder: '00000',
+        placeholder: typeof t === 'function' ? t('clave5Numeros') : '00000',
         maxLength: 5,
         cancelar: true
     });
@@ -415,11 +419,11 @@ async function mostrarDialogoRegistro() {
     if (!clave || clave === false) return;
     
     const confirmarClave = await mostrarModal({
-        titulo: 'Registrarse',
-        mensaje: 'Confirma tu clave:',
+        titulo: typeof t === 'function' ? t('registrarse') : 'Registrarse',
+        mensaje: typeof t === 'function' ? t('confirmarClave') : 'Confirma tu clave:',
         input: true,
         inputType: 'password',
-        placeholder: '00000',
+        placeholder: typeof t === 'function' ? t('clave5Numeros') : '00000',
         maxLength: 5,
         cancelar: true
     });
@@ -428,8 +432,8 @@ async function mostrarDialogoRegistro() {
     
     if (clave !== confirmarClave) {
         await mostrarModal({
-            titulo: 'Error',
-            mensaje: 'Las claves no coinciden',
+            titulo: typeof t === 'function' ? t('error') : 'Error',
+            mensaje: typeof t === 'function' ? t('clavesNoCoinciden') : 'Las claves no coinciden',
             cancelar: false
         });
         return;
@@ -443,15 +447,15 @@ async function mostrarDialogoRegistro() {
                 guardarUsuarioActual(resultado.usuario);
             }
             await mostrarModal({
-                titulo: '¡Registro Exitoso!',
-                mensaje: `Te has registrado como: ${resultado.usuario.nombreUsuario}\n\nYa estás logueado.`,
+                titulo: typeof t === 'function' ? t('registroExitosoCompleto') : '¡Registro Exitoso!',
+                mensaje: `${typeof t === 'function' ? t('teHasRegistradoComo') : 'Te has registrado como:'} ${resultado.usuario.nombreUsuario}\n\n${typeof t === 'function' ? t('yaEstasLogueado') : 'Ya estás logueado.'}`,
                 cancelar: false
             });
             return true;
         } else {
             await mostrarModal({
-                titulo: 'Error',
-                mensaje: resultado.mensaje || 'Error al registrar usuario',
+                titulo: typeof t === 'function' ? t('error') : 'Error',
+                mensaje: resultado.mensaje || (typeof t === 'function' ? t('errorRegistro') : 'Error al registrar usuario'),
                 cancelar: false
             });
             return false;
