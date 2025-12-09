@@ -722,8 +722,8 @@ async function renderizarTorneo() {
         });
     }
     
-    // Renderizar tabla global
-    const tablaGlobal = obtenerTablaGlobal();
+    // Renderizar tabla global (ahora es asíncrono)
+    const tablaGlobal = await obtenerTablaGlobal();
     const tablaGlobalDiv = document.getElementById('tabla-global');
     
     if (tablaGlobal.length === 0) {
