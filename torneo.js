@@ -1555,7 +1555,9 @@ async function mostrarDialogoEnviarPredicciones() {
         }
         
         // Verificar si es privado y pedir contraseña si es necesario
-        if (torneoSeleccionado.esPrivado) {
+        // Solo pedir contraseña si es privado Y tiene clave definida
+        // Los torneos abiertos (esPrivado === false) nunca piden contraseña
+        if (torneoSeleccionado.esPrivado && torneoSeleccionado.clave && torneoSeleccionado.clave.trim() !== '') {
             const claveIngresada = await mostrarModal({
                 titulo: 'Torneo Privado',
                 mensaje: `Este es un torneo privado.\n\nIngresa la contraseña del torneo "${torneoSeleccionado.nombre}":`,
