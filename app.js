@@ -595,6 +595,37 @@ function configurarTabs() {
     
     // Configurar enlaces de ciudades
     configurarEnlacesCiudades();
+    
+    // Configurar botón de reglas del torneo
+    configurarBotonReglasTorneo();
+}
+
+// Configurar botón de reglas del torneo
+function configurarBotonReglasTorneo() {
+    const btnReglas = document.getElementById('btn-reglas-torneo');
+    const modalOverlay = document.getElementById('modal-reglas-torneo-overlay');
+    const btnCerrar = document.getElementById('modal-reglas-torneo-close');
+    
+    if (!btnReglas || !modalOverlay) return;
+    
+    // Abrir modal
+    btnReglas.addEventListener('click', () => {
+        modalOverlay.style.display = 'flex';
+    });
+    
+    // Cerrar modal con botón X
+    if (btnCerrar) {
+        btnCerrar.addEventListener('click', () => {
+            modalOverlay.style.display = 'none';
+        });
+    }
+    
+    // Cerrar modal al hacer clic fuera
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            modalOverlay.style.display = 'none';
+        }
+    });
 }
 
 function configurarEnlacesCiudades() {

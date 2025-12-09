@@ -101,7 +101,12 @@
 
         <!-- Tab Torneo -->
         <div id="torneo" class="tab-content">
-            <h2>🏆 Torneo de Predicciones</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                <h2 style="margin: 0;">🏆 Torneo de Predicciones</h2>
+                <button id="btn-reglas-torneo" class="btn-reglas-torneo" style="padding: 10px 20px; background: #1e3c72; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95em; font-weight: 600; transition: background 0.3s;">
+                    📋 Reglas
+                </button>
+            </div>
             <div id="torneo-container">
                 <!-- Se llenará dinámicamente -->
             </div>
@@ -270,6 +275,55 @@
             </div>
             <div class="modal-body" id="modal-ciudad-body">
                 <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para reglas del torneo -->
+    <div id="modal-reglas-torneo-overlay" class="modal-overlay" style="display: none;">
+        <div class="modal-container" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3>📋 Reglas del Torneo</h3>
+                <button class="modal-close" id="modal-reglas-torneo-close">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-reglas-torneo-body">
+                <div style="line-height: 1.8; color: #475569;">
+                    <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.2em;">🎯 Sistema de Puntos</h3>
+                    <ul style="margin-bottom: 20px; padding-left: 20px;">
+                        <li style="margin-bottom: 10px;"><strong>Resultado exacto:</strong> 3 puntos (acertar el marcador completo)</li>
+                        <li style="margin-bottom: 10px;"><strong>Resultado acertado:</strong> 1 punto (acertar ganador/empate pero no el marcador exacto)</li>
+                        <li style="margin-bottom: 10px;"><strong>Sin acierto:</strong> 0 puntos</li>
+                    </ul>
+
+                    <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.2em;">✏️ Crear y Unirse a Torneos</h3>
+                    <ul style="margin-bottom: 20px; padding-left: 20px;">
+                        <li style="margin-bottom: 10px;">Crea un torneo con un nombre personalizado y obtén un código único</li>
+                        <li style="margin-bottom: 10px;">Comparte el código con tus amigos para que se unan</li>
+                        <li style="margin-bottom: 10px;">Cada participante puede unirse a múltiples torneos</li>
+                        <li style="margin-bottom: 10px;">Solo puedes tener una predicción por torneo</li>
+                    </ul>
+
+                    <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.2em;">📅 Modificación de Predicciones</h3>
+                    <ul style="margin-bottom: 20px; padding-left: 20px;">
+                        <li style="margin-bottom: 10px;">Las predicciones pueden modificarse hasta el <strong>7 de junio de 2026</strong> (inclusive)</li>
+                        <li style="margin-bottom: 10px;">Después de esa fecha, solo puedes hacer predicciones para partidos que aún no han comenzado</li>
+                        <li style="margin-bottom: 10px;">Una vez que un partido ha comenzado, su predicción queda bloqueada</li>
+                    </ul>
+
+                    <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.2em;">🏆 Clasificación</h3>
+                    <ul style="margin-bottom: 20px; padding-left: 20px;">
+                        <li style="margin-bottom: 10px;">La clasificación se actualiza automáticamente según los resultados reales de los partidos</li>
+                        <li style="margin-bottom: 10px;">Se muestra tu posición, puntos totales, resultados exactos y acertados</li>
+                        <li style="margin-bottom: 10px;">La tabla global muestra la clasificación combinada de todos los torneos</li>
+                    </ul>
+
+                    <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.2em;">💡 Consejos</h3>
+                    <ul style="margin-bottom: 20px; padding-left: 20px;">
+                        <li style="margin-bottom: 10px;">Revisa tus predicciones antes del 7 de junio para asegurarte de que estén correctas</li>
+                        <li style="margin-bottom: 10px;">Los resultados exactos valen más puntos, pero también son más difíciles de acertar</li>
+                        <li style="margin-bottom: 10px;">Puedes ver tus predicciones en cualquier momento desde "Ver Mis Predicciones"</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
