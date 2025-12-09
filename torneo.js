@@ -475,28 +475,38 @@ function obtenerMisTorneos() {
     
     codigos.forEach(codigo => {
         const torneo = torneos[codigo];
-        if (torneo && torneo.participantes) {
+        if (torneo) {
             // Verificar si el usuario está en este torneo
-            // Comparar tanto por nombre exacto como por nombre de usuario si está logueado
-            let estaEnTorneo = torneo.participantes.some(p => p && p.nombre === miNombre);
+            let estaEnTorneo = false;
             
-            // Si no coincide por nombre, verificar por usuarioId si está logueado
-            if (!estaEnTorneo && typeof obtenerUsuarioActual === 'function') {
-                const usuario = obtenerUsuarioActual();
-                if (usuario) {
-                    const usuarioId = obtenerIdUsuarioUnico();
-                    estaEnTorneo = torneo.participantes.some(p => {
-                        if (!p) return false;
-                        // Verificar por usuarioId
-                        if (p.usuarioId && p.usuarioId === usuarioId) {
-                            return true;
-                        }
-                        // Verificar por nombre de usuario si coincide
-                        if (usuario.nombreUsuario && p.nombre === usuario.nombreUsuario) {
-                            return true;
-                        }
-                        return false;
-                    });
+            // Si el usuario es el creador del torneo, también debe aparecer
+            if (torneo.creadoPor === miNombre) {
+                estaEnTorneo = true;
+            }
+            
+            // Verificar en participantes si existen
+            if (!estaEnTorneo && torneo.participantes && Array.isArray(torneo.participantes)) {
+                // Comparar tanto por nombre exacto como por nombre de usuario si está logueado
+                estaEnTorneo = torneo.participantes.some(p => p && p.nombre === miNombre);
+                
+                // Si no coincide por nombre, verificar por usuarioId si está logueado
+                if (!estaEnTorneo && typeof obtenerUsuarioActual === 'function') {
+                    const usuario = obtenerUsuarioActual();
+                    if (usuario) {
+                        const usuarioId = obtenerIdUsuarioUnico();
+                        estaEnTorneo = torneo.participantes.some(p => {
+                            if (!p) return false;
+                            // Verificar por usuarioId
+                            if (p.usuarioId && p.usuarioId === usuarioId) {
+                                return true;
+                            }
+                            // Verificar por nombre de usuario si coincide
+                            if (usuario.nombreUsuario && p.nombre === usuario.nombreUsuario) {
+                                return true;
+                            }
+                            return false;
+                        });
+                    }
                 }
             }
             
