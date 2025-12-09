@@ -1835,8 +1835,8 @@ header h1 {
 
 /* Responsive: Ocultar banners progresivamente según el ancho de pantalla */
 
-/* Primero ocultar la barra izquierda en pantallas medianas-grandes */
-@media (max-width: 1400px) {
+/* Ocultar la barra izquierda entre 768px y 900px (solo barra derecha visible) */
+@media (min-width: 768px) and (max-width: 900px) {
     .sidebar-content.sidebar-left {
         display: none !important;
         width: 0 !important;
@@ -1844,34 +1844,8 @@ header h1 {
     }
 }
 
-/* Luego ocultar también la barra derecha en pantallas medianas */
-@media (max-width: 1200px) {
-    .sidebar-content.sidebar-right {
-        display: none !important;
-        width: 0 !important;
-        min-width: 0 !important;
-    }
-    
-    .main-layout {
-        padding: 20px;
-    }
-}
-
-/* En pantallas pequeñas, asegurar que ambas estén ocultas */
-@media (max-width: 1024px) {
-    .sidebar-content {
-        display: none !important;
-        width: 0 !important;
-        min-width: 0 !important;
-    }
-    
-    .main-content {
-        width: 100%;
-    }
-}
-
-/* En móvil, asegurar que no haya publicidad */
-@media (max-width: 768px) {
+/* En móvil (< 768px), asegurar que no haya publicidad (ambas ocultas) */
+@media (max-width: 767px) {
     .sidebar-content {
         display: none !important;
         width: 0 !important;
@@ -1881,6 +1855,10 @@ header h1 {
     .main-layout {
         padding: 5px;
         gap: 0;
+    }
+    
+    .main-content {
+        width: 100%;
     }
 }
 
