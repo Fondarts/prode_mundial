@@ -26,6 +26,7 @@ body {
 
 /* Banners laterales */
 .sidebar-content {
+    display: block;
     width: 160px;
     min-width: 160px;
     position: sticky;
@@ -1838,6 +1839,8 @@ header h1 {
 @media (max-width: 1400px) {
     .sidebar-content.sidebar-left {
         display: none !important;
+        width: 0 !important;
+        min-width: 0 !important;
     }
 }
 
@@ -1845,6 +1848,8 @@ header h1 {
 @media (max-width: 1200px) {
     .sidebar-content.sidebar-right {
         display: none !important;
+        width: 0 !important;
+        min-width: 0 !important;
     }
     
     .main-layout {
@@ -1856,10 +1861,26 @@ header h1 {
 @media (max-width: 1024px) {
     .sidebar-content {
         display: none !important;
+        width: 0 !important;
+        min-width: 0 !important;
     }
     
     .main-content {
         width: 100%;
+    }
+}
+
+/* En móvil, asegurar que no haya publicidad */
+@media (max-width: 768px) {
+    .sidebar-content {
+        display: none !important;
+        width: 0 !important;
+        min-width: 0 !important;
+    }
+    
+    .main-layout {
+        padding: 5px;
+        gap: 0;
     }
 }
 
