@@ -1547,12 +1547,12 @@ async function mostrarListaTorneos() {
         
         // Event listener para crear torneo
         const btnCrearTorneo = document.getElementById('btn-crear-torneo-modal');
-        btnCrearTorneo.addEventListener('click', async () => {
+        btnCrearTorneo.addEventListener('click', () => {
             // Cerrar este modal primero
             document.body.removeChild(overlay);
-            // Llamar a la función de crear torneo (que está en mostrarDialogoEnviarPredicciones)
-            // Resolver con null para indicar que se quiere crear uno nuevo
-            resolve(null);
+            // Resolver con un objeto especial que indique que se quiere crear uno nuevo
+            // Usaremos un objeto con una propiedad especial para diferenciarlo
+            resolve({ crearNuevo: true });
         });
         
         // Función para configurar event listeners de los torneos
@@ -1703,9 +1703,15 @@ async function mostrarDialogoEnviarPredicciones() {
             return; // Usuario canceló
         }
         
-        let codigoLimpio = '';
-        
-        if (torneoSeleccionado.esPrivado) {
+        // Si el resultado tiene la propiedad crearNuevo, significa que se quiere crear un nuevo torneo
+        if (torneoSeleccionado && torneoSeleccionado.crearNuevo === true) {
+            // Cambiar a modo crear y continuar con el flujo de creación
+            crearNuevo = true;
+        } else {
+            // Continuar con el flujo de unirse a torneo existente
+            let codigoLimpio = '';
+            
+            if (torneoSeleccionado.esPrivado) {
             // Torneo Privado - Solo pedir contraseña (sin código)
             const claveIngresada = await mostrarModal({
                 titulo: typeof t === 'function' ? t('torneoPrivado') : 'Torneo Privado',
