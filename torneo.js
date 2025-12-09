@@ -695,7 +695,7 @@ async function renderizarTorneo() {
                 </div>
                 <div class="torneo-item-content">
                     <div class="torneo-item-info">
-                        <p><strong>Código:</strong> <span class="codigo-torneo">${codigo}</span></p>
+                        ${esPrivado ? `<p><strong>Código:</strong> <span class="codigo-torneo">${codigo}</span></p>` : ''}
                         <p><strong>Participantes:</strong> ${participantes ? participantes.length : 0}</p>
                         ${miParticipante ? `<p><strong>Tu posición:</strong> ${miPosicion}º con ${miParticipante.puntos || 0} puntos</p>` : ''}
                     </div>
@@ -1316,7 +1316,6 @@ async function mostrarListaTorneos() {
                 <div class="torneo-item-lista" data-codigo="${torneo.codigo}" style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s; background: #f9fafb; margin-bottom: 8px;">
                     <h3 style="margin: 0 0 6px 0; color: #1e3a8a; font-size: 1em; font-weight: 600;">${torneo.nombre}</h3>
                     <p style="margin: 3px 0; color: #666; font-size: 0.85em;">Creado por: <strong>${torneo.creadoPor}</strong></p>
-                    ${!esPrivado ? `<p style="margin: 3px 0; color: #666; font-size: 0.85em;">Código: <strong style="font-family: monospace; color: #1e3a8a;">${torneo.codigo}</strong></p>` : ''}
                     <p style="margin: 3px 0; color: #666; font-size: 0.85em;">👥 Participantes: <strong>${torneo.participantes}</strong></p>
                 </div>
             `).join('');
