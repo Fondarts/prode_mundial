@@ -16,7 +16,7 @@ const CIUDADES_MUNDIAL_2026 = {
             inauguracion: '2007',
             caracteristicas: 'Estadio de fútbol específico, sede del Toronto FC de la MLS',
             direccion: '170 Princes\' Blvd, Toronto, ON M6K 3C3, Canadá',
-            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
+            imagen: './fotos/Bmo_Field_2016_East_Stand.webp'
         },
         partidos: [
             { fecha: '2026-06-12', fase: 'Fase de Grupos', descripcion: 'Partido inaugural de Canadá' },
@@ -40,7 +40,7 @@ const CIUDADES_MUNDIAL_2026 = {
             inauguracion: '1983 (renovado en 2011)',
             caracteristicas: 'Estadio con techo retráctil, sede del Vancouver Whitecaps',
             direccion: '777 Pacific Blvd, Vancouver, BC V6B 4Y8, Canadá',
-            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
+            imagen: './fotos/BC_Place_2015_Women\'s_FIFA_World_Cup.webp'
         },
         partidos: [
             { fecha: '2026-06-13', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -64,7 +64,7 @@ const CIUDADES_MUNDIAL_2026 = {
             inauguracion: '1966',
             caracteristicas: 'Estadio histórico que ha albergado dos finales de Copa del Mundo (1970 y 1986)',
             direccion: 'Calzada de Tlalpan 3465, Col. Santa Úrsula Coapa, 04650 Ciudad de México, CDMX, México',
-            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
+            imagen: './fotos/Estadio_Azteca_desde_el_aire_4.tif.webp'
         },
         partidos: [
             { fecha: '2026-06-11', fase: 'Fase de Grupos', descripcion: 'Partido inaugural del Mundial 2026' },
@@ -88,7 +88,7 @@ const CIUDADES_MUNDIAL_2026 = {
             inauguracion: '2010',
             caracteristicas: 'Estadio moderno, sede del Club Deportivo Guadalajara (Chivas)',
             direccion: 'Av. Circuito JVC 2800, 45645 Zapopan, Jal., México',
-            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
+            imagen: './fotos/Estadio_Akron_02-07-2022_cabecera_sur_lado_derecho.webp'
         },
         partidos: [
             { fecha: '2026-06-12', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -112,7 +112,7 @@ const CIUDADES_MUNDIAL_2026 = {
             inauguracion: '2015',
             caracteristicas: 'Estadio moderno con excelente acústica, sede del Club de Fútbol Monterrey',
             direccion: 'Av. Pablo Livas 2011, La Pastora, 67110 Guadalupe, N.L., México',
-            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
+            imagen: './fotos/Estadio_BBVA.webp'
         },
         partidos: [
             { fecha: '2026-06-13', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -136,7 +136,7 @@ const CIUDADES_MUNDIAL_2026 = {
             inauguracion: '2017',
             caracteristicas: 'Estadio con techo retráctil, sede de los Atlanta Falcons (NFL) y Atlanta United (MLS)',
             direccion: '1 AMB Drive NW, Atlanta, GA 30313, Estados Unidos',
-            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
+            imagen: './fotos/Mercedes-Benz Stadium.webp'
         },
         partidos: [
             { fecha: '2026-06-16', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -163,7 +163,7 @@ const CIUDADES_MUNDIAL_2026 = {
             inauguracion: '2002',
             caracteristicas: 'Sede de los New England Patriots (NFL) y New England Revolution (MLS)',
             direccion: '1 Patriot Place, Foxborough, MA 02035, Estados Unidos',
-            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
+            imagen: './fotos/Gillette_Stadium_(Top_View).webp'
         },
         partidos: [
             { fecha: '2026-06-14', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -188,7 +188,7 @@ const CIUDADES_MUNDIAL_2026 = {
             inauguracion: '2009',
             caracteristicas: 'Estadio con techo retráctil y pantalla gigante, sede de los Dallas Cowboys (NFL)',
             direccion: '1 AT&T Way, Arlington, TX 76011, Estados Unidos',
-            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
+            imagen: './fotos/AT&T Stadium.webp'
         },
         partidos: [
             { fecha: '2026-06-15', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
