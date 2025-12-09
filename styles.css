@@ -1158,6 +1158,8 @@ header h1 {
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .torneo-columna h3 {
@@ -1339,9 +1341,9 @@ header h1 {
     margin-top: 5px;
     background: white;
     border-radius: 6px;
-    overflow: hidden;
-    table-layout: auto;
-    min-width: 100%;
+    overflow: visible;
+    table-layout: fixed;
+    min-width: 500px;
 }
 
 .tabla-clasificacion-torneo thead {
@@ -1359,27 +1361,24 @@ header h1 {
 
 .tabla-clasificacion-torneo th:first-child {
     text-align: center;
-    width: 45px;
-    min-width: 45px;
+    width: 50px;
 }
 
 .tabla-clasificacion-torneo th:nth-child(2) {
-    min-width: 100px;
-    max-width: 150px;
+    width: 35%;
+    min-width: 120px;
 }
 
 .tabla-clasificacion-torneo th:nth-child(3) {
     text-align: center;
-    width: 50px;
-    min-width: 50px;
+    width: 60px;
 }
 
 .tabla-clasificacion-torneo th:nth-child(4),
 .tabla-clasificacion-torneo th:nth-child(5),
 .tabla-clasificacion-torneo th:nth-child(6) {
     text-align: center;
-    width: 70px;
-    min-width: 70px;
+    width: 80px;
 }
 
 .tabla-clasificacion-torneo td {
