@@ -1229,21 +1229,29 @@ async function mostrarListaTorneos() {
         }
         
         // Convertir a array y separar en privados y abiertos
-        const todosLosTorneosArray = Object.entries(todosLosTorneos).map(([codigo, datos]) => ({
-            codigo,
-            nombre: datos.nombre || `Torneo ${codigo}`,
-            creadoPor: datos.creadoPor || 'Desconocido',
-            fechaCreacion: datos.fechaCreacion || 0,
-            participantes: datos.participantes ? datos.participantes.length : 0,
-            esPrivado: datos.esPrivado || (datos.clave && datos.clave.trim() !== ''), // Si tiene clave, es privado
-            clave: datos.clave || null
-        }));
+        const todosLosTorneosArray = Object.entries(todosLosTorneos).map(([codigo, datos]) => {
+            // Si esPrivado no está definido (undefined o null), considerar privado por defecto (torneos antiguos)
+            // Si esPrivado está explícitamente en false Y no tiene clave, entonces es abierto
+            const esPrivado = datos.esPrivado !== undefined && datos.esPrivado !== null 
+                ? datos.esPrivado 
+                : true; // Por defecto privado si no está definido (torneos antiguos)
+            
+            return {
+                codigo,
+                nombre: datos.nombre || `Torneo ${codigo}`,
+                creadoPor: datos.creadoPor || 'Desconocido',
+                fechaCreacion: datos.fechaCreacion || 0,
+                participantes: datos.participantes ? datos.participantes.length : 0,
+                esPrivado: esPrivado || (datos.clave && datos.clave.trim() !== ''), // Si tiene clave, es privado
+                clave: datos.clave || null
+            };
+        });
         
         // Separar en privados y abiertos
-        // Un torneo es privado si tiene esPrivado=true O si tiene una clave definida
-        const torneosAbiertos = todosLosTorneosArray.filter(t => !t.esPrivado && (!t.clave || t.clave.trim() === ''))
+        // Un torneo es abierto SOLO si esPrivado está explícitamente en false Y no tiene clave
+        const torneosAbiertos = todosLosTorneosArray.filter(t => t.esPrivado === false && (!t.clave || t.clave.trim() === ''))
             .sort((a, b) => b.participantes - a.participantes); // Ordenar por participantes descendente
-        const torneosPrivados = todosLosTorneosArray.filter(t => t.esPrivado || (t.clave && t.clave.trim() !== ''))
+        const torneosPrivados = todosLosTorneosArray.filter(t => t.esPrivado !== false || (t.clave && t.clave.trim() !== ''))
             .sort((a, b) => a.nombre.localeCompare(b.nombre)); // Ordenar alfabéticamente
         
         if (torneosAbiertos.length === 0 && torneosPrivados.length === 0) {
