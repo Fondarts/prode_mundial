@@ -1550,94 +1550,119 @@ async function mostrarDialogoEnviarPredicciones() {
     });
     
     if (crearNuevo === false && crearNuevo !== null) {
-        // Unirse a torneo existente - Primero mostrar lista de torneos
-        const torneoSeleccionado = await mostrarListaTorneos();
-        
-        if (!torneoSeleccionado || torneoSeleccionado === false) {
-            return; // Usuario canceló
-        }
-        
-        // Verificar si es privado y pedir contraseña si es necesario
-        if (torneoSeleccionado.esPrivado) {
-            const claveIngresada = await mostrarModal({
-                titulo: 'Torneo Privado',
-                mensaje: `Este es un torneo privado.\n\nIngresa la contraseña del torneo "${torneoSeleccionado.nombre}":`,
-                input: true,
-                inputType: 'password',
-                placeholder: 'Contraseña',
-                maxLength: 50,
-                cancelar: true
-            });
-            
-            if (!claveIngresada || claveIngresada === false) return;
-            
-            // Verificar contraseña
-            if (claveIngresada.trim() !== torneoSeleccionado.clave) {
-                await mostrarModal({
-                    titulo: 'Contraseña Incorrecta',
-                    mensaje: 'La contraseña ingresada no es correcta.',
-                    cancelar: false
-                });
-                return;
-            }
-        }
-        
-        // Verificar si es privado y pedir contraseña si es necesario
-        // Solo pedir contraseña si es privado Y tiene clave definida
-        // Los torneos abiertos (esPrivado === false) nunca piden contraseña
-        if (torneoSeleccionado.esPrivado && torneoSeleccionado.clave && torneoSeleccionado.clave.trim() !== '') {
-            const claveIngresada = await mostrarModal({
-                titulo: 'Torneo Privado',
-                mensaje: `Este es un torneo privado.\n\nIngresa la contraseña del torneo "${torneoSeleccionado.nombre}":`,
-                input: true,
-                inputType: 'password',
-                placeholder: 'Contraseña',
-                maxLength: 50,
-                cancelar: true
-            });
-            
-            if (!claveIngresada || claveIngresada === false) return;
-            
-            // Verificar contraseña
-            if (claveIngresada.trim() !== torneoSeleccionado.clave) {
-                await mostrarModal({
-                    titulo: 'Contraseña Incorrecta',
-                    mensaje: 'La contraseña ingresada no es correcta.',
-                    cancelar: false
-                });
-                return;
-            }
-        }
-        
-        // Ahora pedir el código del torneo seleccionado
-        const codigo = await mostrarModal({
+        // Unirse a torneo existente
+        // Preguntar si es torneo abierto o privado
+        const tipoUnirse = await mostrarModal({
             titulo: 'Unirse a Torneo',
-            mensaje: `Ingresa el código del torneo "${torneoSeleccionado.nombre}" (6 dígitos):`,
-            input: true,
-            placeholder: '000000',
-            maxLength: 6,
-            cancelar: true
+            mensaje: '¿A qué tipo de torneo quieres unirte?',
+            cancelar: true,
+            okTexto: 'Torneo Abierto',
+            cancelarTexto: 'Torneo Privado'
         });
         
-        if (!codigo || codigo === false) return;
+        let codigoLimpio = '';
+        let torneoSeleccionado = null;
         
-        const codigoLimpio = codigo.trim().replace(/\D/g, '');
-        if (codigoLimpio.length !== 6) {
-            await mostrarModal({
-                titulo: 'Error',
-                mensaje: 'El código debe tener 6 dígitos',
-                cancelar: false
+        if (tipoUnirse === false) {
+            // Torneo Privado - Solo pedir contraseña (sin código)
+            const claveIngresada = await mostrarModal({
+                titulo: 'Torneo Privado',
+                mensaje: 'Ingresa la contraseña del torneo privado:',
+                input: true,
+                inputType: 'password',
+                placeholder: 'Contraseña',
+                maxLength: 50,
+                cancelar: true
             });
-            return;
-        }
-        
-        // Verificar que el código coincida con el torneo seleccionado
-        if (codigoLimpio !== torneoSeleccionado.codigo) {
-            await mostrarModal({
-                titulo: 'Error',
-                mensaje: 'El código ingresado no coincide con el torneo seleccionado',
-                cancelar: false
+            
+            if (!claveIngresada || claveIngresada === false) return;
+            
+            const claveLimpia = claveIngresada.trim();
+            
+            // Buscar torneo por contraseña en Supabase
+            if (usarSupabase() && typeof buscarTorneoPorClaveSupabase === 'function') {
+                torneoSeleccionado = await buscarTorneoPorClaveSupabase(claveLimpia);
+            }
+            
+            // También buscar en torneos locales
+            if (!torneoSeleccionado && torneos && typeof torneos === 'object') {
+                for (const [codigo, datos] of Object.entries(torneos)) {
+                    if (datos.esPrivado && datos.clave && datos.clave.trim() === claveLimpia) {
+                        torneoSeleccionado = {
+                            codigo: codigo,
+                            nombre: datos.nombre,
+                            creadoPor: datos.creadoPor,
+                            esPrivado: true,
+                            clave: datos.clave
+                        };
+                        break;
+                    }
+                }
+            }
+            
+            if (!torneoSeleccionado) {
+                await mostrarModal({
+                    titulo: 'Torneo No Encontrado',
+                    mensaje: 'No se encontró un torneo privado con esa contraseña.',
+                    cancelar: false
+                });
+                return;
+            }
+            
+            codigoLimpio = torneoSeleccionado.codigo;
+        } else if (tipoUnirse === true) {
+            // Torneo Abierto - Mostrar lista y pedir código
+            const torneoSeleccionadoLista = await mostrarListaTorneos();
+            
+            if (!torneoSeleccionadoLista || torneoSeleccionadoLista === false) {
+                return; // Usuario canceló
+            }
+            
+            // Solo permitir seleccionar torneos abiertos
+            if (torneoSeleccionadoLista.esPrivado) {
+                await mostrarModal({
+                    titulo: 'Error',
+                    mensaje: 'Este es un torneo privado. Usa la opción "Torneo Privado" para unirte.',
+                    cancelar: false
+                });
+                return;
+            }
+            
+            // Pedir el código del torneo abierto
+            const codigo = await mostrarModal({
+                titulo: 'Unirse a Torneo',
+                mensaje: `Ingresa el código del torneo "${torneoSeleccionadoLista.nombre}" (6 dígitos):`,
+                input: true,
+                placeholder: '000000',
+                maxLength: 6,
+                cancelar: true
             });
+            
+            if (!codigo || codigo === false) return;
+            
+            codigoLimpio = codigo.trim().replace(/\D/g, '');
+            if (codigoLimpio.length !== 6) {
+                await mostrarModal({
+                    titulo: 'Error',
+                    mensaje: 'El código debe tener 6 dígitos',
+                    cancelar: false
+                });
+                return;
+            }
+            
+            // Verificar que el código coincida con el torneo seleccionado
+            if (codigoLimpio !== torneoSeleccionadoLista.codigo) {
+                await mostrarModal({
+                    titulo: 'Error',
+                    mensaje: 'El código ingresado no coincide con el torneo seleccionado',
+                    cancelar: false
+                });
+                return;
+            }
+            
+            torneoSeleccionado = torneoSeleccionadoLista;
+        } else {
+            // Usuario canceló
             return;
         }
         
