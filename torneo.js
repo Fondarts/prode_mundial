@@ -1301,7 +1301,7 @@ async function mostrarListaTorneos() {
                             <span style="font-size: 0.8em; color: #666; font-weight: normal;">(${torneosAbiertos.length})</span>
                         </h3>
                         <div id="lista-abiertos" style="max-height: calc(85vh - 250px); overflow-y: auto;">
-                            ${renderizarTorneos(torneosAbiertos)}
+                            ${renderizarTorneos(torneosAbiertos, false)}
                         </div>
                     </div>
                     <div>
@@ -1310,7 +1310,7 @@ async function mostrarListaTorneos() {
                             <span style="font-size: 0.8em; color: #666; font-weight: normal;">(${torneosPrivados.length})</span>
                         </h3>
                         <div id="lista-privados" style="max-height: calc(85vh - 250px); overflow-y: auto;">
-                            ${renderizarTorneos(torneosPrivados)}
+                            ${renderizarTorneos(torneosPrivados, true)}
                         </div>
                     </div>
                 </div>
