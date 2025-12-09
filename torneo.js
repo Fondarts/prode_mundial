@@ -1308,10 +1308,17 @@ async function mostrarDialogoEnviarPredicciones() {
     });
     
     if (crearNuevo === false && crearNuevo !== null) {
-        // Unirse a torneo existente
+        // Unirse a torneo existente - Primero mostrar lista de torneos
+        const torneoSeleccionado = await mostrarListaTorneos();
+        
+        if (!torneoSeleccionado || torneoSeleccionado === false) {
+            return; // Usuario canceló
+        }
+        
+        // Ahora pedir el código del torneo seleccionado
         const codigo = await mostrarModal({
             titulo: 'Unirse a Torneo',
-            mensaje: 'Ingresa el código del torneo (6 dígitos):',
+            mensaje: `Ingresa el código del torneo "${torneoSeleccionado.nombre}" (6 dígitos):`,
             input: true,
             placeholder: '000000',
             maxLength: 6,
@@ -1325,6 +1332,16 @@ async function mostrarDialogoEnviarPredicciones() {
             await mostrarModal({
                 titulo: 'Error',
                 mensaje: 'El código debe tener 6 dígitos',
+                cancelar: false
+            });
+            return;
+        }
+        
+        // Verificar que el código coincida con el torneo seleccionado
+        if (codigoLimpio !== torneoSeleccionado.codigo) {
+            await mostrarModal({
+                titulo: 'Error',
+                mensaje: 'El código ingresado no coincide con el torneo seleccionado',
                 cancelar: false
             });
             return;
