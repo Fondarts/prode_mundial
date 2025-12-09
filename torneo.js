@@ -2032,9 +2032,9 @@ async function mostrarDialogoEnviarPredicciones() {
         
         let mensajeTorneo = '';
         if (esPrivado) {
-            mensajeTorneo = `¡Torneo privado creado exitosamente!\n\nContraseña del torneo: ${clave}\n\nComparte esta contraseña con tus amigos para que se unan.`;
+            mensajeTorneo = `${typeof t === 'function' ? t('torneoPrivadoCreado') : '¡Torneo privado creado exitosamente!'}\n\n${typeof t === 'function' ? t('contraseñaTorneo') : 'Contraseña del torneo'}: ${clave}\n\n${typeof t === 'function' ? t('compartirContraseña') : 'Comparte esta contraseña con tus amigos para que se unan.'}`;
         } else {
-            mensajeTorneo = `¡Torneo creado exitosamente!\n\nCódigo del torneo: ${codigo}\n\nComparte este código con tus amigos para que se unan.`;
+            mensajeTorneo = `${typeof t === 'function' ? t('torneoCreadoExitosamente') : '¡Torneo creado exitosamente!'}\n\n${typeof t === 'function' ? t('codigoTorneo') : 'Código del torneo'}: ${codigo}\n\n${typeof t === 'function' ? t('compartirCodigo') : 'Comparte este código con tus amigos para que se unan.'}`;
         }
         
         // Si hubo error en Supabase, agregarlo al mensaje
@@ -2043,7 +2043,7 @@ async function mostrarDialogoEnviarPredicciones() {
         }
         
         await mostrarModal({
-            titulo: '¡Torneo Creado!',
+            titulo: typeof t === 'function' ? t('torneoCreado') : '¡Torneo Creado!',
             mensaje: mensajeTorneo,
             cancelar: false
         });
