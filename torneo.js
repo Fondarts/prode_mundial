@@ -626,13 +626,13 @@ async function renderizarTorneo() {
     torneoDiv.className = 'torneo-layout';
     torneoDiv.innerHTML = `
         <div class="torneo-columna izquierda">
-            <h3>🏆 Mis Torneos</h3>
+            <h3>${typeof t === 'function' ? t('misTorneos') : '🏆 Mis Torneos'}</h3>
             <div id="mis-torneos-lista" class="mis-torneos-lista">
                 <p style="text-align: center; color: #666; padding: 20px;">Cargando...</p>
             </div>
         </div>
         <div class="torneo-columna derecha">
-            <h3>🌍 Tabla Global</h3>
+            <h3>${typeof t === 'function' ? t('tablaGlobal') : '🌍 Tabla Global'}</h3>
             <div id="tabla-global" class="tabla-global">
                 <p style="text-align: center; color: #666; padding: 20px;">Cargando...</p>
             </div>
@@ -673,7 +673,7 @@ async function renderizarTorneo() {
     misTorneosLista.innerHTML = '';
     
     if (misTorneos.length === 0) {
-        misTorneosLista.innerHTML = '<p class="sin-torneos">No estás en ningún torneo aún. Envía tus predicciones desde la pestaña "Grupos".</p>';
+        misTorneosLista.innerHTML = `<p class="sin-torneos">${typeof t === 'function' ? t('noEstasEnNingunTorneo') : 'No estás en ningún torneo aún. Envía tus predicciones desde la pestaña "Grupos".'}</p>`;
     } else {
         // Renderizar cada torneo
         misTorneos.forEach((torneoData, index) => {
@@ -698,32 +698,32 @@ async function renderizarTorneo() {
                         <span class="torneo-toggle-icon">▼</span>
                     </h4>
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        ${esPrivadoFinal ? '<span class="badge-torneo badge-privado">🔒 Privado</span>' : '<span class="badge-torneo badge-abierto">🌍 Abierto</span>'}
-                        ${esCreador ? '<span class="badge-creador">Creador</span>' : ''}
+                        ${esPrivadoFinal ? `<span class="badge-torneo badge-privado">${typeof t === 'function' ? t('privado') : '🔒 Privado'}</span>` : `<span class="badge-torneo badge-abierto">${typeof t === 'function' ? t('abierto') : '🌍 Abierto'}</span>`}
+                        ${esCreador ? `<span class="badge-creador">${typeof t === 'function' ? t('creador') : 'Creador'}</span>` : ''}
                     </div>
                 </div>
                 <div class="torneo-item-content">
                     <div class="torneo-item-info">
-                        ${esPrivadoFinal && torneoData.clave ? `<p><strong>Contraseña:</strong> <span class="codigo-torneo">${torneoData.clave}</span></p>` : ''}
-                        <p><strong>Participantes:</strong> ${participantes ? participantes.length : 0}</p>
-                        ${miParticipante ? `<p><strong>Tu posición:</strong> ${miPosicion}º con ${miParticipante.puntos || 0} puntos</p>` : ''}
+                        ${esPrivadoFinal && torneoData.clave ? `<p><strong>${typeof t === 'function' ? t('contraseña') : 'Contraseña'}:</strong> <span class="codigo-torneo">${torneoData.clave}</span></p>` : ''}
+                        <p><strong>${typeof t === 'function' ? t('participantes') : 'Participantes'}:</strong> ${participantes ? participantes.length : 0}</p>
+                        ${miParticipante ? `<p><strong>${typeof t === 'function' ? t('tuPosicion') : 'Tu posición'}:</strong> ${miPosicion}º ${typeof t === 'function' ? t('con') : 'con'} ${miParticipante.puntos || 0} ${typeof t === 'function' ? t('puntos') : 'puntos'}</p>` : ''}
                     </div>
                     <div class="torneo-item-acciones">
                         <button class="btn-ver-predicciones" data-codigo="${codigo}">
-                            👁️ Ver Mis Predicciones
+                            ${typeof t === 'function' ? t('verMisPredicciones') : '👁️ Ver Mis Predicciones'}
                         </button>
                     </div>
                     <div class="torneo-item-participantes">
-                        <h5>Clasificación:</h5>
+                        <h5>${typeof t === 'function' ? t('clasificacion') : 'Clasificación'}:</h5>
                         <table class="tabla-clasificacion-torneo">
                             <thead>
                                 <tr>
-                                    <th>Pos</th>
-                                    <th>Nombre</th>
-                                    <th>Pts</th>
-                                    <th>Exactos</th>
-                                    <th>Acertados</th>
-                                    <th>Partidos</th>
+                                    <th>${typeof t === 'function' ? t('pos') : 'Pos'}</th>
+                                    <th>${typeof t === 'function' ? t('nombre') : 'Nombre'}</th>
+                                    <th>${typeof t === 'function' ? t('pts') : 'Pts'}</th>
+                                    <th>${typeof t === 'function' ? t('exactos') : 'Exactos'}</th>
+                                    <th>${typeof t === 'function' ? t('acertados') : 'Acertados'}</th>
+                                    <th>${typeof t === 'function' ? t('partidos') : 'Partidos'}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -815,8 +815,8 @@ function mostrarPrediccionesTorneo(codigo) {
     if (!torneos[codigo]) {
         if (typeof mostrarModal === 'function') {
             mostrarModal({
-                titulo: 'Error',
-                mensaje: 'Torneo no encontrado',
+                titulo: typeof t === 'function' ? t('error') : 'Error',
+                mensaje: typeof t === 'function' ? t('torneoNoEncontrado') : 'Torneo no encontrado',
                 cancelar: false
             });
         }
@@ -829,8 +829,8 @@ function mostrarPrediccionesTorneo(codigo) {
     if (!participante || !participante.predicciones) {
         if (typeof mostrarModal === 'function') {
             mostrarModal({
-                titulo: 'Sin Predicciones',
-                mensaje: 'No has enviado predicciones para este torneo aún.',
+                titulo: typeof t === 'function' ? t('sinPredicciones') : 'Sin Predicciones',
+                mensaje: typeof t === 'function' ? t('noHasEnviadoPredicciones') : 'No has enviado predicciones para este torneo aún.',
                 cancelar: false
             });
         }
@@ -844,13 +844,13 @@ function mostrarPrediccionesTorneo(codigo) {
     modalContent.className = 'modal-predicciones';
     modalContent.innerHTML = `
         <div class="modal-predicciones-header">
-            <h2>Mis Predicciones - ${torneo.nombre || `Torneo ${codigo}`}</h2>
+            <h2>${typeof t === 'function' ? t('misPredicciones') : 'Mis Predicciones'} - ${torneo.nombre || `Torneo ${codigo}`}</h2>
             <button class="modal-predicciones-cerrar" onclick="this.closest('.modal-predicciones-overlay').remove()">&times;</button>
         </div>
         <div class="modal-predicciones-body">
             <div style="margin-bottom: 20px; display: flex; gap: 10px; justify-content: center;">
                 <button id="btn-cargar-prediccion" class="btn-cargar-prediccion" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer; transition: all 0.2s;">
-                    📥 Cargar Predicción
+                    ${typeof t === 'function' ? t('cargarPrediccion') : '📥 Cargar Predicción'}
                 </button>
             </div>
             <div id="predicciones-container" class="predicciones-container-solo-lectura"></div>
@@ -987,8 +987,8 @@ function cargarPrediccionEnPaginaPrincipal(predicciones) {
     // Mostrar mensaje de confirmación
     if (typeof mostrarModal === 'function') {
         mostrarModal({
-            titulo: 'Predicción Cargada',
-            mensaje: 'Las predicciones se han cargado correctamente en la página principal.',
+            titulo: typeof t === 'function' ? t('prediccionCargada') : 'Predicción Cargada',
+            mensaje: typeof t === 'function' ? t('prediccionesCargadasCorrectamente') : 'Las predicciones se han cargado correctamente en la página principal.',
             cancelar: false
         });
     }
@@ -1923,10 +1923,10 @@ async function mostrarDialogoEnviarPredicciones() {
         
         while (!nombreValido) {
             nombreTorneo = await mostrarModal({
-                titulo: 'Crear Torneo',
-                mensaje: 'Ingresa un nombre para el torneo:',
+                titulo: typeof t === 'function' ? t('crearTorneo') : 'Crear Torneo',
+                mensaje: typeof t === 'function' ? t('ingresarNombreTorneo') : 'Ingresa un nombre para el torneo:',
                 input: true,
-                placeholder: 'Nombre del torneo (obligatorio)',
+                placeholder: typeof t === 'function' ? t('nombreTorneo') + ' (obligatorio)' : 'Nombre del torneo (obligatorio)',
                 maxLength: 30,
                 cancelar: true
             });
