@@ -1459,7 +1459,12 @@ async function mostrarListaTorneos() {
                 <button id="cerrar-lista-torneos" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">&times;</button>
             </div>
             <div style="padding: 20px; display: flex; flex-direction: column; flex: 1; overflow: hidden;">
-                <input type="text" id="buscador-torneos" placeholder="${typeof t === 'function' ? t('buscarTorneo') : '🔍 Buscar torneo por nombre o código...'}" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1em; margin-bottom: 20px; box-sizing: border-box;">
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <input type="text" id="buscador-torneos" placeholder="${typeof t === 'function' ? t('buscarTorneo') : '🔍 Buscar torneo por nombre o código...'}" style="flex: 1; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1em; box-sizing: border-box;">
+                    <button id="btn-crear-torneo-modal" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s;">
+                        ${typeof t === 'function' ? t('crearTorneo') : '➕ Crear Torneo'}
+                    </button>
+                </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; overflow-y: auto; flex: 1;">
                     <div>
                         <h3 style="margin: 0 0 15px 0; color: #1e3a8a; font-size: 1.2em; border-bottom: 2px solid #1e3a8a; padding-bottom: 8px;">
@@ -1538,6 +1543,16 @@ async function mostrarListaTorneos() {
             if (e.target === overlay) {
                 cerrar();
             }
+        });
+        
+        // Event listener para crear torneo
+        const btnCrearTorneo = document.getElementById('btn-crear-torneo-modal');
+        btnCrearTorneo.addEventListener('click', async () => {
+            // Cerrar este modal primero
+            document.body.removeChild(overlay);
+            // Llamar a la función de crear torneo (que está en mostrarDialogoEnviarPredicciones)
+            // Resolver con null para indicar que se quiere crear uno nuevo
+            resolve(null);
         });
         
         // Función para configurar event listeners de los torneos
