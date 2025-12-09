@@ -1832,14 +1832,30 @@ header h1 {
     pointer-events: none;
 }
 
-/* Responsive: Ocultar banners en pantallas pequeñas */
-@media (max-width: 1024px) {
-    .sidebar-content {
-        display: none;
+/* Responsive: Ocultar banners progresivamente según el ancho de pantalla */
+
+/* Primero ocultar la barra izquierda en pantallas medianas-grandes */
+@media (max-width: 1400px) {
+    .sidebar-content.sidebar-left {
+        display: none !important;
+    }
+}
+
+/* Luego ocultar también la barra derecha en pantallas medianas */
+@media (max-width: 1200px) {
+    .sidebar-content.sidebar-right {
+        display: none !important;
     }
     
     .main-layout {
         padding: 20px;
+    }
+}
+
+/* En pantallas pequeñas, asegurar que ambas estén ocultas */
+@media (max-width: 1024px) {
+    .sidebar-content {
+        display: none !important;
     }
     
     .main-content {
