@@ -451,99 +451,117 @@ async function calcularPuntosTorneo(codigo) {
     await guardarTorneos();
 }
 
-// Obtener todos los torneos del usuario
-function obtenerMisTorneos() {
+// Obtener todos los torneos del usuario desde Supabase
+async function obtenerMisTorneos() {
     const misTorneos = [];
     
-    // Asegurar que torneos es un objeto válido
-    if (!torneos || typeof torneos !== 'object') {
+    // Si Supabase no está disponible, retornar vacío
+    if (!usarSupabase() || typeof obtenerTorneosSupabase !== 'function') {
         return [];
     }
     
-    // Actualizar miNombre desde localStorage o usuario logueado
-    const nombreGuardado = localStorage.getItem('mundial2026_mi_nombre');
-    if (nombreGuardado) {
-        miNombre = nombreGuardado;
-    } else if (typeof obtenerUsuarioActual === 'function') {
+    // Obtener nombre del usuario desde usuario logueado o localStorage
+    let nombreUsuario = '';
+    if (typeof obtenerUsuarioActual === 'function') {
         const usuario = obtenerUsuarioActual();
         if (usuario && usuario.nombreUsuario) {
-            miNombre = usuario.nombreUsuario;
+            nombreUsuario = usuario.nombreUsuario;
         }
     }
     
-    const codigos = Object.keys(torneos);
+    // También obtener el nombre guardado como fallback
+    const nombreGuardado = localStorage.getItem('mundial2026_mi_nombre');
+    if (!nombreUsuario && nombreGuardado) {
+        nombreUsuario = nombreGuardado;
+    }
     
-    codigos.forEach(codigo => {
-        const torneo = torneos[codigo];
-        if (torneo) {
-            // Verificar si el usuario está en este torneo
+    // Obtener usuarioId para búsqueda
+    const usuarioId = obtenerIdUsuarioUnico();
+    
+    try {
+        // Cargar todos los torneos desde Supabase
+        const todosLosTorneos = await cargarDatosDesdeSupabase();
+        if (!todosLosTorneos) {
+            return [];
+        }
+        
+        // Filtrar torneos donde el usuario es creador o participante
+        for (const [codigo, torneo] of Object.entries(todosLosTorneos)) {
             let estaEnTorneo = false;
             
-            // Si el usuario es el creador del torneo, también debe aparecer
-            if (torneo.creadoPor === miNombre) {
+            // Verificar si es el creador
+            if (torneo.creadoPor === nombreUsuario) {
                 estaEnTorneo = true;
             }
             
-            // Verificar en participantes si existen
+            // Verificar si está en participantes
             if (!estaEnTorneo && torneo.participantes && Array.isArray(torneo.participantes)) {
-                // Comparar tanto por nombre exacto como por nombre de usuario si está logueado
-                estaEnTorneo = torneo.participantes.some(p => p && p.nombre === miNombre);
-                
-                // Si no coincide por nombre, verificar por usuarioId si está logueado
-                if (!estaEnTorneo && typeof obtenerUsuarioActual === 'function') {
-                    const usuario = obtenerUsuarioActual();
-                    if (usuario) {
-                        const usuarioId = obtenerIdUsuarioUnico();
-                        estaEnTorneo = torneo.participantes.some(p => {
-                            if (!p) return false;
-                            // Verificar por usuarioId
-                            if (p.usuarioId && p.usuarioId === usuarioId) {
-                                return true;
-                            }
-                            // Verificar por nombre de usuario si coincide
-                            if (usuario.nombreUsuario && p.nombre === usuario.nombreUsuario) {
-                                return true;
-                            }
-                            return false;
-                        });
+                estaEnTorneo = torneo.participantes.some(p => {
+                    if (!p) return false;
+                    // Verificar por nombre
+                    if (p.nombre === nombreUsuario) {
+                        return true;
                     }
-                }
+                    // Verificar por usuarioId
+                    if (p.usuarioId && p.usuarioId === usuarioId) {
+                        return true;
+                    }
+                    return false;
+                });
             }
             
             if (estaEnTorneo) {
                 misTorneos.push({ codigo, ...torneo });
             }
         }
-    });
-    
-    
-    // Ordenar por fecha de creación (más reciente primero)
-    misTorneos.sort((a, b) => (b.fechaCreacion || 0) - (a.fechaCreacion || 0));
-    
-    return misTorneos;
+        
+        // Ordenar por fecha de creación (más reciente primero)
+        misTorneos.sort((a, b) => (b.fechaCreacion || 0) - (a.fechaCreacion || 0));
+        
+        return misTorneos;
+    } catch (error) {
+        return [];
+    }
 }
 
-// Obtener tabla global (todos los participantes de todos los torneos)
-function obtenerTablaGlobal() {
+// Obtener tabla global (todos los participantes de todos los torneos) desde Supabase
+async function obtenerTablaGlobal() {
     const participantesGlobal = {};
     
-    Object.keys(torneos).forEach(codigo => {
-        const torneo = torneos[codigo];
-        torneo.participantes.forEach(participante => {
-            if (!participantesGlobal[participante.nombre]) {
-                participantesGlobal[participante.nombre] = {
-                    nombre: participante.nombre,
-                    puntos: 0,
-                    torneos: []
-                };
+    // Cargar datos desde Supabase si está disponible
+    let torneosParaTabla = torneos;
+    if (usarSupabase() && typeof cargarDatosDesdeSupabase === 'function') {
+        try {
+            const datosSupabase = await cargarDatosDesdeSupabase();
+            if (datosSupabase) {
+                torneosParaTabla = datosSupabase;
             }
-            participantesGlobal[participante.nombre].puntos += participante.puntos;
-            participantesGlobal[participante.nombre].torneos.push({
-                codigo,
-                nombre: torneo.nombre,
-                puntos: participante.puntos
+        } catch (error) {
+        }
+    }
+    
+    Object.keys(torneosParaTabla).forEach(codigo => {
+        const torneo = torneosParaTabla[codigo];
+        if (torneo && torneo.participantes && Array.isArray(torneo.participantes)) {
+            torneo.participantes.forEach(participante => {
+                if (!participante || !participante.nombre) return;
+                
+                if (!participantesGlobal[participante.nombre]) {
+                    participantesGlobal[participante.nombre] = {
+                        nombre: participante.nombre,
+                        puntos: 0,
+                        torneos: []
+                    };
+                }
+                const puntosParticipante = participante.puntos || (participante.estadisticas && participante.estadisticas.puntosTotales) || 0;
+                participantesGlobal[participante.nombre].puntos += puntosParticipante;
+                participantesGlobal[participante.nombre].torneos.push({
+                    codigo,
+                    nombre: torneo.nombre,
+                    puntos: puntosParticipante
+                });
             });
-        });
+        }
     });
     
     // Convertir a array y ordenar
@@ -551,7 +569,7 @@ function obtenerTablaGlobal() {
 }
 
 // Renderizar interfaz del torneo
-function renderizarTorneo() {
+async function renderizarTorneo() {
     const container = document.getElementById('torneo-container');
     if (!container) return;
     
@@ -562,17 +580,46 @@ function renderizarTorneo() {
     torneoDiv.innerHTML = `
         <div class="torneo-columna izquierda">
             <h3>🏆 Mis Torneos</h3>
-            <div id="mis-torneos-lista" class="mis-torneos-lista"></div>
+            <div id="mis-torneos-lista" class="mis-torneos-lista">
+                <p style="text-align: center; color: #666; padding: 20px;">Cargando...</p>
+            </div>
         </div>
         <div class="torneo-columna derecha">
             <h3>🌍 Tabla Global</h3>
-            <div id="tabla-global" class="tabla-global"></div>
+            <div id="tabla-global" class="tabla-global">
+                <p style="text-align: center; color: #666; padding: 20px;">Cargando...</p>
+            </div>
         </div>
     `;
     container.appendChild(torneoDiv);
     
-    // Renderizar mis torneos
-    const misTorneos = obtenerMisTorneos();
+    // Recargar datos desde Supabase antes de renderizar
+    if (usarSupabase() && typeof cargarDatosDesdeSupabase === 'function') {
+        try {
+            const datosSupabase = await cargarDatosDesdeSupabase();
+            if (datosSupabase) {
+                torneos = datosSupabase;
+            }
+        } catch (error) {
+        }
+    }
+    
+    // Actualizar miNombre desde usuario logueado o localStorage
+    if (typeof obtenerUsuarioActual === 'function') {
+        const usuario = obtenerUsuarioActual();
+        if (usuario && usuario.nombreUsuario) {
+            miNombre = usuario.nombreUsuario;
+        }
+    }
+    if (!miNombre) {
+        const nombreGuardado = localStorage.getItem('mundial2026_mi_nombre');
+        if (nombreGuardado) {
+            miNombre = nombreGuardado;
+        }
+    }
+    
+    // Renderizar mis torneos (ahora es asíncrono y consulta Supabase directamente)
+    const misTorneos = await obtenerMisTorneos();
     const misTorneosLista = document.getElementById('mis-torneos-lista');
     
     // Limpiar la lista antes de renderizar
