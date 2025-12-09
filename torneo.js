@@ -677,13 +677,19 @@ async function renderizarTorneo() {
     } else {
         // Renderizar cada torneo
         misTorneos.forEach((torneoData, index) => {
-            const { codigo, nombre, participantes, creadoPor } = torneoData;
+            const { codigo, nombre, participantes, creadoPor, esPrivado } = torneoData;
             const torneoItem = document.createElement('div');
             torneoItem.className = 'torneo-item';
             torneoItem.dataset.codigo = codigo;
             const esCreador = creadoPor === miNombre;
             const miParticipante = participantes.find(p => p && p.nombre === miNombre);
             const miPosicion = participantes.findIndex(p => p && p.nombre === miNombre) + 1;
+            
+            // Determinar si es privado (similar a la lógica en mostrarListaTorneos)
+            const tieneClave = torneoData.clave && torneoData.clave.trim() !== '';
+            const esAbiertoExplicito = esPrivado === false;
+            const esPrivadoExplicito = esPrivado === true;
+            const esPrivadoFinal = esAbiertoExplicito ? false : (esPrivadoExplicito || tieneClave || esPrivado === undefined);
             
             torneoItem.innerHTML = `
                 <div class="torneo-item-header">
@@ -695,7 +701,7 @@ async function renderizarTorneo() {
                 </div>
                 <div class="torneo-item-content">
                     <div class="torneo-item-info">
-                        ${esPrivado ? `<p><strong>Código:</strong> <span class="codigo-torneo">${codigo}</span></p>` : ''}
+                        ${esPrivadoFinal ? `<p><strong>Código:</strong> <span class="codigo-torneo">${codigo}</span></p>` : ''}
                         <p><strong>Participantes:</strong> ${participantes ? participantes.length : 0}</p>
                         ${miParticipante ? `<p><strong>Tu posición:</strong> ${miPosicion}º con ${miParticipante.puntos || 0} puntos</p>` : ''}
                     </div>
