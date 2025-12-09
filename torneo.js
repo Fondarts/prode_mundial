@@ -460,13 +460,45 @@ function obtenerMisTorneos() {
         return [];
     }
     
+    // Actualizar miNombre desde localStorage o usuario logueado
+    const nombreGuardado = localStorage.getItem('mundial2026_mi_nombre');
+    if (nombreGuardado) {
+        miNombre = nombreGuardado;
+    } else if (typeof obtenerUsuarioActual === 'function') {
+        const usuario = obtenerUsuarioActual();
+        if (usuario && usuario.nombreUsuario) {
+            miNombre = usuario.nombreUsuario;
+        }
+    }
+    
     const codigos = Object.keys(torneos);
     
     codigos.forEach(codigo => {
         const torneo = torneos[codigo];
         if (torneo && torneo.participantes) {
             // Verificar si el usuario está en este torneo
-            const estaEnTorneo = torneo.participantes.some(p => p && p.nombre === miNombre);
+            // Comparar tanto por nombre exacto como por nombre de usuario si está logueado
+            let estaEnTorneo = torneo.participantes.some(p => p && p.nombre === miNombre);
+            
+            // Si no coincide por nombre, verificar por usuarioId si está logueado
+            if (!estaEnTorneo && typeof obtenerUsuarioActual === 'function') {
+                const usuario = obtenerUsuarioActual();
+                if (usuario) {
+                    const usuarioId = obtenerIdUsuarioUnico();
+                    estaEnTorneo = torneo.participantes.some(p => {
+                        if (!p) return false;
+                        // Verificar por usuarioId
+                        if (p.usuarioId && p.usuarioId === usuarioId) {
+                            return true;
+                        }
+                        // Verificar por nombre de usuario si coincide
+                        if (usuario.nombreUsuario && p.nombre === usuario.nombreUsuario) {
+                            return true;
+                        }
+                        return false;
+                    });
+                }
+            }
             
             if (estaEnTorneo) {
                 misTorneos.push({ codigo, ...torneo });
