@@ -1700,7 +1700,7 @@ async function mostrarDialogoEnviarPredicciones() {
         crearNuevo = true;
     } else {
         crearNuevo = false;
-            // Continuar con el flujo de unirse a torneo existente
+        // Continuar con el flujo de unirse a torneo existente
             let codigoLimpio = '';
             
             if (torneoSeleccionado.esPrivado) {
