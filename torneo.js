@@ -1686,28 +1686,19 @@ async function mostrarDialogoEnviarPredicciones() {
         });
     });
     
-    // SEGUNDO: Preguntar si crear o unirse a un torneo
-    const crearNuevo = await mostrarModal({
-        titulo: typeof t === 'function' ? t('enviarPredicciones') : 'Enviar Predicciones',
-        mensaje: typeof t === 'function' ? t('quieresCrearUnirte') : '¿Quieres crear un nuevo torneo o unirte a uno existente?',
-        cancelar: true,
-        okTexto: 'Crear Nuevo',
-        cancelarTexto: typeof t === 'function' ? t('unirseExistente') : 'Unirse a Existente'
-    });
+    // Ir directamente a la lista de torneos (que tiene el botón de crear torneo)
+    const torneoSeleccionado = await mostrarListaTorneos();
     
-    if (crearNuevo === false && crearNuevo !== null) {
-        // Unirse a torneo existente - Mostrar lista de torneos directamente
-        const torneoSeleccionado = await mostrarListaTorneos();
-        
-        if (!torneoSeleccionado || torneoSeleccionado === false) {
-            return; // Usuario canceló
-        }
-        
-        // Si el resultado tiene la propiedad crearNuevo, significa que se quiere crear un nuevo torneo
-        if (torneoSeleccionado && torneoSeleccionado.crearNuevo === true) {
-            // Cambiar a modo crear y continuar con el flujo de creación
-            crearNuevo = true;
-        } else {
+    if (!torneoSeleccionado || torneoSeleccionado === false) {
+        return; // Usuario canceló
+    }
+    
+    // Si el resultado tiene la propiedad crearNuevo, significa que se quiere crear un nuevo torneo
+    let crearNuevo = false;
+    if (torneoSeleccionado && torneoSeleccionado.crearNuevo === true) {
+        // Cambiar a modo crear y continuar con el flujo de creación
+        crearNuevo = true;
+    } else {
             // Continuar con el flujo de unirse a torneo existente
             let codigoLimpio = '';
             
