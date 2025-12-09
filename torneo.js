@@ -1210,6 +1210,80 @@ function mostrarModal(opciones) {
 
 // Función para mostrar diálogo de envío de predicciones
 async function mostrarDialogoEnviarPredicciones() {
+    // PRIMERO: Verificar si el usuario está logueado
+    let usuarioLogueado = false;
+    if (typeof obtenerUsuarioActual === 'function') {
+        const usuario = obtenerUsuarioActual();
+        usuarioLogueado = usuario !== null && usuario !== undefined;
+    }
+    
+    // Si no está logueado, mostrar modal de autenticación
+    if (!usuarioLogueado) {
+        const opcionAuth = await mostrarModal({
+            titulo: 'Autenticación Requerida',
+            mensaje: 'Para enviar predicciones necesitas estar logueado.\n\n¿Qué deseas hacer?',
+            cancelar: true,
+            okTexto: 'Iniciar Sesión',
+            cancelarTexto: 'Registrarse'
+        });
+        
+        if (opcionAuth === false) {
+            // Usuario eligió "Registrarse"
+            if (typeof mostrarDialogoRegistro === 'function') {
+                const registroExitoso = await mostrarDialogoRegistro();
+                if (!registroExitoso) {
+                    // Si el registro fue cancelado o falló, no continuar
+                    return;
+                }
+                // Actualizar estado de autenticación
+                if (typeof renderizarEstadoAuth === 'function') {
+                    renderizarEstadoAuth();
+                }
+            } else {
+                await mostrarModal({
+                    titulo: 'Error',
+                    mensaje: 'No se pudo mostrar el diálogo de registro',
+                    cancelar: false
+                });
+                return;
+            }
+        } else if (opcionAuth === null) {
+            // Usuario canceló
+            return;
+        } else {
+            // Usuario eligió "Iniciar Sesión"
+            if (typeof mostrarDialogoLogin === 'function') {
+                const loginExitoso = await mostrarDialogoLogin();
+                if (!loginExitoso) {
+                    // Si el login fue cancelado o falló, no continuar
+                    return;
+                }
+                // Actualizar estado de autenticación
+                if (typeof renderizarEstadoAuth === 'function') {
+                    renderizarEstadoAuth();
+                }
+            } else {
+                await mostrarModal({
+                    titulo: 'Error',
+                    mensaje: 'No se pudo mostrar el diálogo de login',
+                    cancelar: false
+                });
+                return;
+            }
+        }
+        
+        // Verificar nuevamente que ahora esté logueado
+        if (typeof obtenerUsuarioActual === 'function') {
+            const usuario = obtenerUsuarioActual();
+            usuarioLogueado = usuario !== null && usuario !== undefined;
+        }
+        
+        if (!usuarioLogueado) {
+            // Si aún no está logueado, no continuar
+            return;
+        }
+    }
+    
     // Obtener todas las predicciones actuales
     const predicciones = {};
     GRUPOS_MUNDIAL_2026.forEach((grupo, grupoIndex) => {
@@ -1224,7 +1298,7 @@ async function mostrarDialogoEnviarPredicciones() {
         });
     });
     
-    // PRIMERO: Preguntar si crear o unirse a un torneo
+    // SEGUNDO: Preguntar si crear o unirse a un torneo
     const crearNuevo = await mostrarModal({
         titulo: 'Enviar Predicciones',
         mensaje: '¿Quieres crear un nuevo torneo o unirte a uno existente?',
