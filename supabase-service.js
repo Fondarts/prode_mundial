@@ -226,21 +226,27 @@ async function guardarParticipanteSupabase(codigo, nombre, predicciones, usuario
             if (error) throw error;
         } else {
             // Crear nuevo
+            const datosInsertar = {
+                torneo_id: torneo.id,
+                nombre: nombre,
+                predicciones: predicciones,
+                puntos: 0,
+                estadisticas: {
+                    resultadosExactos: 0,
+                    resultadosAcertados: 0,
+                    partidosJugados: 0,
+                    puntosTotales: 0
+                }
+            };
+            
+            // Solo agregar usuario_id si es válido y no está vacío
+            if (usuarioId && typeof usuarioId === 'string' && usuarioId.trim() !== '' && usuarioId !== 'null' && usuarioId !== 'undefined') {
+                datosInsertar.usuario_id = usuarioId;
+            }
+            
             const { error } = await supabaseClient
                 .from('participantes')
-                .insert({
-                    torneo_id: torneo.id,
-                    nombre: nombre,
-                    predicciones: predicciones,
-                    usuario_id: usuarioId,
-                    puntos: 0,
-                    estadisticas: {
-                        resultadosExactos: 0,
-                        resultadosAcertados: 0,
-                        partidosJugados: 0,
-                        puntosTotales: 0
-                    }
-                });
+                .insert(datosInsertar);
             
             if (error) throw error;
         }
