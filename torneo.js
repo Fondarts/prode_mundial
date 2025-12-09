@@ -278,12 +278,17 @@ async function enviarPredicciones(codigo, nombre, predicciones) {
     }
     
     // Guardar en Supabase si está disponible
+    let errorSupabase = null;
     if (usarSupabase() && typeof guardarParticipanteSupabase === 'function') {
-        const exito = await guardarParticipanteSupabase(codigo, nombre, predicciones, usuarioId, yaTiene);
-        if (!exito) {
-            // Si falla en Supabase, mostrar error pero continuar con localStorage
-            console.error('Error al guardar participante en Supabase. Continuando con localStorage...');
-            // No retornar error aquí para permitir que se guarde en localStorage como fallback
+        try {
+            const exito = await guardarParticipanteSupabase(codigo, nombre, predicciones, usuarioId, yaTiene);
+            if (!exito) {
+                errorSupabase = 'No se pudo guardar en Supabase. Se guardará solo localmente.';
+                console.error('Error al guardar participante en Supabase. Continuando con localStorage...');
+            }
+        } catch (error) {
+            errorSupabase = `Error al guardar en Supabase: ${error.message || error}`;
+            console.error('Error al guardar participante en Supabase:', error);
         }
     }
     
@@ -1480,9 +1485,16 @@ async function mostrarDialogoEnviarPredicciones() {
             return;
         }
         
+        let mensajeTorneo = `¡Torneo creado exitosamente!\n\nCódigo del torneo: ${codigo}\n\nComparte este código con tus amigos para que se unan.`;
+        
+        // Si hubo error en Supabase, agregarlo al mensaje
+        if (resultado && resultado.errorSupabase) {
+            mensajeTorneo += `\n\n⚠️ ${resultado.errorSupabase}`;
+        }
+        
         await mostrarModal({
             titulo: '¡Torneo Creado!',
-            mensaje: `¡Torneo creado exitosamente!\n\nCódigo del torneo: ${codigo}\n\nComparte este código con tus amigos para que se unan.`,
+            mensaje: mensajeTorneo,
             cancelar: false
         });
     }
