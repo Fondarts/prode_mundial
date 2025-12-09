@@ -1455,7 +1455,7 @@ async function mostrarListaTorneos() {
         
         modal.innerHTML = `
             <div style="background: #1e3a8a; color: white; padding: 20px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
-                <h2 style="margin: 0; font-size: 1.5em;">Seleccionar Torneo</h2>
+                <h2 style="margin: 0; font-size: 1.5em;">${typeof t === 'function' ? t('seleccionarTorneo') : 'Seleccionar Torneo'}</h2>
                 <button id="cerrar-lista-torneos" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">&times;</button>
             </div>
             <div style="padding: 20px; display: flex; flex-direction: column; flex: 1; overflow: hidden;">
@@ -1967,8 +1967,8 @@ async function mostrarDialogoEnviarPredicciones() {
             let claveValida = false;
             while (!claveValida) {
                 const clave1 = await mostrarModal({
-                    titulo: 'Contraseña del Torneo',
-                    mensaje: 'Ingresa una contraseña para el torneo privado:',
+                    titulo: typeof t === 'function' ? t('contraseñaTorneo') : 'Contraseña del Torneo',
+                    mensaje: typeof t === 'function' ? t('ingresarContraseñaTorneo') : 'Ingresa una contraseña para el torneo privado:',
                     input: true,
                     inputType: 'password',
                     placeholder: 'Contraseña',
@@ -1980,19 +1980,19 @@ async function mostrarDialogoEnviarPredicciones() {
                 
                 if (!clave1 || clave1.trim() === '') {
                     await mostrarModal({
-                        titulo: 'Contraseña Requerida',
-                        mensaje: 'Debes ingresar una contraseña para el torneo privado.',
+                        titulo: typeof t === 'function' ? t('contraseñaRequerida') : 'Contraseña Requerida',
+                        mensaje: typeof t === 'function' ? t('debesIngresarContraseña') : 'Debes ingresar una contraseña para el torneo privado.',
                         cancelar: false
                     });
                     continue;
                 }
                 
                 const clave2 = await mostrarModal({
-                    titulo: 'Confirmar Contraseña',
-                    mensaje: 'Confirma la contraseña:',
+                    titulo: typeof t === 'function' ? t('confirmarContraseña') : 'Confirmar Contraseña',
+                    mensaje: typeof t === 'function' ? t('confirmarContraseña') : 'Confirma la contraseña:',
                     input: true,
                     inputType: 'password',
-                    placeholder: 'Repetir contraseña',
+                    placeholder: typeof t === 'function' ? t('repetirContraseña') : 'Repetir contraseña',
                     maxLength: 50,
                     cancelar: true
                 });
@@ -2001,8 +2001,8 @@ async function mostrarDialogoEnviarPredicciones() {
                 
                 if (clave1.trim() !== clave2.trim()) {
                     await mostrarModal({
-                        titulo: 'Contraseñas No Coinciden',
-                        mensaje: 'Las contraseñas no coinciden. Intenta nuevamente.',
+                        titulo: typeof t === 'function' ? t('contraseñasNoCoincidenTitulo') : 'Contraseñas No Coinciden',
+                        mensaje: typeof t === 'function' ? t('contraseñasNoCoincidenIntenta') : 'Las contraseñas no coinciden. Intenta nuevamente.',
                         cancelar: false
                     });
                     continue;

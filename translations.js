@@ -194,7 +194,13 @@ const translations = {
         creadoPor: "Creado por:",
         enviarPredicciones: "Enviar Predicciones",
         quieresCrearUnirte: "¿Quieres crear un nuevo torneo o unirte a uno existente?",
-        desconocido: "Desconocido"
+        desconocido: "Desconocido",
+        debesIngresarContraseña: "Debes ingresar una contraseña para el torneo privado.",
+        repetirContraseña: "Repetir contraseña",
+        contraseñasNoCoincidenIntenta: "Las contraseñas no coinciden. Intenta nuevamente.",
+        ingresarContraseñaTorneo: "Ingresa una contraseña para el torneo privado:",
+        contraseñaRequerida: "Contraseña Requerida",
+        contraseñasNoCoincidenTitulo: "Contraseñas No Coinciden"
     },
     en: {
         // Header
