@@ -1231,15 +1231,17 @@ async function mostrarListaTorneos() {
         // Convertir a array y separar en privados y abiertos
         const todosLosTorneosArray = Object.entries(todosLosTorneos).map(([codigo, datos]) => {
             // Determinar si es privado:
-            // - Si tiene clave, es privado
+            // - Si esPrivado está explícitamente en false, es abierto (sin importar si tiene clave)
             // - Si esPrivado está explícitamente en true, es privado
-            // - Si esPrivado está explícitamente en false, es abierto
+            // - Si tiene clave definida, es privado
             // - Si esPrivado no está definido (undefined o null), considerar privado por defecto (torneos antiguos)
             const tieneClave = datos.clave && datos.clave.trim() !== '';
-            const esPrivadoExplicito = datos.esPrivado === true;
             const esAbiertoExplicito = datos.esPrivado === false;
+            const esPrivadoExplicito = datos.esPrivado === true;
             
-            const esPrivado = tieneClave || esPrivadoExplicito || (!esAbiertoExplicito && datos.esPrivado === undefined);
+            // Un torneo es abierto SOLO si esPrivado está explícitamente en false
+            // Si esPrivado es false, no importa si tiene clave, es abierto
+            const esPrivado = esAbiertoExplicito ? false : (esPrivadoExplicito || tieneClave || datos.esPrivado === undefined);
             
             return {
                 codigo,
