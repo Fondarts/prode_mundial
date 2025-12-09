@@ -1322,6 +1322,8 @@ header h1 {
     padding: 10px;
     border-radius: 6px;
     margin-top: 15px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .torneo-item-participantes h5 {
@@ -1333,11 +1335,13 @@ header h1 {
 .tabla-clasificacion-torneo {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.85em;
+    font-size: 0.8em;
     margin-top: 5px;
     background: white;
     border-radius: 6px;
     overflow: hidden;
+    table-layout: auto;
+    min-width: 100%;
 }
 
 .tabla-clasificacion-torneo thead {
@@ -1346,31 +1350,42 @@ header h1 {
 }
 
 .tabla-clasificacion-torneo th {
-    padding: 10px 8px;
+    padding: 8px 6px;
     text-align: left;
     font-weight: 600;
-    font-size: 0.85em;
+    font-size: 0.8em;
     white-space: nowrap;
 }
 
 .tabla-clasificacion-torneo th:first-child {
     text-align: center;
-    width: 50px;
+    width: 45px;
+    min-width: 45px;
 }
 
 .tabla-clasificacion-torneo th:nth-child(2) {
-    min-width: 120px;
+    min-width: 100px;
+    max-width: 150px;
 }
 
-.tabla-clasificacion-torneo th:nth-child(n+3) {
+.tabla-clasificacion-torneo th:nth-child(3) {
     text-align: center;
-    width: 80px;
+    width: 50px;
+    min-width: 50px;
+}
+
+.tabla-clasificacion-torneo th:nth-child(4),
+.tabla-clasificacion-torneo th:nth-child(5),
+.tabla-clasificacion-torneo th:nth-child(6) {
+    text-align: center;
+    width: 70px;
+    min-width: 70px;
 }
 
 .tabla-clasificacion-torneo td {
-    padding: 10px 8px;
+    padding: 8px 6px;
     border-bottom: 1px solid #e0e0e0;
-    font-size: 0.85em;
+    font-size: 0.8em;
     background: white;
 }
 
@@ -1378,6 +1393,13 @@ header h1 {
     text-align: center;
     font-weight: 600;
     color: #1e3c72;
+}
+
+.tabla-clasificacion-torneo td:nth-child(2) {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .tabla-clasificacion-torneo td:nth-child(n+3) {
