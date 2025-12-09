@@ -1550,24 +1550,20 @@ async function mostrarDialogoEnviarPredicciones() {
     });
     
     if (crearNuevo === false && crearNuevo !== null) {
-        // Unirse a torneo existente
-        // Preguntar si es torneo abierto o privado
-        const tipoUnirse = await mostrarModal({
-            titulo: 'Unirse a Torneo',
-            mensaje: '¿A qué tipo de torneo quieres unirte?',
-            cancelar: true,
-            okTexto: 'Torneo Abierto',
-            cancelarTexto: 'Torneo Privado'
-        });
+        // Unirse a torneo existente - Mostrar lista de torneos directamente
+        const torneoSeleccionado = await mostrarListaTorneos();
+        
+        if (!torneoSeleccionado || torneoSeleccionado === false) {
+            return; // Usuario canceló
+        }
         
         let codigoLimpio = '';
-        let torneoSeleccionado = null;
         
-        if (tipoUnirse === false) {
+        if (torneoSeleccionado.esPrivado) {
             // Torneo Privado - Solo pedir contraseña (sin código)
             const claveIngresada = await mostrarModal({
                 titulo: 'Torneo Privado',
-                mensaje: 'Ingresa la contraseña del torneo privado:',
+                mensaje: `Este es un torneo privado.\n\nIngresa la contraseña del torneo "${torneoSeleccionado.nombre}":`,
                 input: true,
                 inputType: 'password',
                 placeholder: 'Contraseña',
@@ -1577,61 +1573,22 @@ async function mostrarDialogoEnviarPredicciones() {
             
             if (!claveIngresada || claveIngresada === false) return;
             
-            const claveLimpia = claveIngresada.trim();
-            
-            // Buscar torneo por contraseña en Supabase
-            if (usarSupabase() && typeof buscarTorneoPorClaveSupabase === 'function') {
-                torneoSeleccionado = await buscarTorneoPorClaveSupabase(claveLimpia);
-            }
-            
-            // También buscar en torneos locales
-            if (!torneoSeleccionado && torneos && typeof torneos === 'object') {
-                for (const [codigo, datos] of Object.entries(torneos)) {
-                    if (datos.esPrivado && datos.clave && datos.clave.trim() === claveLimpia) {
-                        torneoSeleccionado = {
-                            codigo: codigo,
-                            nombre: datos.nombre,
-                            creadoPor: datos.creadoPor,
-                            esPrivado: true,
-                            clave: datos.clave
-                        };
-                        break;
-                    }
-                }
-            }
-            
-            if (!torneoSeleccionado) {
+            // Verificar contraseña
+            if (claveIngresada.trim() !== torneoSeleccionado.clave) {
                 await mostrarModal({
-                    titulo: 'Torneo No Encontrado',
-                    mensaje: 'No se encontró un torneo privado con esa contraseña.',
+                    titulo: 'Contraseña Incorrecta',
+                    mensaje: 'La contraseña ingresada no es correcta.',
                     cancelar: false
                 });
                 return;
             }
             
             codigoLimpio = torneoSeleccionado.codigo;
-        } else if (tipoUnirse === true) {
-            // Torneo Abierto - Mostrar lista y pedir código
-            const torneoSeleccionadoLista = await mostrarListaTorneos();
-            
-            if (!torneoSeleccionadoLista || torneoSeleccionadoLista === false) {
-                return; // Usuario canceló
-            }
-            
-            // Solo permitir seleccionar torneos abiertos
-            if (torneoSeleccionadoLista.esPrivado) {
-                await mostrarModal({
-                    titulo: 'Error',
-                    mensaje: 'Este es un torneo privado. Usa la opción "Torneo Privado" para unirte.',
-                    cancelar: false
-                });
-                return;
-            }
-            
-            // Pedir el código del torneo abierto
+        } else {
+            // Torneo Abierto - Pedir código
             const codigo = await mostrarModal({
                 titulo: 'Unirse a Torneo',
-                mensaje: `Ingresa el código del torneo "${torneoSeleccionadoLista.nombre}" (6 dígitos):`,
+                mensaje: `Ingresa el código del torneo "${torneoSeleccionado.nombre}" (6 dígitos):`,
                 input: true,
                 placeholder: '000000',
                 maxLength: 6,
@@ -1651,7 +1608,7 @@ async function mostrarDialogoEnviarPredicciones() {
             }
             
             // Verificar que el código coincida con el torneo seleccionado
-            if (codigoLimpio !== torneoSeleccionadoLista.codigo) {
+            if (codigoLimpio !== torneoSeleccionado.codigo) {
                 await mostrarModal({
                     titulo: 'Error',
                     mensaje: 'El código ingresado no coincide con el torneo seleccionado',
@@ -1659,11 +1616,6 @@ async function mostrarDialogoEnviarPredicciones() {
                 });
                 return;
             }
-            
-            torneoSeleccionado = torneoSeleccionadoLista;
-        } else {
-            // Usuario canceló
-            return;
         }
         
         // Verificar si el torneo existe
