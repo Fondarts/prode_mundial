@@ -697,11 +697,14 @@ async function renderizarTorneo() {
                         <span class="torneo-nombre-texto">${nombre || `Torneo ${codigo}`}</span>
                         <span class="torneo-toggle-icon">▼</span>
                     </h4>
-                    ${esCreador ? '<span class="badge-creador">Creador</span>' : ''}
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        ${esPrivadoFinal ? '<span class="badge-torneo badge-privado">🔒 Privado</span>' : '<span class="badge-torneo badge-abierto">🌍 Abierto</span>'}
+                        ${esCreador ? '<span class="badge-creador">Creador</span>' : ''}
+                    </div>
                 </div>
                 <div class="torneo-item-content">
                     <div class="torneo-item-info">
-                        ${esPrivadoFinal ? `<p><strong>Código:</strong> <span class="codigo-torneo">${codigo}</span></p>` : ''}
+                        ${esPrivadoFinal && torneoData.clave ? `<p><strong>Contraseña:</strong> <span class="codigo-torneo">${torneoData.clave}</span></p>` : ''}
                         <p><strong>Participantes:</strong> ${participantes ? participantes.length : 0}</p>
                         ${miParticipante ? `<p><strong>Tu posición:</strong> ${miPosicion}º con ${miParticipante.puntos || 0} puntos</p>` : ''}
                     </div>
