@@ -15,7 +15,8 @@ const CIUDADES_MUNDIAL_2026 = {
             capacidad: '30,000 (ampliable a 45,000 para el Mundial)',
             inauguracion: '2007',
             caracteristicas: 'Estadio de fútbol específico, sede del Toronto FC de la MLS',
-            direccion: '170 Princes\' Blvd, Toronto, ON M6K 3C3, Canadá'
+            direccion: '170 Princes\' Blvd, Toronto, ON M6K 3C3, Canadá',
+            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
         },
         partidos: [
             { fecha: '2026-06-12', fase: 'Fase de Grupos', descripcion: 'Partido inaugural de Canadá' },
@@ -38,7 +39,8 @@ const CIUDADES_MUNDIAL_2026 = {
             capacidad: '54,500 espectadores',
             inauguracion: '1983 (renovado en 2011)',
             caracteristicas: 'Estadio con techo retráctil, sede del Vancouver Whitecaps',
-            direccion: '777 Pacific Blvd, Vancouver, BC V6B 4Y8, Canadá'
+            direccion: '777 Pacific Blvd, Vancouver, BC V6B 4Y8, Canadá',
+            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
         },
         partidos: [
             { fecha: '2026-06-13', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -61,7 +63,8 @@ const CIUDADES_MUNDIAL_2026 = {
             capacidad: '83,264 espectadores',
             inauguracion: '1966',
             caracteristicas: 'Estadio histórico que ha albergado dos finales de Copa del Mundo (1970 y 1986)',
-            direccion: 'Calzada de Tlalpan 3465, Col. Santa Úrsula Coapa, 04650 Ciudad de México, CDMX, México'
+            direccion: 'Calzada de Tlalpan 3465, Col. Santa Úrsula Coapa, 04650 Ciudad de México, CDMX, México',
+            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
         },
         partidos: [
             { fecha: '2026-06-11', fase: 'Fase de Grupos', descripcion: 'Partido inaugural del Mundial 2026' },
@@ -84,7 +87,8 @@ const CIUDADES_MUNDIAL_2026 = {
             capacidad: '46,355 espectadores',
             inauguracion: '2010',
             caracteristicas: 'Estadio moderno, sede del Club Deportivo Guadalajara (Chivas)',
-            direccion: 'Av. Circuito JVC 2800, 45645 Zapopan, Jal., México'
+            direccion: 'Av. Circuito JVC 2800, 45645 Zapopan, Jal., México',
+            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
         },
         partidos: [
             { fecha: '2026-06-12', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -107,7 +111,8 @@ const CIUDADES_MUNDIAL_2026 = {
             capacidad: '51,000 espectadores',
             inauguracion: '2015',
             caracteristicas: 'Estadio moderno con excelente acústica, sede del Club de Fútbol Monterrey',
-            direccion: 'Av. Pablo Livas 2011, La Pastora, 67110 Guadalupe, N.L., México'
+            direccion: 'Av. Pablo Livas 2011, La Pastora, 67110 Guadalupe, N.L., México',
+            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
         },
         partidos: [
             { fecha: '2026-06-13', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -130,7 +135,8 @@ const CIUDADES_MUNDIAL_2026 = {
             capacidad: '71,000 espectadores',
             inauguracion: '2017',
             caracteristicas: 'Estadio con techo retráctil, sede de los Atlanta Falcons (NFL) y Atlanta United (MLS)',
-            direccion: '1 AMB Drive NW, Atlanta, GA 30313, Estados Unidos'
+            direccion: '1 AMB Drive NW, Atlanta, GA 30313, Estados Unidos',
+            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
         },
         partidos: [
             { fecha: '2026-06-16', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -156,7 +162,8 @@ const CIUDADES_MUNDIAL_2026 = {
             capacidad: '68,756 espectadores',
             inauguracion: '2002',
             caracteristicas: 'Sede de los New England Patriots (NFL) y New England Revolution (MLS)',
-            direccion: '1 Patriot Place, Foxborough, MA 02035, Estados Unidos'
+            direccion: '1 Patriot Place, Foxborough, MA 02035, Estados Unidos',
+            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
         },
         partidos: [
             { fecha: '2026-06-14', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -180,7 +187,8 @@ const CIUDADES_MUNDIAL_2026 = {
             capacidad: '80,000 espectadores',
             inauguracion: '2009',
             caracteristicas: 'Estadio con techo retráctil y pantalla gigante, sede de los Dallas Cowboys (NFL)',
-            direccion: '1 AT&T Way, Arlington, TX 76011, Estados Unidos'
+            direccion: '1 AT&T Way, Arlington, TX 76011, Estados Unidos',
+            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
         },
         partidos: [
             { fecha: '2026-06-15', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -205,7 +213,8 @@ const CIUDADES_MUNDIAL_2026 = {
             capacidad: '72,220 espectadores',
             inauguracion: '2002',
             caracteristicas: 'Estadio con techo retráctil, sede de los Houston Texans (NFL)',
-            direccion: '1 NRG Parkway, Houston, TX 77054, Estados Unidos'
+            direccion: '1 NRG Parkway, Houston, TX 77054, Estados Unidos',
+            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
         },
         partidos: [
             { fecha: '2026-06-13', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -229,7 +238,8 @@ const CIUDADES_MUNDIAL_2026 = {
             capacidad: '76,416 espectadores',
             inauguracion: '1972',
             caracteristicas: 'Sede de los Kansas City Chiefs (NFL) y Kansas City Current (NWSL)',
-            direccion: '1 Arrowhead Drive, Kansas City, MO 64129, Estados Unidos'
+            direccion: '1 Arrowhead Drive, Kansas City, MO 64129, Estados Unidos',
+            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
         },
         partidos: [
             { fecha: '2026-06-14', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -253,7 +263,8 @@ const CIUDADES_MUNDIAL_2026 = {
             capacidad: '70,000 espectadores',
             inauguracion: '2020',
             caracteristicas: 'Estadio ultramoderno con techo translúcido, sede de los Los Angeles Rams y Chargers (NFL)',
-            direccion: '1001 Stadium Drive, Inglewood, CA 90301, Estados Unidos'
+            direccion: '1001 Stadium Drive, Inglewood, CA 90301, Estados Unidos',
+            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
         },
         partidos: [
             { fecha: '2026-06-12', fase: 'Fase de Grupos', descripcion: 'Partido inaugural de EE.UU.' },
@@ -278,7 +289,8 @@ const CIUDADES_MUNDIAL_2026 = {
             capacidad: '65,326 espectadores',
             inauguracion: '1987',
             caracteristicas: 'Sede de los Miami Dolphins (NFL) y Miami Hurricanes (NCAA)',
-            direccion: '347 Don Shula Drive, Miami Gardens, FL 33056, Estados Unidos'
+            direccion: '347 Don Shula Drive, Miami Gardens, FL 33056, Estados Unidos',
+            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
         },
         partidos: [
             { fecha: '2026-06-13', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -302,7 +314,8 @@ const CIUDADES_MUNDIAL_2026 = {
             capacidad: '82,500 espectadores',
             inauguracion: '2010',
             caracteristicas: 'Sede de los New York Giants y New York Jets (NFL)',
-            direccion: '1 MetLife Stadium Drive, East Rutherford, NJ 07073, Estados Unidos'
+            direccion: '1 MetLife Stadium Drive, East Rutherford, NJ 07073, Estados Unidos',
+            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
         },
         partidos: [
             { fecha: '2026-06-14', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -328,7 +341,8 @@ const CIUDADES_MUNDIAL_2026 = {
             capacidad: '67,594 espectadores',
             inauguracion: '2003',
             caracteristicas: 'Sede de los Philadelphia Eagles (NFL) y Temple Owls (NCAA)',
-            direccion: '1 Lincoln Financial Field Way, Philadelphia, PA 19148, Estados Unidos'
+            direccion: '1 Lincoln Financial Field Way, Philadelphia, PA 19148, Estados Unidos',
+            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
         },
         partidos: [
             { fecha: '2026-06-15', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -351,7 +365,8 @@ const CIUDADES_MUNDIAL_2026 = {
             capacidad: '68,500 espectadores',
             inauguracion: '2014',
             caracteristicas: 'Sede de los San Francisco 49ers (NFL), estadio con tecnología de punta',
-            direccion: '4900 Marie P DeBartolo Way, Santa Clara, CA 95054, Estados Unidos'
+            direccion: '4900 Marie P DeBartolo Way, Santa Clara, CA 95054, Estados Unidos',
+            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
         },
         partidos: [
             { fecha: '2026-06-12', fase: 'Fase de Grupos', descripcion: 'Partido de grupos' },
@@ -374,7 +389,8 @@ const CIUDADES_MUNDIAL_2026 = {
             capacidad: '72,000 espectadores',
             inauguracion: '2002',
             caracteristicas: 'Sede de los Seattle Seahawks (NFL) y Seattle Sounders (MLS)',
-            direccion: '800 Occidental Ave S, Seattle, WA 98134, Estados Unidos'
+            direccion: '800 Occidental Ave S, Seattle, WA 98134, Estados Unidos',
+            imagen: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
         },
         partidos: [
             { fecha: '2026-06-13', fase: 'Fase de Grupos', descripcion: 'Segundo partido del grupo de EE.UU.' },
@@ -396,4 +412,5 @@ function formatearFecha(fechaStr) {
     const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
     return fecha.toLocaleDateString('es-ES', opciones);
 }
+
 

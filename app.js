@@ -607,6 +607,32 @@ function configurarEnlacesCiudades() {
     });
 }
 
+// Función para buscar partidos por fecha y ciudad
+function buscarPartidosPorFechaYCiudad(fecha, ciudadKey) {
+    const partidosEncontrados = [];
+    
+    if (typeof GRUPOS_MUNDIAL_2026 === 'undefined') return partidosEncontrados;
+    
+    GRUPOS_MUNDIAL_2026.forEach((grupo, grupoIndex) => {
+        grupo.partidos.forEach((partido, partidoIndex) => {
+            const fechaHorario = obtenerFechaHorarioPartido(grupoIndex, partidoIndex);
+            if (fechaHorario.fecha === fecha) {
+                const equipoLocal = grupo.equipos[partido.local];
+                const equipoVisitante = grupo.equipos[partido.visitante];
+                partidosEncontrados.push({
+                    grupo: grupo.nombre,
+                    local: equipoLocal,
+                    visitante: equipoVisitante,
+                    horario: fechaHorario.horario,
+                    fase: 'Fase de Grupos'
+                });
+            }
+        });
+    });
+    
+    return partidosEncontrados;
+}
+
 function mostrarInfoCiudad(ciudadKey) {
     const ciudad = obtenerInfoCiudad(ciudadKey);
     if (!ciudad) return;
@@ -616,6 +642,9 @@ function mostrarInfoCiudad(ciudadKey) {
     const body = document.getElementById('modal-ciudad-body');
     
     title.textContent = `${ciudad.bandera} ${ciudad.nombre}, ${ciudad.pais}`;
+    
+    // Imagen del estadio
+    const imagenEstadio = ciudad.estadio.imagen || 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop';
     
     let html = `
         <div style="margin-bottom: 25px;">
@@ -627,6 +656,9 @@ function mostrarInfoCiudad(ciudadKey) {
         
         <div style="margin-bottom: 25px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
             <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.3em;">🏟️ Estadio</h3>
+            <div style="margin-bottom: 15px;">
+                <img src="${imagenEstadio}" alt="${ciudad.estadio.nombre}" style="width: 100%; max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onerror="this.src='https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop';">
+            </div>
             <h4 style="color: #2a5298; margin-bottom: 10px; font-size: 1.1em;">${ciudad.estadio.nombre}</h4>
             <p style="line-height: 1.8; color: #475569; margin-bottom: 8px;"><strong>Capacidad:</strong> ${ciudad.estadio.capacidad}</p>
             <p style="line-height: 1.8; color: #475569; margin-bottom: 8px;"><strong>Inauguración:</strong> ${ciudad.estadio.inauguracion}</p>
@@ -641,12 +673,28 @@ function mostrarInfoCiudad(ciudadKey) {
     
     ciudad.partidos.forEach(partido => {
         const fechaFormateada = formatearFecha(partido.fecha);
-        html += `
-            <div style="padding: 15px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 5px;">
-                <p style="margin: 0; color: #1565c0; font-weight: 600; margin-bottom: 5px;">${fechaFormateada}</p>
-                <p style="margin: 0; color: #475569;"><strong>${partido.fase}:</strong> ${partido.descripcion}</p>
-            </div>
-        `;
+        const partidosDetalle = buscarPartidosPorFechaYCiudad(partido.fecha, ciudadKey);
+        
+        if (partidosDetalle.length > 0) {
+            // Mostrar partidos con equipos
+            partidosDetalle.forEach(p => {
+                html += `
+                    <div style="padding: 15px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 5px;">
+                        <p style="margin: 0; color: #1565c0; font-weight: 600; margin-bottom: 8px;">${fechaFormateada} ${p.horario ? '• ' + p.horario : ''}</p>
+                        <p style="margin: 0; color: #1e3c72; font-weight: 600; font-size: 1.05em; margin-bottom: 5px;">${p.local} vs ${p.visitante}</p>
+                        <p style="margin: 0; color: #666; font-size: 0.9em;"><strong>${p.fase}</strong> • ${p.grupo}</p>
+                    </div>
+                `;
+            });
+        } else {
+            // Mostrar partido genérico si no se encuentran detalles
+            html += `
+                <div style="padding: 15px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 5px;">
+                    <p style="margin: 0; color: #1565c0; font-weight: 600; margin-bottom: 5px;">${fechaFormateada}</p>
+                    <p style="margin: 0; color: #475569;"><strong>${partido.fase}:</strong> ${partido.descripcion}</p>
+                </div>
+            `;
+        }
     });
     
     html += `
