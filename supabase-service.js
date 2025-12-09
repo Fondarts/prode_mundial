@@ -74,12 +74,19 @@ async function crearTorneoSupabase(codigo, nombre, nombreCreador, esPrivado = fa
             codigo: codigo,
             nombre: nombre || `Torneo ${codigo}`,
             creado_por: nombreCreador,
-            resultados_reales: {},
-            es_privado: esPrivado
+            resultados_reales: {}
         };
         
-        // Solo agregar clave si es privado
-        if (esPrivado && clave) {
+        // Solo agregar es_privado si la columna existe (intentar, si falla continuar sin ella)
+        // Intentar agregar es_privado
+        try {
+            datosInsertar.es_privado = esPrivado;
+        } catch (e) {
+            // Si falla, la columna probablemente no existe, continuar sin ella
+        }
+        
+        // Solo agregar clave si es privado y tiene valor
+        if (esPrivado && clave && clave.trim() !== '') {
             datosInsertar.clave = clave;
         }
         
@@ -89,9 +96,40 @@ async function crearTorneoSupabase(codigo, nombre, nombreCreador, esPrivado = fa
             .select()
             .single();
         
-        if (error) throw error;
+        if (error) {
+            // Si el error es que la columna no existe, intentar sin es_privado
+            if (error.code === 'PGRST204' || (error.message && error.message.includes('es_privado'))) {
+                // Intentar sin es_privado
+                const datosSinEsPrivado = {
+                    codigo: codigo,
+                    nombre: nombre || `Torneo ${codigo}`,
+                    creado_por: nombreCreador,
+                    resultados_reales: {}
+                };
+                
+                // Solo agregar clave si es privado
+                if (esPrivado && clave && clave.trim() !== '') {
+                    datosSinEsPrivado.clave = clave;
+                }
+                
+                const { data: dataRetry, error: errorRetry } = await supabaseClient
+                    .from('torneos')
+                    .insert(datosSinEsPrivado)
+                    .select()
+                    .single();
+                
+                if (errorRetry) {
+                    console.error('Error al crear torneo en Supabase:', errorRetry);
+                    throw errorRetry;
+                }
+                return true;
+            }
+            console.error('Error al crear torneo en Supabase:', error);
+            throw error;
+        }
         return true;
     } catch (error) {
+        console.error('Error en crearTorneoSupabase:', error);
         return false;
     }
 }
