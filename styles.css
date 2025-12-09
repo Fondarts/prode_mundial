@@ -462,6 +462,7 @@ header h1 {
 
 .tabla-posiciones th:nth-child(2) {
     width: 35%;
+    min-width: 140px;
 }
 
 .tabla-posiciones td {
@@ -613,33 +614,18 @@ header h1 {
 
 .tabla-posiciones .playoff-select {
     width: 100%;
-    max-width: 120px;
+    max-width: 100%;
     margin: 0 auto;
     display: block;
     position: relative;
     z-index: 1;
     pointer-events: auto;
+    box-sizing: border-box;
 }
 
 .tabla-posiciones .playoff-select:focus,
 .tabla-posiciones .playoff-select:active {
-    z-index: 100;
-    position: relative;
-}
-
-.tabla-posiciones tbody {
-    position: relative;
-    z-index: 0;
-}
-
-.tabla-posiciones tbody tr {
-    position: relative;
-    z-index: 0;
-}
-
-.tabla-posiciones tbody tr:has(.playoff-select:focus),
-.tabla-posiciones tbody tr:has(.playoff-select:active) {
-    z-index: 100;
+    z-index: 1;
     position: relative;
 }
 
@@ -649,7 +635,7 @@ header h1 {
     text-align: center;
     font-size: 0.85em;
     position: relative;
-    overflow: visible;
+    overflow: hidden;
 }
 
 .tabla-posiciones td:has(.playoff-select) {
@@ -660,8 +646,9 @@ header h1 {
     padding: 6px 4px;
     text-align: center;
     min-width: 120px;
-    overflow: visible;
+    overflow: hidden;
     z-index: 1;
+    max-width: 100%;
 }
 
 .resultado-input {
