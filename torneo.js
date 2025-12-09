@@ -1823,12 +1823,77 @@ async function mostrarDialogoEnviarPredicciones() {
         
         nombreTorneo = nombreTorneo.trim();
         
+        // Preguntar si es privado o abierto
+        const tipoTorneo = await mostrarModal({
+            titulo: 'Tipo de Torneo',
+            mensaje: '¿Qué tipo de torneo quieres crear?',
+            cancelar: true,
+            okTexto: 'Torneo Abierto',
+            cancelarTexto: 'Torneo Privado'
+        });
+        
+        if (tipoTorneo === null) return; // Usuario canceló
+        
+        const esPrivado = tipoTorneo === false; // Si eligió "Torneo Privado" (cancelar)
+        let clave = null;
+        
+        // Si es privado, pedir contraseña
+        if (esPrivado) {
+            let claveValida = false;
+            while (!claveValida) {
+                const clave1 = await mostrarModal({
+                    titulo: 'Contraseña del Torneo',
+                    mensaje: 'Ingresa una contraseña para el torneo privado:',
+                    input: true,
+                    inputType: 'password',
+                    placeholder: 'Contraseña',
+                    maxLength: 50,
+                    cancelar: true
+                });
+                
+                if (clave1 === false || clave1 === null) return;
+                
+                if (!clave1 || clave1.trim() === '') {
+                    await mostrarModal({
+                        titulo: 'Contraseña Requerida',
+                        mensaje: 'Debes ingresar una contraseña para el torneo privado.',
+                        cancelar: false
+                    });
+                    continue;
+                }
+                
+                const clave2 = await mostrarModal({
+                    titulo: 'Confirmar Contraseña',
+                    mensaje: 'Confirma la contraseña:',
+                    input: true,
+                    inputType: 'password',
+                    placeholder: 'Repetir contraseña',
+                    maxLength: 50,
+                    cancelar: true
+                });
+                
+                if (clave2 === false || clave2 === null) return;
+                
+                if (clave1.trim() !== clave2.trim()) {
+                    await mostrarModal({
+                        titulo: 'Contraseñas No Coinciden',
+                        mensaje: 'Las contraseñas no coinciden. Intenta nuevamente.',
+                        cancelar: false
+                    });
+                    continue;
+                }
+                
+                clave = clave1.trim();
+                claveValida = true;
+            }
+        }
+        
         // Asegurar que torneos existe antes de crear
         if (!torneos || typeof torneos !== 'object') {
             torneos = {};
         }
         
-        const codigo = await crearTorneo(nombreTorneo, miNombre);
+        const codigo = await crearTorneo(nombreTorneo, miNombre, esPrivado, clave);
         const resultado = await enviarPredicciones(codigo, miNombre, predicciones);
         
         if (resultado && !resultado.exito) {
