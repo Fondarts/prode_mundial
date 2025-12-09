@@ -1585,37 +1585,8 @@ async function mostrarDialogoEnviarPredicciones() {
             
             codigoLimpio = torneoSeleccionado.codigo;
         } else {
-            // Torneo Abierto - Pedir código
-            const codigo = await mostrarModal({
-                titulo: 'Unirse a Torneo',
-                mensaje: `Ingresa el código del torneo "${torneoSeleccionado.nombre}" (6 dígitos):`,
-                input: true,
-                placeholder: '000000',
-                maxLength: 6,
-                cancelar: true
-            });
-            
-            if (!codigo || codigo === false) return;
-            
-            codigoLimpio = codigo.trim().replace(/\D/g, '');
-            if (codigoLimpio.length !== 6) {
-                await mostrarModal({
-                    titulo: 'Error',
-                    mensaje: 'El código debe tener 6 dígitos',
-                    cancelar: false
-                });
-                return;
-            }
-            
-            // Verificar que el código coincida con el torneo seleccionado
-            if (codigoLimpio !== torneoSeleccionado.codigo) {
-                await mostrarModal({
-                    titulo: 'Error',
-                    mensaje: 'El código ingresado no coincide con el torneo seleccionado',
-                    cancelar: false
-                });
-                return;
-            }
+            // Torneo Abierto - Unirse directamente sin pedir código ni contraseña
+            codigoLimpio = torneoSeleccionado.codigo;
         }
         
         // Verificar si el torneo existe
