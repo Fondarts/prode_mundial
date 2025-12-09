@@ -1235,14 +1235,15 @@ async function mostrarListaTorneos() {
             creadoPor: datos.creadoPor || 'Desconocido',
             fechaCreacion: datos.fechaCreacion || 0,
             participantes: datos.participantes ? datos.participantes.length : 0,
-            esPrivado: datos.esPrivado || false,
+            esPrivado: datos.esPrivado || (datos.clave && datos.clave.trim() !== ''), // Si tiene clave, es privado
             clave: datos.clave || null
         }));
         
         // Separar en privados y abiertos
-        const torneosAbiertos = todosLosTorneosArray.filter(t => !t.esPrivado)
+        // Un torneo es privado si tiene esPrivado=true O si tiene una clave definida
+        const torneosAbiertos = todosLosTorneosArray.filter(t => !t.esPrivado && (!t.clave || t.clave.trim() === ''))
             .sort((a, b) => b.participantes - a.participantes); // Ordenar por participantes descendente
-        const torneosPrivados = todosLosTorneosArray.filter(t => t.esPrivado)
+        const torneosPrivados = todosLosTorneosArray.filter(t => t.esPrivado || (t.clave && t.clave.trim() !== ''))
             .sort((a, b) => a.nombre.localeCompare(b.nombre)); // Ordenar alfabéticamente
         
         if (torneosAbiertos.length === 0 && torneosPrivados.length === 0) {
