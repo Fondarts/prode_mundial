@@ -1694,11 +1694,12 @@ async function mostrarDialogoEnviarPredicciones() {
     }
     
     // Si el resultado tiene la propiedad crearNuevo, significa que se quiere crear un nuevo torneo
-    let crearNuevo = false;
+    let crearNuevo = null;
     if (torneoSeleccionado && torneoSeleccionado.crearNuevo === true) {
         // Cambiar a modo crear y continuar con el flujo de creación
         crearNuevo = true;
     } else {
+        crearNuevo = false;
             // Continuar con el flujo de unirse a torneo existente
             let codigoLimpio = '';
             
