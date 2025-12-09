@@ -87,3 +87,4 @@ El Mundial 2026 aún no ha comenzado, por lo que:
 - Por ahora, usa el modo de prueba para simular resultados
 
 
+
