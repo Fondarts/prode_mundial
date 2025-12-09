@@ -25,7 +25,9 @@ async function obtenerTorneosSupabase() {
                 participantes: [],
                 creadoPor: torneo.creado_por,
                 fechaCreacion: new Date(torneo.fecha_creacion).getTime(),
-                resultadosReales: torneo.resultados_reales || {}
+                resultadosReales: torneo.resultados_reales || {},
+                esPrivado: torneo.es_privado || false,
+                clave: torneo.clave || null
             };
         });
         
@@ -54,7 +56,9 @@ async function obtenerTorneoPorCodigoSupabase(codigo) {
             nombre: data.nombre,
             creadoPor: data.creado_por,
             fechaCreacion: new Date(data.fecha_creacion).getTime(),
-            resultadosReales: data.resultados_reales || {}
+            resultadosReales: data.resultados_reales || {},
+            esPrivado: data.es_privado || false,
+            clave: data.clave || null
         };
     } catch (error) {
         return null;
@@ -62,18 +66,26 @@ async function obtenerTorneoPorCodigoSupabase(codigo) {
 }
 
 // Crear nuevo torneo
-async function crearTorneoSupabase(codigo, nombre, nombreCreador) {
+async function crearTorneoSupabase(codigo, nombre, nombreCreador, esPrivado = false, clave = null) {
     if (!usarSupabase()) return false;
     
     try {
+        const datosInsertar = {
+            codigo: codigo,
+            nombre: nombre || `Torneo ${codigo}`,
+            creado_por: nombreCreador,
+            resultados_reales: {},
+            es_privado: esPrivado
+        };
+        
+        // Solo agregar clave si es privado
+        if (esPrivado && clave) {
+            datosInsertar.clave = clave;
+        }
+        
         const { data, error } = await supabaseClient
             .from('torneos')
-            .insert({
-                codigo: codigo,
-                nombre: nombre || `Torneo ${codigo}`,
-                creado_por: nombreCreador,
-                resultados_reales: {}
-            })
+            .insert(datosInsertar)
             .select()
             .single();
         

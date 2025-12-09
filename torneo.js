@@ -178,7 +178,7 @@ function generarCodigoTorneo() {
 }
 
 // Crear nuevo torneo
-async function crearTorneo(nombre, nombreCreador) {
+async function crearTorneo(nombre, nombreCreador, esPrivado = false, clave = null) {
     // Asegurar que torneos existe y es un objeto
     if (!torneos || typeof torneos !== 'object') {
         torneos = {};
@@ -188,7 +188,7 @@ async function crearTorneo(nombre, nombreCreador) {
     
     // Crear en Supabase si está disponible
     if (usarSupabase() && typeof crearTorneoSupabase === 'function') {
-        const exito = await crearTorneoSupabase(codigo, nombre, nombreCreador);
+        const exito = await crearTorneoSupabase(codigo, nombre, nombreCreador, esPrivado, clave);
         if (!exito) {
         }
     }
@@ -199,7 +199,9 @@ async function crearTorneo(nombre, nombreCreador) {
         participantes: [],
         creadoPor: nombreCreador,
         fechaCreacion: Date.now(),
-        resultadosReales: {}
+        resultadosReales: {},
+        esPrivado: esPrivado,
+        clave: clave
     };
     
     await guardarTorneos();
@@ -1226,16 +1228,24 @@ async function mostrarListaTorneos() {
             Object.assign(todosLosTorneos, torneos);
         }
         
-        // Convertir a array y ordenar por fecha de creación
-        const listaTorneos = Object.entries(todosLosTorneos).map(([codigo, datos]) => ({
+        // Convertir a array y separar en privados y abiertos
+        const todosLosTorneosArray = Object.entries(todosLosTorneos).map(([codigo, datos]) => ({
             codigo,
             nombre: datos.nombre || `Torneo ${codigo}`,
             creadoPor: datos.creadoPor || 'Desconocido',
             fechaCreacion: datos.fechaCreacion || 0,
-            participantes: datos.participantes ? datos.participantes.length : 0
-        })).sort((a, b) => b.fechaCreacion - a.fechaCreacion);
+            participantes: datos.participantes ? datos.participantes.length : 0,
+            esPrivado: datos.esPrivado || false,
+            clave: datos.clave || null
+        }));
         
-        if (listaTorneos.length === 0) {
+        // Separar en privados y abiertos
+        const torneosAbiertos = todosLosTorneosArray.filter(t => !t.esPrivado)
+            .sort((a, b) => b.participantes - a.participantes); // Ordenar por participantes descendente
+        const torneosPrivados = todosLosTorneosArray.filter(t => t.esPrivado)
+            .sort((a, b) => a.nombre.localeCompare(b.nombre)); // Ordenar alfabéticamente
+        
+        if (torneosAbiertos.length === 0 && torneosPrivados.length === 0) {
             await mostrarModal({
                 titulo: 'Sin Torneos',
                 mensaje: 'No hay torneos disponibles en este momento.',
@@ -1252,28 +1262,48 @@ async function mostrarListaTorneos() {
         
         const modal = document.createElement('div');
         modal.className = 'modal-torneos-lista';
-        modal.style.cssText = 'background: white; border-radius: 8px; padding: 0; max-width: 600px; width: 90%; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.3);';
+        modal.style.cssText = 'background: white; border-radius: 8px; padding: 0; max-width: 1000px; width: 95%; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.3);';
+        
+        const renderizarTorneos = (listaTorneos) => {
+            if (listaTorneos.length === 0) {
+                return '<p style="color: #999; text-align: center; padding: 20px;">No hay torneos en esta categoría</p>';
+            }
+            return listaTorneos.map(torneo => `
+                <div class="torneo-item-lista" data-codigo="${torneo.codigo}" style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s; background: #f9fafb; margin-bottom: 8px;">
+                    <h3 style="margin: 0 0 6px 0; color: #1e3a8a; font-size: 1em; font-weight: 600;">${torneo.nombre}</h3>
+                    <p style="margin: 3px 0; color: #666; font-size: 0.85em;">Creado por: <strong>${torneo.creadoPor}</strong></p>
+                    <p style="margin: 3px 0; color: #666; font-size: 0.85em;">Código: <strong style="font-family: monospace; color: #1e3a8a;">${torneo.codigo}</strong></p>
+                    <p style="margin: 3px 0; color: #666; font-size: 0.85em;">👥 Participantes: <strong>${torneo.participantes}</strong></p>
+                </div>
+            `).join('');
+        };
         
         modal.innerHTML = `
             <div style="background: #1e3a8a; color: white; padding: 20px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
                 <h2 style="margin: 0; font-size: 1.5em;">Seleccionar Torneo</h2>
                 <button id="cerrar-lista-torneos" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">&times;</button>
             </div>
-            <div style="padding: 20px; overflow-y: auto; flex: 1;">
-                <p style="margin-top: 0; color: #666; margin-bottom: 15px;">Selecciona un torneo de la lista:</p>
-                <div id="lista-torneos-container" style="display: flex; flex-direction: column; gap: 10px;">
-                    ${listaTorneos.map(torneo => `
-                        <div class="torneo-item-lista" data-codigo="${torneo.codigo}" style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 15px; cursor: pointer; transition: all 0.2s; background: #f9fafb;">
-                            <div style="display: flex; justify-content: space-between; align-items: start;">
-                                <div style="flex: 1;">
-                                    <h3 style="margin: 0 0 8px 0; color: #1e3a8a; font-size: 1.1em;">${torneo.nombre}</h3>
-                                    <p style="margin: 4px 0; color: #666; font-size: 0.9em;">Creado por: <strong>${torneo.creadoPor}</strong></p>
-                                    <p style="margin: 4px 0; color: #666; font-size: 0.9em;">Código: <strong style="font-family: monospace;">${torneo.codigo}</strong></p>
-                                    <p style="margin: 4px 0; color: #666; font-size: 0.9em;">Participantes: <strong>${torneo.participantes}</strong></p>
-                                </div>
-                            </div>
+            <div style="padding: 20px; display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+                <input type="text" id="buscador-torneos" placeholder="🔍 Buscar torneo por nombre o código..." style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1em; margin-bottom: 20px; box-sizing: border-box;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; overflow-y: auto; flex: 1;">
+                    <div>
+                        <h3 style="margin: 0 0 15px 0; color: #1e3a8a; font-size: 1.2em; border-bottom: 2px solid #1e3a8a; padding-bottom: 8px;">
+                            🌍 Torneos Abiertos
+                            <span style="font-size: 0.8em; color: #666; font-weight: normal;">(${torneosAbiertos.length})</span>
+                        </h3>
+                        <div id="lista-abiertos" style="max-height: calc(85vh - 250px); overflow-y: auto;">
+                            ${renderizarTorneos(torneosAbiertos)}
                         </div>
-                    `).join('')}
+                    </div>
+                    <div>
+                        <h3 style="margin: 0 0 15px 0; color: #1e3a8a; font-size: 1.2em; border-bottom: 2px solid #1e3a8a; padding-bottom: 8px;">
+                            🔒 Torneos de Amigos
+                            <span style="font-size: 0.8em; color: #666; font-weight: normal;">(${torneosPrivados.length})</span>
+                        </h3>
+                        <div id="lista-privados" style="max-height: calc(85vh - 250px); overflow-y: auto;">
+                            ${renderizarTorneos(torneosPrivados)}
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
@@ -1281,10 +1311,48 @@ async function mostrarListaTorneos() {
         overlay.appendChild(modal);
         document.body.appendChild(overlay);
         
-        // Event listeners
-        const cerrarBtn = document.getElementById('cerrar-lista-torneos');
-        const itemsTorneos = modal.querySelectorAll('.torneo-item-lista');
+        // Guardar todas las listas para el buscador
+        const todasLasListas = [...torneosAbiertos, ...torneosPrivados];
         
+        // Función de búsqueda
+        const buscador = document.getElementById('buscador-torneos');
+        const listaAbiertos = document.getElementById('lista-abiertos');
+        const listaPrivados = document.getElementById('lista-privados');
+        
+        const filtrarTorneos = (termino) => {
+            const terminoLower = termino.toLowerCase().trim();
+            
+            if (!terminoLower) {
+                // Sin filtro, mostrar todos
+                listaAbiertos.innerHTML = renderizarTorneos(torneosAbiertos);
+                listaPrivados.innerHTML = renderizarTorneos(torneosPrivados);
+            } else {
+                // Filtrar
+                const abiertosFiltrados = torneosAbiertos.filter(t => 
+                    t.nombre.toLowerCase().includes(terminoLower) || 
+                    t.codigo.includes(terminoLower) ||
+                    t.creadoPor.toLowerCase().includes(terminoLower)
+                );
+                const privadosFiltrados = torneosPrivados.filter(t => 
+                    t.nombre.toLowerCase().includes(terminoLower) || 
+                    t.codigo.includes(terminoLower) ||
+                    t.creadoPor.toLowerCase().includes(terminoLower)
+                );
+                
+                listaAbiertos.innerHTML = renderizarTorneos(abiertosFiltrados);
+                listaPrivados.innerHTML = renderizarTorneos(privadosFiltrados);
+            }
+            
+            // Reconfigurar event listeners para los nuevos elementos
+            configurarEventListenersTorneos();
+        };
+        
+        buscador.addEventListener('input', (e) => {
+            filtrarTorneos(e.target.value);
+        });
+        
+        // Event listeners para cerrar
+        const cerrarBtn = document.getElementById('cerrar-lista-torneos');
         const cerrar = () => {
             document.body.removeChild(overlay);
             resolve(false);
@@ -1297,29 +1365,44 @@ async function mostrarListaTorneos() {
             }
         });
         
-        itemsTorneos.forEach(item => {
-            item.addEventListener('click', () => {
-                const codigo = item.dataset.codigo;
-                const torneo = listaTorneos.find(t => t.codigo === codigo);
-                document.body.removeChild(overlay);
-                resolve(torneo);
-            });
+        // Función para configurar event listeners de los torneos
+        const configurarEventListenersTorneos = () => {
+            const itemsTorneos = modal.querySelectorAll('.torneo-item-lista');
             
-            // Efecto hover
-            item.addEventListener('mouseenter', () => {
-                item.style.borderColor = '#1e3a8a';
-                item.style.background = '#eff6ff';
-                item.style.transform = 'translateY(-2px)';
-                item.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+            itemsTorneos.forEach(item => {
+                // Remover listeners anteriores si existen
+                const nuevoItem = item.cloneNode(true);
+                item.parentNode.replaceChild(nuevoItem, item);
+                
+                nuevoItem.addEventListener('click', () => {
+                    const codigo = nuevoItem.dataset.codigo;
+                    const torneo = todasLasListas.find(t => t.codigo === codigo);
+                    document.body.removeChild(overlay);
+                    resolve(torneo);
+                });
+                
+                // Efecto hover
+                nuevoItem.addEventListener('mouseenter', () => {
+                    nuevoItem.style.borderColor = '#1e3a8a';
+                    nuevoItem.style.background = '#eff6ff';
+                    nuevoItem.style.transform = 'translateY(-2px)';
+                    nuevoItem.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                });
+                
+                nuevoItem.addEventListener('mouseleave', () => {
+                    nuevoItem.style.borderColor = '#e5e7eb';
+                    nuevoItem.style.background = '#f9fafb';
+                    nuevoItem.style.transform = 'translateY(0)';
+                    nuevoItem.style.boxShadow = 'none';
+                });
             });
-            
-            item.addEventListener('mouseleave', () => {
-                item.style.borderColor = '#e5e7eb';
-                item.style.background = '#f9fafb';
-                item.style.transform = 'translateY(0)';
-                item.style.boxShadow = 'none';
-            });
-        });
+        };
+        
+        // Configurar listeners iniciales
+        configurarEventListenersTorneos();
+        
+        // Focus en el buscador
+        setTimeout(() => buscador.focus(), 100);
     });
 }
 
@@ -1428,6 +1511,31 @@ async function mostrarDialogoEnviarPredicciones() {
         
         if (!torneoSeleccionado || torneoSeleccionado === false) {
             return; // Usuario canceló
+        }
+        
+        // Verificar si es privado y pedir contraseña si es necesario
+        if (torneoSeleccionado.esPrivado) {
+            const claveIngresada = await mostrarModal({
+                titulo: 'Torneo Privado',
+                mensaje: `Este es un torneo privado.\n\nIngresa la contraseña del torneo "${torneoSeleccionado.nombre}":`,
+                input: true,
+                inputType: 'password',
+                placeholder: 'Contraseña',
+                maxLength: 50,
+                cancelar: true
+            });
+            
+            if (!claveIngresada || claveIngresada === false) return;
+            
+            // Verificar contraseña
+            if (claveIngresada.trim() !== torneoSeleccionado.clave) {
+                await mostrarModal({
+                    titulo: 'Contraseña Incorrecta',
+                    mensaje: 'La contraseña ingresada no es correcta.',
+                    cancelar: false
+                });
+                return;
+            }
         }
         
         // Ahora pedir el código del torneo seleccionado
