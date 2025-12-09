@@ -1335,6 +1335,9 @@ header h1 {
     border-collapse: collapse;
     font-size: 0.85em;
     margin-top: 5px;
+    background: white;
+    border-radius: 6px;
+    overflow: hidden;
 }
 
 .tabla-clasificacion-torneo thead {
@@ -1343,16 +1346,42 @@ header h1 {
 }
 
 .tabla-clasificacion-torneo th {
-    padding: 8px 6px;
+    padding: 10px 8px;
     text-align: left;
     font-weight: 600;
     font-size: 0.85em;
+    white-space: nowrap;
+}
+
+.tabla-clasificacion-torneo th:first-child {
+    text-align: center;
+    width: 50px;
+}
+
+.tabla-clasificacion-torneo th:nth-child(2) {
+    min-width: 120px;
+}
+
+.tabla-clasificacion-torneo th:nth-child(n+3) {
+    text-align: center;
+    width: 80px;
 }
 
 .tabla-clasificacion-torneo td {
-    padding: 6px;
+    padding: 10px 8px;
     border-bottom: 1px solid #e0e0e0;
     font-size: 0.85em;
+    background: white;
+}
+
+.tabla-clasificacion-torneo td:first-child {
+    text-align: center;
+    font-weight: 600;
+    color: #1e3c72;
+}
+
+.tabla-clasificacion-torneo td:nth-child(n+3) {
+    text-align: center;
 }
 
 .tabla-clasificacion-torneo tbody tr:hover {
@@ -2604,9 +2633,23 @@ header h1 {
         border-collapse: collapse;
     }
     
+    .tabla-clasificacion-torneo {
+        display: table;
+        width: 100%;
+    }
+    
     .tabla-clasificacion-torneo thead,
     .tabla-clasificacion-torneo tbody {
-        display: block;
+        display: table-row-group;
+    }
+    
+    .tabla-clasificacion-torneo tr {
+        display: table-row;
+    }
+    
+    .tabla-clasificacion-torneo th,
+    .tabla-clasificacion-torneo td {
+        display: table-cell;
     }
     
     .tabla-global-table thead,
