@@ -607,25 +607,130 @@ function configurarEnlacesCiudades() {
     });
 }
 
+// Mapeo de partidos específicos a ciudades
+// Estructura: [grupoIndex][partidoIndex] = ciudadKey
+const MAPEO_PARTIDOS_CIUDADES = {
+    0: { // Grupo A
+        0: 'ciudad-de-mexico', // México vs Sudáfrica - 11 jun
+        1: 'toronto', // Corea del Sur vs Playoff D - 12 jun
+        2: 'ciudad-de-mexico', // México vs Corea del Sur - 17 jun
+        3: 'guadalajara', // Playoff D vs Sudáfrica - 16 jun
+        4: 'monterrey', // Playoff D vs México - 21 jun
+        5: 'vancouver' // Sudáfrica vs Corea del Sur - 21 jun
+    },
+    1: { // Grupo B
+        0: 'toronto', // Canadá vs Playoff B1 - 11 jun
+        1: 'vancouver', // Catar vs Suiza - 11 jun
+        2: 'toronto', // Canadá vs Catar - 16 jun
+        3: 'vancouver', // Suiza vs Playoff B1 - 16 jun
+        4: 'vancouver', // Suiza vs Canadá - 20 jun
+        5: 'toronto' // Playoff B1 vs Catar - 20 jun
+    },
+    2: { // Grupo C
+        0: 'los-angeles', // Brasil vs Marruecos - 12 jun
+        1: 'san-francisco', // Haití vs Escocia - 12 jun
+        2: 'los-angeles', // Brasil vs Haití - 17 jun
+        3: 'san-francisco', // Escocia vs Marruecos - 17 jun
+        4: 'san-francisco', // Escocia vs Brasil - 21 jun
+        5: 'los-angeles' // Marruecos vs Haití - 21 jun
+    },
+    3: { // Grupo D
+        0: 'dallas', // USA vs Paraguay - 12 jun
+        1: 'houston', // Australia vs Playoff C - 12 jun
+        2: 'dallas', // USA vs Australia - 16 jun
+        3: 'houston', // Playoff C vs Paraguay - 17 jun
+        4: 'houston', // Playoff C vs USA - 21 jun
+        5: 'dallas' // Paraguay vs Australia - 21 jun
+    },
+    4: { // Grupo E
+        0: 'atlanta', // Alemania vs Curazao - 11 jun
+        1: 'miami', // Costa de Marfil vs Ecuador - 12 jun
+        2: 'atlanta', // Alemania vs Costa de Marfil - 16 jun
+        3: 'miami', // Ecuador vs Curazao - 17 jun
+        4: 'atlanta', // Ecuador vs Alemania - 20 jun
+        5: 'miami' // Curazao vs Costa de Marfil - 20 jun
+    },
+    5: { // Grupo F
+        0: 'nueva-york', // Países Bajos vs Japón - 11 jun
+        1: 'filadelfia', // Playoff B2 vs Túnez - 12 jun
+        2: 'nueva-york', // Países Bajos vs Playoff B2 - 16 jun
+        3: 'filadelfia', // Túnez vs Japón - 17 jun
+        4: 'filadelfia', // Túnez vs Países Bajos - 21 jun
+        5: 'nueva-york' // Japón vs Playoff B2 - 21 jun
+    },
+    6: { // Grupo G
+        0: 'boston', // Bélgica vs Egipto - 11 jun
+        1: 'kansas-city', // Irán vs Nueva Zelanda - 12 jun
+        2: 'boston', // Bélgica vs Irán - 16 jun
+        3: 'kansas-city', // Nueva Zelanda vs Egipto - 17 jun
+        4: 'kansas-city', // Nueva Zelanda vs Bélgica - 21 jun
+        5: 'boston' // Egipto vs Irán - 21 jun
+    },
+    7: { // Grupo H
+        0: 'seattle', // España vs Cabo Verde - 11 jun
+        1: 'los-angeles', // Arabia Saudita vs Uruguay - 12 jun
+        2: 'seattle', // España vs Arabia Saudita - 16 jun
+        3: 'los-angeles', // Uruguay vs Cabo Verde - 17 jun
+        4: 'seattle', // Uruguay vs España - 21 jun
+        5: 'los-angeles' // Cabo Verde vs Arabia Saudita - 21 jun
+    },
+    8: { // Grupo I
+        0: 'miami', // Francia vs Senegal - 11 jun
+        1: 'atlanta', // Playoff 2 vs Noruega - 12 jun
+        2: 'miami', // Francia vs Playoff 2 - 16 jun
+        3: 'atlanta', // Noruega vs Senegal - 17 jun
+        4: 'atlanta', // Noruega vs Francia - 20 jun
+        5: 'miami' // Senegal vs Playoff 2 - 20 jun
+    },
+    9: { // Grupo J
+        0: 'nueva-york', // Argentina vs Argelia - 12 jun
+        1: 'filadelfia', // Austria vs Jordania - 12 jun
+        2: 'nueva-york', // Argentina vs Austria - 16 jun
+        3: 'filadelfia', // Jordania vs Argelia - 17 jun
+        4: 'filadelfia', // Jordania vs Argentina - 21 jun
+        5: 'nueva-york' // Argelia vs Austria - 21 jun
+    },
+    10: { // Grupo K
+        0: 'boston', // Portugal vs Playoff 1 - 11 jun
+        1: 'kansas-city', // Uzbekistán vs Colombia - 12 jun
+        2: 'boston', // Portugal vs Uzbekistán - 16 jun
+        3: 'kansas-city', // Colombia vs Playoff 1 - 17 jun
+        4: 'kansas-city', // Colombia vs Portugal - 21 jun
+        5: 'boston' // Playoff 1 vs Uzbekistán - 21 jun
+    },
+    11: { // Grupo L
+        0: 'dallas', // Inglaterra vs Croacia - 11 jun
+        1: 'houston', // Ghana vs Panamá - 12 jun
+        2: 'dallas', // Inglaterra vs Ghana - 16 jun
+        3: 'houston', // Panamá vs Croacia - 17 jun
+        4: 'houston', // Panamá vs Inglaterra - 20 jun
+        5: 'dallas' // Croacia vs Ghana - 20 jun
+    }
+};
+
 // Función para buscar partidos por fecha y ciudad
 function buscarPartidosPorFechaYCiudad(fecha, ciudadKey) {
     const partidosEncontrados = [];
     
-    if (typeof GRUPOS_MUNDIAL_2026 === 'undefined') return partidosEncontrados;
+    if (typeof GRUPOS_MUNDIAL_2026 === 'undefined' || !MAPEO_PARTIDOS_CIUDADES) return partidosEncontrados;
     
     GRUPOS_MUNDIAL_2026.forEach((grupo, grupoIndex) => {
         grupo.partidos.forEach((partido, partidoIndex) => {
-            const fechaHorario = obtenerFechaHorarioPartido(grupoIndex, partidoIndex);
-            if (fechaHorario.fecha === fecha) {
-                const equipoLocal = grupo.equipos[partido.local];
-                const equipoVisitante = grupo.equipos[partido.visitante];
-                partidosEncontrados.push({
-                    grupo: grupo.nombre,
-                    local: equipoLocal,
-                    visitante: equipoVisitante,
-                    horario: fechaHorario.horario,
-                    fase: 'Fase de Grupos'
-                });
+            // Verificar si este partido se juega en esta ciudad
+            if (MAPEO_PARTIDOS_CIUDADES[grupoIndex] && MAPEO_PARTIDOS_CIUDADES[grupoIndex][partidoIndex] === ciudadKey) {
+                const fechaHorario = obtenerFechaHorarioPartido(grupoIndex, partidoIndex);
+                // Verificar que la fecha coincida (puede haber diferencias por zona horaria)
+                if (fechaHorario.fecha === fecha || fechaHorario.fecha === fecha.split('T')[0]) {
+                    const equipoLocal = grupo.equipos[partido.local];
+                    const equipoVisitante = grupo.equipos[partido.visitante];
+                    partidosEncontrados.push({
+                        grupo: grupo.nombre,
+                        local: equipoLocal,
+                        visitante: equipoVisitante,
+                        horario: fechaHorario.horario,
+                        fase: 'Fase de Grupos'
+                    });
+                }
             }
         });
     });
