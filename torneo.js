@@ -1340,23 +1340,42 @@ async function mostrarDialogoEnviarPredicciones() {
         localStorage.setItem('mundial2026_mi_nombre', miNombre);
         
         // Crear nuevo torneo
-        const nombreTorneo = await mostrarModal({
-            titulo: 'Crear Torneo',
-            mensaje: 'Ingresa un nombre para el torneo (opcional):',
-            input: true,
-            placeholder: 'Nombre del torneo',
-            maxLength: 30,
-            cancelar: true
-        });
+        let nombreTorneo = '';
+        let nombreValido = false;
         
-        if (nombreTorneo === false) return;
+        while (!nombreValido) {
+            nombreTorneo = await mostrarModal({
+                titulo: 'Crear Torneo',
+                mensaje: 'Ingresa un nombre para el torneo:',
+                input: true,
+                placeholder: 'Nombre del torneo (obligatorio)',
+                maxLength: 30,
+                cancelar: true
+            });
+            
+            if (nombreTorneo === false) return;
+            
+            // Validar que el nombre no esté vacío
+            if (!nombreTorneo || nombreTorneo.trim() === '') {
+                await mostrarModal({
+                    titulo: 'Nombre Requerido',
+                    mensaje: 'El nombre del torneo es obligatorio. Por favor ingresa un nombre.',
+                    cancelar: false
+                });
+                nombreValido = false;
+            } else {
+                nombreValido = true;
+            }
+        }
+        
+        nombreTorneo = nombreTorneo.trim();
         
         // Asegurar que torneos existe antes de crear
         if (!torneos || typeof torneos !== 'object') {
             torneos = {};
         }
         
-        const codigo = await crearTorneo(nombreTorneo || '', miNombre);
+        const codigo = await crearTorneo(nombreTorneo, miNombre);
         const resultado = await enviarPredicciones(codigo, miNombre, predicciones);
         
         if (resultado && !resultado.exito) {
