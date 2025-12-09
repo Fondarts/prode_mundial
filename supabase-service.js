@@ -164,6 +164,7 @@ async function guardarParticipanteSupabase(codigo, nombre, predicciones, usuario
         if (!torneo) return false;
         
         // Si se proporciona usuarioId válido, verificar si ya existe una predicción de ese usuario
+        // Solo si la columna usuario_id existe en la tabla
         if (usuarioId && usuarioId.trim() !== '') {
             try {
                 const { data: participanteExistentePorUsuario, error: errorConsulta } = await supabaseClient
@@ -174,7 +175,12 @@ async function guardarParticipanteSupabase(codigo, nombre, predicciones, usuario
                     .maybeSingle();
                 
                 if (errorConsulta) {
-                    // Si hay error en la consulta, continuar con el flujo normal
+                    // Si el error es que la columna no existe, ignorar y continuar
+                    if (errorConsulta.code === 'PGRST204' && errorConsulta.message && errorConsulta.message.includes('usuario_id')) {
+                        // La columna no existe, continuar sin usar usuario_id
+                    } else {
+                        // Otro tipo de error, continuar con el flujo normal
+                    }
                 } else if (participanteExistentePorUsuario) {
                     // Si ya existe y no se permite actualización, retornar false
                     if (!permitirActualizacion) {
@@ -194,7 +200,12 @@ async function guardarParticipanteSupabase(codigo, nombre, predicciones, usuario
                     return true;
                 }
             } catch (error) {
-                // Si hay error, continuar con el flujo normal (verificar por nombre)
+                // Si el error es que la columna no existe, ignorar y continuar
+                if (error.code === 'PGRST204' && error.message && error.message.includes('usuario_id')) {
+                    // La columna no existe, continuar sin usar usuario_id
+                } else {
+                    // Otro tipo de error, continuar con el flujo normal
+                }
             }
         }
         
@@ -213,10 +224,8 @@ async function guardarParticipanteSupabase(codigo, nombre, predicciones, usuario
                 updated_at: new Date().toISOString()
             };
             
-            // Solo actualizar usuario_id si es válido
-            if (usuarioId && usuarioId.trim() !== '') {
-                datosActualizar.usuario_id = usuarioId;
-            }
+            // Solo actualizar usuario_id si es válido (y la columna existe)
+            // No intentamos actualizar usuario_id si la columna no existe en la tabla
             
             const { error } = await supabaseClient
                 .from('participantes')
@@ -239,7 +248,8 @@ async function guardarParticipanteSupabase(codigo, nombre, predicciones, usuario
                 }
             };
             
-            // Solo agregar usuario_id si es válido y no está vacío
+            // Intentar insertar con usuario_id si es válido
+            // Si la columna no existe, se intentará sin ella
             if (usuarioId && typeof usuarioId === 'string' && usuarioId.trim() !== '' && usuarioId !== 'null' && usuarioId !== 'undefined') {
                 datosInsertar.usuario_id = usuarioId;
             }
@@ -250,8 +260,23 @@ async function guardarParticipanteSupabase(codigo, nombre, predicciones, usuario
                 .select();
             
             if (error) {
-                console.error('Error al insertar participante en Supabase:', error);
-                throw error;
+                // Si el error es que la columna usuario_id no existe, intentar sin ella
+                if (error.code === 'PGRST204' && error.message && error.message.includes('usuario_id')) {
+                    // Eliminar usuario_id del objeto y volver a intentar
+                    delete datosInsertar.usuario_id;
+                    const { data: dataRetry, error: errorRetry } = await supabaseClient
+                        .from('participantes')
+                        .insert(datosInsertar)
+                        .select();
+                    
+                    if (errorRetry) {
+                        console.error('Error al insertar participante en Supabase:', errorRetry);
+                        throw errorRetry;
+                    }
+                } else {
+                    console.error('Error al insertar participante en Supabase:', error);
+                    throw error;
+                }
             }
         }
         
