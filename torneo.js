@@ -1885,10 +1885,11 @@ async function mostrarDialogoEnviarPredicciones() {
             cancelar: false
         });
         
-        if (typeof renderizarTorneo === 'function') {
-            await renderizarTorneo();
+            if (typeof renderizarTorneo === 'function') {
+                await renderizarTorneo();
+            }
+            return;
         }
-        return;
     }
     
     // Crear nuevo torneo
