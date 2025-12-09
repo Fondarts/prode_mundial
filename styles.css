@@ -619,8 +619,8 @@ header h1 {
 }
 
 .tabla-posiciones .playoff-select {
-    width: 100%;
-    max-width: 100%;
+    width: 95%;
+    max-width: 95%;
     margin: 0 auto;
     display: block;
     position: relative;
