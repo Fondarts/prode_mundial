@@ -1273,7 +1273,7 @@ async function mostrarListaTorneos() {
         modal.className = 'modal-torneos-lista';
         modal.style.cssText = 'background: white; border-radius: 8px; padding: 0; max-width: 1000px; width: 95%; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.3);';
         
-        const renderizarTorneos = (listaTorneos) => {
+        const renderizarTorneos = (listaTorneos, esPrivado = false) => {
             if (listaTorneos.length === 0) {
                 return '<p style="color: #999; text-align: center; padding: 20px;">No hay torneos en esta categoría</p>';
             }
@@ -1281,7 +1281,7 @@ async function mostrarListaTorneos() {
                 <div class="torneo-item-lista" data-codigo="${torneo.codigo}" style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s; background: #f9fafb; margin-bottom: 8px;">
                     <h3 style="margin: 0 0 6px 0; color: #1e3a8a; font-size: 1em; font-weight: 600;">${torneo.nombre}</h3>
                     <p style="margin: 3px 0; color: #666; font-size: 0.85em;">Creado por: <strong>${torneo.creadoPor}</strong></p>
-                    <p style="margin: 3px 0; color: #666; font-size: 0.85em;">Código: <strong style="font-family: monospace; color: #1e3a8a;">${torneo.codigo}</strong></p>
+                    ${!esPrivado ? `<p style="margin: 3px 0; color: #666; font-size: 0.85em;">Código: <strong style="font-family: monospace; color: #1e3a8a;">${torneo.codigo}</strong></p>` : ''}
                     <p style="margin: 3px 0; color: #666; font-size: 0.85em;">👥 Participantes: <strong>${torneo.participantes}</strong></p>
                 </div>
             `).join('');
@@ -1333,8 +1333,8 @@ async function mostrarListaTorneos() {
             
             if (!terminoLower) {
                 // Sin filtro, mostrar todos
-                listaAbiertos.innerHTML = renderizarTorneos(torneosAbiertos);
-                listaPrivados.innerHTML = renderizarTorneos(torneosPrivados);
+                listaAbiertos.innerHTML = renderizarTorneos(torneosAbiertos, false);
+                listaPrivados.innerHTML = renderizarTorneos(torneosPrivados, true);
             } else {
                 // Filtrar
                 const abiertosFiltrados = torneosAbiertos.filter(t => 
@@ -1348,8 +1348,8 @@ async function mostrarListaTorneos() {
                     t.creadoPor.toLowerCase().includes(terminoLower)
                 );
                 
-                listaAbiertos.innerHTML = renderizarTorneos(abiertosFiltrados);
-                listaPrivados.innerHTML = renderizarTorneos(privadosFiltrados);
+                listaAbiertos.innerHTML = renderizarTorneos(abiertosFiltrados, false);
+                listaPrivados.innerHTML = renderizarTorneos(privadosFiltrados, true);
             }
             
             // Reconfigurar event listeners para los nuevos elementos
