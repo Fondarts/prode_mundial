@@ -53,7 +53,7 @@
         <div class="tabs">
             <button class="tab-btn active" data-tab="grupos" data-i18n="grupos">Grupos</button>
             <button class="tab-btn" data-tab="eliminatorias" data-i18n="eliminatorias">Eliminatorias</button>
-            <button class="tab-btn" data-tab="torneo" data-i18n="torneo">Torneo</button>
+            <button class="tab-btn" data-tab="torneo" data-i18n="misTorneos">Mis Torneos</button>
             <button class="tab-btn" data-tab="informacion" data-i18n="informacion">Información</button>
         </div>
 
@@ -238,6 +238,19 @@
         </div>
     </div>
 
+    <!-- Modal para información de países -->
+    <div id="modal-pais-overlay" class="modal-overlay" style="display: none;">
+        <div class="modal-container" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3 id="modal-pais-title"></h3>
+                <button class="modal-close" id="modal-pais-close">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-pais-body">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+    </div>
+
     <!-- Modal para reglas del torneo -->
     <div id="modal-reglas-torneo-overlay" class="modal-overlay" style="display: none;">
         <div class="modal-container" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
@@ -310,6 +323,7 @@
     <script src="translations.js"></script>
     
     <script src="ciudades-data.js"></script>
+    <script src="paises-data.js?v=4"></script>
     <script src="data.js"></script>
     <script src="supabase-config.js"></script>
     <script src="supabase-service.js"></script>

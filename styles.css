@@ -473,6 +473,10 @@ header h1 {
     font-size: 0.85em;
 }
 
+.tabla-posiciones td:nth-child(2) {
+    text-align: left;
+}
+
 .tabla-posiciones tr:hover {
     background: #f0f0f0;
 }
@@ -547,7 +551,7 @@ header h1 {
 .equipo {
     flex: 1;
     font-weight: 600;
-    text-align: center;
+    text-align: left;
     font-size: 0.85em;
     min-width: 0;
     overflow: hidden;
@@ -556,7 +560,7 @@ header h1 {
 }
 
 .equipo-local {
-    text-align: right;
+    text-align: left;
 }
 
 .equipo-visitante {

@@ -141,6 +141,27 @@ function renderizarGrupos() {
         `;
         
         container.appendChild(grupoDiv);
+        
+        // Configurar event listeners para links de países (todos los grupos)
+        // Usar setTimeout para asegurar que el DOM esté completamente renderizado
+        setTimeout(() => {
+            grupoDiv.querySelectorAll('.pais-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const paisKey = link.getAttribute('data-pais');
+                    if (paisKey) {
+                        if (typeof obtenerInfoPais === 'function' && typeof mostrarInfoPais === 'function') {
+                            mostrarInfoPais(paisKey);
+                        } else {
+                            console.error('Funciones no disponibles:', {
+                                obtenerInfoPais: typeof obtenerInfoPais,
+                                mostrarInfoPais: typeof mostrarInfoPais
+                            });
+                        }
+                    }
+                });
+            });
+        }, 0);
     });
     
     // Asegurar que los selects tengan los event listeners correctos
@@ -161,6 +182,27 @@ function renderizarGrupos() {
             
             resultados[grupoIndex].playoffSelecciones[equipoIndex] = seleccion;
             
+            // Actualizar la bandera visualmente
+            const selectElement = e.target;
+            const containerDiv = selectElement.parentElement;
+            const flagElement = containerDiv.querySelector('.playoff-flag, .playoff-flag-placeholder');
+            
+            if (seleccion) {
+                const bandera = obtenerBanderaPais(seleccion);
+                if (bandera && flagElement) {
+                    if (flagElement.classList.contains('playoff-flag-placeholder')) {
+                        flagElement.outerHTML = `<img src="${bandera}" alt="${seleccion}" class="playoff-flag" style="width: 20px; height: 15px; vertical-align: middle; margin-right: 6px; border: 1px solid #ddd; border-radius: 2px; display: inline-block;">`;
+                    } else {
+                        flagElement.src = bandera;
+                        flagElement.alt = seleccion;
+                    }
+                }
+            } else {
+                if (flagElement && !flagElement.classList.contains('playoff-flag-placeholder')) {
+                    flagElement.outerHTML = `<div class="playoff-flag-placeholder" style="width: 20px; height: 15px; border: 1px solid #ddd; border-radius: 2px; display: inline-block; background: white; margin-right: 6px; vertical-align: middle;"></div>`;
+                }
+            }
+            
             guardarResultados();
             renderizarGrupos();
             actualizarEliminatorias();
@@ -169,6 +211,246 @@ function renderizarGrupos() {
 }
 
 // Función para traducir nombres de países
+// Función para obtener la URL de la bandera de un país
+// Función auxiliar para obtener el nombre original en español desde un nombre traducido
+function obtenerNombreOriginalEspanol(nombreTraducido) {
+    const t = typeof window.t === 'function' ? window.t : (key) => key;
+    
+    // Mapeo inverso: de traducciones a nombres originales en español
+    const traducciones = {
+        es: {
+            'México': 'México',
+            'Sudáfrica': 'Sudáfrica',
+            'Corea del Sur': 'Corea del Sur',
+            'Canadá': 'Canadá',
+            'Qatar': 'Qatar',
+            'Suiza': 'Suiza',
+            'Brasil': 'Brasil',
+            'Marruecos': 'Marruecos',
+            'Haití': 'Haití',
+            'Escocia': 'Escocia',
+            'USA': 'USA',
+            'Paraguay': 'Paraguay',
+            'Australia': 'Australia',
+            'Alemania': 'Alemania',
+            'Curaçao': 'Curaçao',
+            'C de Marfil': 'C de Marfil',
+            'Costa de Marfil': 'Costa de Marfil',
+            'Ecuador': 'Ecuador',
+            'Holanda': 'Holanda',
+            'Japón': 'Japón',
+            'Túnez': 'Túnez',
+            'Bélgica': 'Bélgica',
+            'Egipto': 'Egipto',
+            'Irán': 'Irán',
+            'N. Zelanda': 'N. Zelanda',
+            'Nueva Zelanda': 'Nueva Zelanda',
+            'España': 'España',
+            'Cabo Verde': 'Cabo Verde',
+            'Arabia Saudí': 'Arabia Saudí',
+            'Uruguay': 'Uruguay',
+            'Francia': 'Francia',
+            'Senegal': 'Senegal',
+            'Noruega': 'Noruega',
+            'Argentina': 'Argentina',
+            'Argelia': 'Argelia',
+            'Austria': 'Austria',
+            'Jordania': 'Jordania',
+            'Portugal': 'Portugal',
+            'Colombia': 'Colombia',
+            'Uzbekistán': 'Uzbekistán',
+            'Inglaterra': 'Inglaterra',
+            'Croacia': 'Croacia',
+            'Ghana': 'Ghana',
+            'Panamá': 'Panamá',
+            'Gales': 'Gales',
+            'Bosnia': 'Bosnia',
+            'Italia': 'Italia',
+            'Irlanda del Norte': 'Irlanda del Norte',
+            'Eslovaquia': 'Eslovaquia',
+            'Kosovo': 'Kosovo',
+            'Turquía': 'Turquía',
+            'Rumania': 'Rumania',
+            'Ucrania': 'Ucrania',
+            'Suecia': 'Suecia',
+            'Polonia': 'Polonia',
+            'Albania': 'Albania',
+            'Bolivia': 'Bolivia',
+            'Surinam': 'Surinam',
+            'Irak': 'Irak',
+            'Nueva Caledonia': 'Nueva Caledonia',
+            'Jamaica': 'Jamaica',
+            'RD Congo': 'RD Congo',
+            'Rep. Checa': 'Rep. Checa',
+            'República Checa': 'República Checa',
+            'Irlanda': 'Irlanda',
+            'Dinamarca': 'Dinamarca',
+            'Macedonia del Norte': 'Macedonia del Norte'
+        },
+        en: {
+            'Mexico': 'México',
+            'South Africa': 'Sudáfrica',
+            'South Korea': 'Corea del Sur',
+            'Canada': 'Canadá',
+            'Qatar': 'Qatar',
+            'Switzerland': 'Suiza',
+            'Brazil': 'Brasil',
+            'Morocco': 'Marruecos',
+            'Haiti': 'Haití',
+            'Scotland': 'Escocia',
+            'United States': 'USA',
+            'USA': 'USA',
+            'Paraguay': 'Paraguay',
+            'Australia': 'Australia',
+            'Germany': 'Alemania',
+            'Curaçao': 'Curaçao',
+            'Ivory Coast': 'C de Marfil',
+            'Ecuador': 'Ecuador',
+            'Netherlands': 'Holanda',
+            'Japan': 'Japón',
+            'Tunisia': 'Túnez',
+            'Belgium': 'Bélgica',
+            'Egypt': 'Egipto',
+            'Iran': 'Irán',
+            'New Zealand': 'Nueva Zelanda',
+            'Spain': 'España',
+            'Cape Verde': 'Cabo Verde',
+            'Saudi Arabia': 'Arabia Saudí',
+            'Uruguay': 'Uruguay',
+            'France': 'Francia',
+            'Senegal': 'Senegal',
+            'Norway': 'Noruega',
+            'Argentina': 'Argentina',
+            'Algeria': 'Argelia',
+            'Austria': 'Austria',
+            'Jordan': 'Jordania',
+            'Portugal': 'Portugal',
+            'Colombia': 'Colombia',
+            'Uzbekistan': 'Uzbekistán',
+            'England': 'Inglaterra',
+            'Croatia': 'Croacia',
+            'Ghana': 'Ghana',
+            'Panama': 'Panamá',
+            'Wales': 'Gales',
+            'Bosnia': 'Bosnia',
+            'Italy': 'Italia',
+            'Northern Ireland': 'Irlanda del Norte',
+            'Slovakia': 'Eslovaquia',
+            'Kosovo': 'Kosovo',
+            'Turkey': 'Turquía',
+            'Romania': 'Rumania',
+            'Ukraine': 'Ucrania',
+            'Sweden': 'Suecia',
+            'Poland': 'Polonia',
+            'Albania': 'Albania',
+            'Bolivia': 'Bolivia',
+            'Suriname': 'Surinam',
+            'Iraq': 'Irak',
+            'New Caledonia': 'Nueva Caledonia',
+            'Jamaica': 'Jamaica',
+            'DR Congo': 'RD Congo',
+            'Czech Republic': 'Rep. Checa',
+            'Czechia': 'Rep. Checa',
+            'Ireland': 'Irlanda',
+            'Denmark': 'Dinamarca',
+            'North Macedonia': 'Macedonia del Norte'
+        }
+    };
+    
+    const idioma = getCurrentLanguage();
+    const mapa = traducciones[idioma] || traducciones.es;
+    return mapa[nombreTraducido] || nombreTraducido;
+}
+
+function obtenerBanderaPais(nombre) {
+    // Primero intentar con el nombre tal cual
+    // Si no funciona, intentar convertir el nombre traducido a español
+    let nombreOriginal = nombre;
+    
+    // Mapeo de nombres de países a códigos ISO para banderas
+    const banderasMap = {
+        'México': 'mx',
+        'Sudáfrica': 'za',
+        'Corea del Sur': 'kr',
+        'Canadá': 'ca',
+        'Qatar': 'qa',
+        'Suiza': 'ch',
+        'Brasil': 'br',
+        'Marruecos': 'ma',
+        'Haití': 'ht',
+        'Escocia': 'gb-sct',
+        'USA': 'us',
+        'Paraguay': 'py',
+        'Australia': 'au',
+        'Alemania': 'de',
+        'Curaçao': 'cw',
+        'C de Marfil': 'ci',
+        'Costa de Marfil': 'ci',
+        'Ecuador': 'ec',
+        'Holanda': 'nl',
+        'Japón': 'jp',
+        'Túnez': 'tn',
+        'Bélgica': 'be',
+        'Egipto': 'eg',
+        'Irán': 'ir',
+        'N. Zelanda': 'nz',
+        'Nueva Zelanda': 'nz',
+        'España': 'es',
+        'Cabo Verde': 'cv',
+        'Arabia Saudí': 'sa',
+        'Uruguay': 'uy',
+        'Francia': 'fr',
+        'Senegal': 'sn',
+        'Noruega': 'no',
+        'Argentina': 'ar',
+        'Argelia': 'dz',
+        'Austria': 'at',
+        'Jordania': 'jo',
+        'Portugal': 'pt',
+        'Colombia': 'co',
+        'Uzbekistán': 'uz',
+        'Inglaterra': 'gb-eng',
+        'Croacia': 'hr',
+        'Ghana': 'gh',
+        'Panamá': 'pa',
+        // Playoffs
+        'Rep. Checa': 'cz',
+        'República Checa': 'cz',
+        'Irlanda': 'ie',
+        'Dinamarca': 'dk',
+        'Macedonia del Norte': 'mk',
+        'Gales': 'gb-wls',
+        'Bosnia': 'ba',
+        'Italia': 'it',
+        'Irlanda del Norte': 'gb-nir',
+        'Eslovaquia': 'sk',
+        'Kosovo': 'xk',
+        'Turquía': 'tr',
+        'Rumania': 'ro',
+        'Ucrania': 'ua',
+        'Suecia': 'se',
+        'Polonia': 'pl',
+        'Albania': 'al',
+        'Bolivia': 'bo',
+        'Surinam': 'sr',
+        'Irak': 'iq',
+        'Nueva Caledonia': 'nc',
+        'Jamaica': 'jm',
+        'RD Congo': 'cd'
+    };
+    
+    let codigo = banderasMap[nombre];
+    if (!codigo) {
+        // Intentar con el nombre original en español
+        nombreOriginal = obtenerNombreOriginalEspanol(nombre);
+        codigo = banderasMap[nombreOriginal];
+    }
+    if (codigo) {
+        return `https://flagcdn.com/w160/${codigo}.png`;
+    }
+    return ''; // Retornar string vacío si no se encuentra
+}
+
 function traducirNombrePais(nombre) {
     const t = typeof window.t === 'function' ? window.t : (key) => key;
     
@@ -275,18 +557,85 @@ function renderizarTablaPosiciones(grupo, grupoIndex) {
         html += `<td>${index + 1}</td>`;
         html += `<td>`;
         
-        // Si es un playoff, mostrar select
+        // Si es un playoff, mostrar select con bandera
         const equipoOriginal = grupo.equipos[pos.indice];
         if (PLAYOFFS_OPCIONES[equipoOriginal]) {
             const seleccion = resultados[grupoIndex]?.playoffSelecciones?.[pos.indice] || '';
-            html += `<select class="playoff-select" data-grupo="${grupoIndex}" data-equipo="${pos.indice}">`;
+            const banderaSeleccionada = seleccion ? obtenerBanderaPais(seleccion) : '';
+            const banderaHtml = banderaSeleccionada 
+                ? `<img src="${banderaSeleccionada}" alt="${seleccion}" class="playoff-flag" style="width: 20px; height: 15px; vertical-align: middle; margin-right: 6px; border: 1px solid #ddd; border-radius: 2px; display: inline-block;">` 
+                : `<div class="playoff-flag-placeholder" style="width: 20px; height: 15px; border: 1px solid #ddd; border-radius: 2px; display: inline-block; background: white; margin-right: 6px; vertical-align: middle;"></div>`;
+            html += `<div style="display: inline-flex; align-items: center;">${banderaHtml}<select class="playoff-select" data-grupo="${grupoIndex}" data-equipo="${pos.indice}">`;
             html += `<option value="">${equipoOriginal}</option>`;
             PLAYOFFS_OPCIONES[equipoOriginal].forEach(opcion => {
-                html += `<option value="${opcion}" ${seleccion === opcion ? 'selected' : ''}>${opcion}</option>`;
+                const bandera = obtenerBanderaPais(opcion);
+                const banderaHtml = bandera ? `<img src="${bandera}" alt="${opcion}" style="width: 16px; height: 12px; vertical-align: middle; margin-right: 4px;">` : '';
+                html += `<option value="${opcion}" ${seleccion === opcion ? 'selected' : ''}>${banderaHtml}${opcion}</option>`;
             });
-            html += `</select>`;
+            html += `</select></div>`;
         } else {
-            html += obtenerNombreEquipo(grupo, grupoIndex, pos.indice);
+            const nombreEquipo = obtenerNombreEquipo(grupo, grupoIndex, pos.indice);
+            const bandera = obtenerBanderaPais(equipoOriginal);
+            const banderaHtml = bandera ? `<img src="${bandera}" alt="${nombreEquipo}" style="width: 20px; height: 15px; vertical-align: middle; margin-right: 6px; border: 1px solid #ddd; border-radius: 2px;">` : '';
+            // Hacer clickeable si no es un playoff (todos los grupos)
+            if (!PLAYOFFS_OPCIONES[equipoOriginal]) {
+                // Mapeo de nombres originales a claves de país
+                const paisKeyMap = {
+                    'México': 'mexico',
+                    'Sudáfrica': 'sudafrica',
+                    'Corea del Sur': 'corea-del-sur',
+                    'Canadá': 'canada',
+                    'Qatar': 'qatar',
+                    'Suiza': 'suiza',
+                    'Brasil': 'brasil',
+                    'Marruecos': 'marruecos',
+                    'Haití': 'haiti',
+                    'Escocia': 'escocia',
+                    'USA': 'usa',
+                    'Paraguay': 'paraguay',
+                    'Australia': 'australia',
+                    'Alemania': 'alemania',
+                    'Curaçao': 'curazao',
+                    'C de Marfil': 'costa-de-marfil',
+                    'Costa de Marfil': 'costa-de-marfil',
+                    'Ecuador': 'ecuador',
+                    'Holanda': 'holanda',
+                    'Japón': 'japon',
+                    'Túnez': 'tunez',
+                    'Bélgica': 'belgica',
+                    'Egipto': 'egipto',
+                    'Irán': 'iran',
+                    'N. Zelanda': 'nueva-zelanda',
+                    'Nueva Zelanda': 'nueva-zelanda',
+                    'España': 'espana',
+                    'Cabo Verde': 'cabo-verde',
+                    'Arabia Saudí': 'arabia-saudi',
+                    'Uruguay': 'uruguay',
+                    'Francia': 'francia',
+                    'Senegal': 'senegal',
+                    'Noruega': 'noruega',
+                    'Argentina': 'argentina',
+                    'Argelia': 'argelia',
+                    'Austria': 'austria',
+                    'Jordania': 'jordania',
+                    'Portugal': 'portugal',
+                    'Colombia': 'colombia',
+                    'Uzbekistán': 'uzbekistan',
+                    'Inglaterra': 'inglaterra',
+                    'Croacia': 'croacia',
+                    'Ghana': 'ghana',
+                    'Panamá': 'panama'
+                };
+                const paisKey = paisKeyMap[equipoOriginal];
+                if (paisKey) {
+                    html += `<a href="#" class="pais-link" data-pais="${paisKey}" style="color: #2196f3; text-decoration: none; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center;">${banderaHtml}${nombreEquipo}</a>`;
+                } else {
+                    html += `<span style="display: inline-flex; align-items: center;">${banderaHtml}${nombreEquipo}</span>`;
+                }
+            } else {
+                // Para playoffs, mostrar sin estilo de link (color normal)
+                html += `<span style="display: inline-flex; align-items: center; color: inherit;">${banderaHtml}${nombreEquipo}</span>`;
+            }
         }
         
         html += `</td>`;
@@ -403,8 +752,14 @@ function renderizarPartidos(grupo, grupoIndex) {
             : true;
         
         // En los partidos, solo mostrar el nombre del equipo (usando la selección si existe)
-        const equipoLocal = obtenerNombreEquipo(grupo, grupoIndex, partido.local);
-        const equipoVisitante = obtenerNombreEquipo(grupo, grupoIndex, partido.visitante);
+        const equipoLocalNombre = obtenerNombreEquipo(grupo, grupoIndex, partido.local);
+        const equipoVisitanteNombre = obtenerNombreEquipo(grupo, grupoIndex, partido.visitante);
+        const equipoLocalOriginal = grupo.equipos[partido.local];
+        const equipoVisitanteOriginal = grupo.equipos[partido.visitante];
+        const banderaLocal = obtenerBanderaPais(equipoLocalOriginal);
+        const banderaVisitante = obtenerBanderaPais(equipoVisitanteOriginal);
+        const banderaLocalHtml = banderaLocal ? `<img src="${banderaLocal}" alt="${equipoLocalNombre}" style="width: 24px; height: 18px; vertical-align: middle; border: 1px solid #ddd; border-radius: 2px;">` : '';
+        const banderaVisitanteHtml = banderaVisitante ? `<img src="${banderaVisitante}" alt="${equipoVisitanteNombre}" style="width: 24px; height: 18px; vertical-align: middle; border: 1px solid #ddd; border-radius: 2px;">` : '';
         
         // Deshabilitar si ya se jugó O si no se puede modificar según las reglas de fecha
         const disabledAttr = (yaJugado || !puedeModificar) ? 'disabled readonly' : '';
@@ -438,9 +793,10 @@ function renderizarPartidos(grupo, grupoIndex) {
                     ${fechaHorario.fecha ? `<span class="fecha-partido">${diaSemana} ${fechaFormateada}</span>` : ''}
                     ${fechaHorario.horario ? `<span class="horario-partido">${fechaHorario.horario}</span>` : ''}
                 </div>
-                <div class="partido-equipos-resultado">
-                    <span class="equipo equipo-local">${equipoLocal}</span>
-                    <div class="resultado-input">
+                <div class="partido-equipos-resultado" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                    <div class="bandera-local" style="flex-shrink: 0;">${banderaLocalHtml}</div>
+                    <span class="equipo equipo-local" style="flex: 1; text-align: left;">${equipoLocalNombre}</span>
+                    <div class="resultado-input" style="flex-shrink: 0;">
                         <input type="number" min="0" max="20" 
                                value="${golesLocal}" 
                                data-grupo="${grupoIndex}" 
@@ -457,7 +813,8 @@ function renderizarPartidos(grupo, grupoIndex) {
                                placeholder="-"
                                ${disabledAttr}>
                     </div>
-                    <span class="equipo equipo-visitante">${equipoVisitante}</span>
+                    <span class="equipo equipo-visitante" style="flex: 1; text-align: left;">${equipoVisitanteNombre}</span>
+                    <div class="bandera-visitante" style="flex-shrink: 0;">${banderaVisitanteHtml}</div>
                 </div>
             </div>
         `;
@@ -681,6 +1038,27 @@ document.addEventListener('change', (e) => {
         }
         
         resultados[grupoIndex].playoffSelecciones[equipoIndex] = seleccion;
+        
+        // Actualizar la bandera visualmente
+        const selectElement = e.target;
+        const containerDiv = selectElement.parentElement;
+        const flagElement = containerDiv.querySelector('.playoff-flag, .playoff-flag-placeholder');
+        
+        if (seleccion) {
+            const bandera = obtenerBanderaPais(seleccion);
+            if (bandera && flagElement) {
+                if (flagElement.classList.contains('playoff-flag-placeholder')) {
+                    flagElement.outerHTML = `<img src="${bandera}" alt="${seleccion}" class="playoff-flag" style="width: 20px; height: 15px; vertical-align: middle; margin-right: 6px; border: 1px solid #ddd; border-radius: 2px; display: inline-block;">`;
+                } else {
+                    flagElement.src = bandera;
+                    flagElement.alt = seleccion;
+                }
+            }
+        } else {
+            if (flagElement && !flagElement.classList.contains('playoff-flag-placeholder')) {
+                flagElement.outerHTML = `<div class="playoff-flag-placeholder" style="width: 20px; height: 15px; border: 1px solid #ddd; border-radius: 2px; display: inline-block; background: white; margin-right: 6px; vertical-align: middle;"></div>`;
+            }
+        }
         
         guardarResultados();
         renderizarGrupos();
@@ -1058,6 +1436,216 @@ function mostrarInfoCiudad(ciudadKey) {
     
     // Cerrar modal
     document.getElementById('modal-ciudad-close').onclick = () => {
+        modal.style.display = 'none';
+    };
+    
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    };
+}
+
+// Función para mostrar información de un país
+function mostrarInfoPais(paisKey) {
+    if (typeof obtenerInfoPais !== 'function') {
+        console.error('obtenerInfoPais no está disponible. Asegúrate de que paises-data.js esté cargado.');
+        alert('Error: No se puede cargar la información del país. Por favor recarga la página.');
+        return;
+    }
+    
+    const pais = obtenerInfoPais(paisKey);
+    if (!pais) {
+        console.error('País no encontrado:', paisKey);
+        return;
+    }
+    
+    // Validar que el país tenga al menos los datos básicos
+    if (!pais.bandera || !pais.nombre) {
+        console.error('País con datos incompletos:', pais);
+        alert('Error: Los datos del país están incompletos.');
+        return;
+    }
+    
+    // Asegurar que existan las estructuras necesarias aunque estén vacías
+    if (!pais.camiseta) {
+        pais.camiseta = { principal: '', alternativa: '', descripcion: '' };
+    }
+    if (!pais.jugadores) {
+        pais.jugadores = [];
+    }
+    if (!pais.historial) {
+        pais.historial = {
+            participaciones: 0,
+            mejorResultado: '-',
+            ultimaParticipacion: '-',
+            titulos: 0,
+            partidosJugados: 0,
+            victorias: 0,
+            empates: 0,
+            derrotas: 0,
+            golesAFavor: 0,
+            golesEnContra: 0,
+            resumen: ''
+        };
+    }
+    
+    console.log('País cargado:', pais);
+    
+    const modal = document.getElementById('modal-pais-overlay');
+    const title = document.getElementById('modal-pais-title');
+    const body = document.getElementById('modal-pais-body');
+    
+    if (!modal || !title || !body) {
+        console.error('Elementos del modal no encontrados', { modal, title, body });
+        return;
+    }
+    
+    const t = typeof window.t === 'function' ? window.t : (key) => key;
+    const lang = typeof getCurrentLanguage === 'function' ? getCurrentLanguage() : 'es';
+    const nombrePais = lang === 'en' ? pais.nombreIngles : pais.nombre;
+    const apodo = lang === 'en' ? (pais.apodoIngles || pais.apodo) : pais.apodo;
+    const directorTecnico = lang === 'en' ? (pais.directorTecnicoIngles || pais.directorTecnico) : pais.directorTecnico;
+    
+    // Título del modal sin "MX", solo bandera y nombre
+    const banderaImg = pais.bandera || '';
+    title.innerHTML = `<img src="${banderaImg}" alt="${nombrePais}" style="width: 24px; height: 18px; vertical-align: middle; margin-right: 8px; border: 1px solid #ddd; border-radius: 2px;"> ${nombrePais}${apodo ? ` - ${apodo}` : ''}`;
+    
+    // Header con nombre y apodo
+    let html = `
+        <div style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; color: white; text-align: center;">
+            <h2 style="margin: 0; font-size: 1.8em; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <img src="${banderaImg}" alt="${nombrePais}" style="width: 40px; height: 30px; border: 1px solid rgba(255,255,255,0.3); border-radius: 3px;"> <span>${nombrePais}</span>
+            </h2>
+            ${apodo ? `<p style="margin: 8px 0 0 0; font-size: 1.1em; color: white;">${apodo}</p>` : ''}
+        </div>
+        
+        ${pais.camiseta && (pais.camiseta.principal || pais.camiseta.alternativa || pais.camiseta.descripcion) ? `
+        <div style="margin-bottom: 25px;">
+            <h3 style="color: #1e3c72; margin-bottom: 20px; font-size: 1.4em; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.5em;">👕</span> ${t('camiseta')}
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 15px;">
+                ${pais.camiseta.principal ? `
+                <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;">
+                    <h4 style="color: #2a5298; margin-bottom: 15px; font-size: 1.1em; font-weight: 600;">${t('camisetaPrincipal')}</h4>
+                    <img src="${pais.camiseta.principal}" alt="${t('camisetaPrincipal')}" style="width: 100%; max-width: 250px; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-bottom: 15px;" onerror="this.style.display='none';">
+                    ${pais.camiseta.descripcion ? `<p style="margin: 0; color: #666; font-size: 0.9em; line-height: 1.5;">${pais.camiseta.descripcion}</p>` : ''}
+                </div>
+                ` : ''}
+                ${pais.camiseta.alternativa ? `
+                <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;">
+                    <h4 style="color: #2a5298; margin-bottom: 15px; font-size: 1.1em; font-weight: 600;">${t('camisetaAlternativa')}</h4>
+                    <img src="${pais.camiseta.alternativa}" alt="${t('camisetaAlternativa')}" style="width: 100%; max-width: 250px; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-bottom: 15px;" onerror="this.style.display='none';">
+                </div>
+                ` : ''}
+            </div>
+        </div>
+        ` : ''}
+        
+        ${pais.jugadores && pais.jugadores.length > 0 ? (() => {
+    // Ordenar jugadores por número de camiseta
+    const jugadoresOrdenados = [...pais.jugadores].sort((a, b) => (a.numero || 0) - (b.numero || 0));
+    let jugadoresHtml = `
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: #1e3c72; margin-bottom: 10px; font-size: 1.1em; display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 1.1em;">⚽</span> ${t('jugadores')}
+            </h3>
+            <div style="background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f5f5f5; border-bottom: 1px solid #e0e0e0;">
+                            <th style="padding: 8px 10px; text-align: left; font-size: 0.8em; color: #666; font-weight: 600; width: 35px;">#</th>
+                            <th style="padding: 8px 10px; text-align: left; font-size: 0.8em; color: #666; font-weight: 600;">${lang === 'en' ? 'Name' : 'Nombre'}</th>
+                            <th style="padding: 8px 10px; text-align: left; font-size: 0.8em; color: #666; font-weight: 600;">${t('posicion')}</th>
+                            <th style="padding: 8px 10px; text-align: left; font-size: 0.8em; color: #666; font-weight: 600;">${t('club')}</th>
+                            <th style="padding: 8px 10px; text-align: left; font-size: 0.8em; color: #666; font-weight: 600;">${lang === 'en' ? 'Age' : 'Edad'}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+`;
+    
+    jugadoresOrdenados.forEach((jugador, index) => {
+        const rowStyle = index % 2 === 0 ? 'background: #fafafa;' : 'background: white;';
+        jugadoresHtml += `
+                        <tr style="${rowStyle} border-bottom: 1px solid #f0f0f0;">
+                            <td style="padding: 7px 10px; font-weight: 600; color: #2196f3; font-size: 0.85em;">${jugador.numero || '-'}</td>
+                            <td style="padding: 7px 10px; color: #1e3c72; font-weight: 500; font-size: 0.85em;">${jugador.nombre || '-'}</td>
+                            <td style="padding: 7px 10px; color: #666; font-size: 0.8em;">${jugador.posicion || '-'}</td>
+                            <td style="padding: 7px 10px; color: #666; font-size: 0.8em;">${jugador.club || '-'}</td>
+                            <td style="padding: 7px 10px; color: #666; font-size: 0.8em;">${jugador.edad ? `${jugador.edad} ${lang === 'en' ? 'yrs' : 'años'}` : '-'}</td>
+                        </tr>
+        `;
+    });
+    
+    // Agregar director técnico separado al final
+    if (directorTecnico) {
+        jugadoresHtml += `
+                        <tr style="background: #fff3cd; border-bottom: 1px solid #f0f0f0;">
+                            <td style="padding: 7px 10px; font-weight: 600; color: #856404; font-size: 0.85em;">👔</td>
+                            <td style="padding: 7px 10px; color: #856404; font-weight: 600; font-size: 0.85em;">${directorTecnico}</td>
+                            <td style="padding: 7px 10px; color: #856404; font-size: 0.8em;">${t('directorTecnico')}</td>
+                            <td style="padding: 7px 10px; color: #856404; font-size: 0.8em;">-</td>
+                            <td style="padding: 7px 10px; color: #856404; font-size: 0.8em;">${pais.edadDT ? `${pais.edadDT} ${lang === 'en' ? 'yrs' : 'años'}` : '-'}</td>
+                        </tr>
+        `;
+    }
+    
+    jugadoresHtml += `
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    return jugadoresHtml;
+})() : ''}
+        
+        <div style="margin-bottom: 25px;">
+            <h3 style="color: #1e3c72; margin-bottom: 12px; font-size: 1.2em; display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.2em;">🏆</span> ${t('historialMundial')}
+            </h3>
+            ${pais.historial.resumen ? `<p style="background: #e3f2fd; padding: 10px 12px; border-radius: 6px; margin-bottom: 12px; color: #475569; font-size: 0.9em; line-height: 1.5; border-left: 3px solid #2196f3;">${pais.historial.resumen}</p>` : ''}
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+                <div style="background: white; padding: 12px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
+                    <h4 style="color: #2a5298; margin-bottom: 10px; font-size: 0.95em; font-weight: 600; border-bottom: 1px solid #e3f2fd; padding-bottom: 6px;">${lang === 'en' ? 'General' : 'General'}</h4>
+                    <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('participaciones')}:</strong> <span style="color: #1e3c72; font-weight: 600;">${pais.historial.participaciones}</span></p>
+                    <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('mejorResultado')}:</strong> <span style="color: #1e3c72; font-weight: 600; text-align: right; flex: 1; margin-left: 8px; font-size: 0.8em;">${pais.historial.mejorResultado}</span></p>
+                    <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('ultimaParticipacion')}:</strong> <span style="color: #1e3c72; font-weight: 600;">${pais.historial.ultimaParticipacion}</span></p>
+                    <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('titulos')}:</strong> <span style="color: #1e3c72; font-weight: 600;">${pais.historial.titulos}</span></p>
+                </div>
+                <div style="background: white; padding: 12px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
+                    <h4 style="color: #2a5298; margin-bottom: 10px; font-size: 0.95em; font-weight: 600; border-bottom: 1px solid #e3f2fd; padding-bottom: 6px;">${lang === 'en' ? 'Matches' : 'Partidos'}</h4>
+                    <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('partidosJugados')}:</strong> <span style="color: #1e3c72; font-weight: 600;">${pais.historial.partidosJugados}</span></p>
+                    <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('victorias')}:</strong> <span style="color: #4caf50; font-weight: 600;">${pais.historial.victorias}</span></p>
+                    <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('empates')}:</strong> <span style="color: #ff9800; font-weight: 600;">${pais.historial.empates}</span></p>
+                    <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('derrotas')}:</strong> <span style="color: #f44336; font-weight: 600;">${pais.historial.derrotas}</span></p>
+                </div>
+                <div style="background: white; padding: 12px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
+                    <h4 style="color: #2a5298; margin-bottom: 10px; font-size: 0.95em; font-weight: 600; border-bottom: 1px solid #e3f2fd; padding-bottom: 6px;">${lang === 'en' ? 'Goals' : 'Goles'}</h4>
+                    <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('golesAFavor')}:</strong> <span style="color: #4caf50; font-weight: 600;">${pais.historial.golesAFavor}</span></p>
+                    <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('golesEnContra')}:</strong> <span style="color: #f44336; font-weight: 600;">${pais.historial.golesEnContra}</span></p>
+                    <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${lang === 'en' ? 'Goal Difference' : 'Diferencia'}:</strong> <span style="color: ${pais.historial.golesAFavor - pais.historial.golesEnContra >= 0 ? '#4caf50' : '#f44336'}; font-weight: 600;">${pais.historial.golesAFavor - pais.historial.golesEnContra > 0 ? '+' : ''}${pais.historial.golesAFavor - pais.historial.golesEnContra}</span></p>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    console.log('HTML generado:', html.substring(0, 500));
+    console.log('Body element:', body);
+    console.log('Modal element:', modal);
+    
+    if (!body) {
+        console.error('Body no encontrado!');
+        return;
+    }
+    
+    body.innerHTML = html;
+    modal.style.display = 'flex';
+    console.log('Modal mostrado, display:', modal.style.display);
+    console.log('Body innerHTML length:', body.innerHTML.length);
+    
+    // Cerrar modal
+    document.getElementById('modal-pais-close').onclick = () => {
         modal.style.display = 'none';
     };
     
@@ -1647,13 +2235,94 @@ function crearMatchCard(fase, index, partido) {
     const disabledAttr = (yaJugado || !puedeModificar) ? 'disabled readonly' : '';
     const readonlyClass = (yaJugado || !puedeModificar) ? 'partido-ya-jugado' : '';
     
+    // Obtener banderas para eliminatorias
+    // Si el equipo es un playoff, obtener la selección del grupo correspondiente
+    let banderaLocal = '';
+    let banderaVisitante = '';
+    
+    // Para el equipo local
+    if (!esPorDefinirLocal && partido.local?.grupo && partido.local?.datos && partido.local.datos.indice !== undefined) {
+        const grupoIndex = GRUPOS_MUNDIAL_2026.findIndex(g => g.nombre === partido.local.grupo);
+        if (grupoIndex !== -1) {
+            const grupo = GRUPOS_MUNDIAL_2026[grupoIndex];
+            const equipoIndex = partido.local.datos.indice;
+            if (equipoIndex !== undefined && grupo.equipos && grupo.equipos[equipoIndex] !== undefined) {
+                const equipoOriginal = grupo.equipos[equipoIndex];
+                if (typeof PLAYOFFS_OPCIONES !== 'undefined' && PLAYOFFS_OPCIONES[equipoOriginal]) {
+                    // Es un playoff
+                    const seleccion = resultados[grupoIndex]?.playoffSelecciones?.[equipoIndex] || '';
+                    if (seleccion) {
+                        banderaLocal = obtenerBanderaPais(seleccion);
+                    } else {
+                        // Es un playoff sin seleccionar, mostrar rectángulo blanco
+                        banderaLocal = null; // Marcador especial
+                    }
+                } else {
+                    // No es un playoff, obtener bandera del equipo original (siempre en español)
+                    banderaLocal = obtenerBanderaPais(equipoOriginal);
+                }
+            } else {
+                // Fallback: intentar obtener bandera del nombre (puede estar traducido)
+                banderaLocal = obtenerBanderaPais(equipoLocalNombre);
+            }
+        } else {
+            // Fallback: intentar obtener bandera del nombre
+            banderaLocal = obtenerBanderaPais(equipoLocalNombre);
+        }
+    } else if (!esPorDefinirLocal) {
+        // Fallback: intentar obtener bandera del nombre
+        banderaLocal = obtenerBanderaPais(equipoLocalNombre);
+    }
+    
+    // Para el equipo visitante
+    if (!esPorDefinirVisitante && partido.visitante?.grupo && partido.visitante?.datos && partido.visitante.datos.indice !== undefined) {
+        const grupoIndex = GRUPOS_MUNDIAL_2026.findIndex(g => g.nombre === partido.visitante.grupo);
+        if (grupoIndex !== -1) {
+            const grupo = GRUPOS_MUNDIAL_2026[grupoIndex];
+            const equipoIndex = partido.visitante.datos.indice;
+            if (equipoIndex !== undefined && grupo.equipos && grupo.equipos[equipoIndex] !== undefined) {
+                const equipoOriginal = grupo.equipos[equipoIndex];
+                if (typeof PLAYOFFS_OPCIONES !== 'undefined' && PLAYOFFS_OPCIONES[equipoOriginal]) {
+                    // Es un playoff
+                    const seleccion = resultados[grupoIndex]?.playoffSelecciones?.[equipoIndex] || '';
+                    if (seleccion) {
+                        banderaVisitante = obtenerBanderaPais(seleccion);
+                    } else {
+                        // Es un playoff sin seleccionar, mostrar rectángulo blanco
+                        banderaVisitante = null; // Marcador especial
+                    }
+                } else {
+                    // No es un playoff, obtener bandera del equipo original (siempre en español)
+                    banderaVisitante = obtenerBanderaPais(equipoOriginal);
+                }
+            } else {
+                // Fallback: intentar obtener bandera del nombre
+                banderaVisitante = obtenerBanderaPais(equipoVisitanteNombre);
+            }
+        } else {
+            // Fallback: intentar obtener bandera del nombre
+            banderaVisitante = obtenerBanderaPais(equipoVisitanteNombre);
+        }
+    } else if (!esPorDefinirVisitante) {
+        // Fallback: intentar obtener bandera del nombre
+        banderaVisitante = obtenerBanderaPais(equipoVisitanteNombre);
+    }
+    
+    const banderaLocalHtml = banderaLocal === null 
+        ? `<div style="width: 20px; height: 15px; border: 1px solid rgba(255,255,255,0.3); border-radius: 2px; display: inline-block; background: white; flex-shrink: 0;"></div>`
+        : (banderaLocal ? `<img src="${banderaLocal}" alt="${equipoLocalNombre}" style="width: 20px; height: 15px; vertical-align: middle; border: 1px solid rgba(255,255,255,0.3); border-radius: 2px; flex-shrink: 0;">` : '');
+    const banderaVisitanteHtml = banderaVisitante === null 
+        ? `<div style="width: 20px; height: 15px; border: 1px solid rgba(255,255,255,0.3); border-radius: 2px; display: inline-block; background: white; flex-shrink: 0;"></div>`
+        : (banderaVisitante ? `<img src="${banderaVisitante}" alt="${equipoVisitanteNombre}" style="width: 20px; height: 15px; vertical-align: middle; border: 1px solid rgba(255,255,255,0.3); border-radius: 2px; flex-shrink: 0;">` : '');
+    
     matchDiv.innerHTML = `
-        <div class="bracket-team ${ganadorLocal ? 'ganador' : ''} ${esPorDefinirLocal ? 'por-definir' : ''} ${readonlyClass}">
-            <div class="bracket-team-info">
+        <div class="bracket-team ${ganadorLocal ? 'ganador' : ''} ${esPorDefinirLocal ? 'por-definir' : ''} ${readonlyClass}" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+            <div class="bandera-local" style="flex-shrink: 0;">${banderaLocalHtml}</div>
+            <div class="bracket-team-info" style="flex: 1; text-align: left;">
                 <span class="bracket-team-nombre">${equipoLocalNombre}</span>
                 ${localInfo ? `<span class="bracket-team-posicion">${localInfo}</span>` : ''}
             </div>
-            <div class="bracket-resultado">
+            <div class="bracket-resultado" style="flex-shrink: 0;">
                 <input type="number" min="0" max="20" 
                        value="${golesLocalStr}" 
                        data-eliminatoria="${fase}" 
@@ -1664,12 +2333,13 @@ function crearMatchCard(fase, index, partido) {
                        ${disabledAttr}>
             </div>
         </div>
-        <div class="bracket-team ${ganadorVisitante ? 'ganador' : ''} ${esPorDefinirVisitante ? 'por-definir' : ''} ${readonlyClass}">
-            <div class="bracket-team-info">
+        <div class="bracket-team ${ganadorVisitante ? 'ganador' : ''} ${esPorDefinirVisitante ? 'por-definir' : ''} ${readonlyClass}" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+            <div class="bandera-visitante" style="flex-shrink: 0;">${banderaVisitanteHtml}</div>
+            <div class="bracket-team-info" style="flex: 1; text-align: left;">
                 <span class="bracket-team-nombre">${equipoVisitanteNombre}</span>
                 ${visitanteInfo ? `<span class="bracket-team-posicion">${visitanteInfo}</span>` : ''}
             </div>
-            <div class="bracket-resultado">
+            <div class="bracket-resultado" style="flex-shrink: 0;">
                 <input type="number" min="0" max="20" 
                        value="${golesVisitanteStr}" 
                        data-eliminatoria="${fase}" 

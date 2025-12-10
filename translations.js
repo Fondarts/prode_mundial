@@ -8,7 +8,7 @@ const translations = {
         // Tabs
         grupos: "Grupos",
         eliminatorias: "Eliminatorias",
-        torneo: "Torneo",
+        torneo: "Mis Torneos",
         informacion: "Información",
         
         // Buttons
@@ -157,6 +157,29 @@ const translations = {
         caracteristicas: "Características:",
         direccion: "Dirección:",
         partidosProgramados: "Partidos Programados",
+        
+        // Países - Información
+        informacionPais: "Información del País",
+        camiseta: "Camiseta",
+        camisetaPrincipal: "Principal",
+        camisetaAlternativa: "Alternativa",
+        jugadores: "Jugadores",
+        historialMundial: "Historial en Copas del Mundo",
+        participaciones: "Participaciones",
+        mejorResultado: "Mejor Resultado",
+        ultimaParticipacion: "Última Participación",
+        titulos: "Títulos",
+        partidosJugados: "Partidos Jugados",
+        victorias: "Victorias",
+        empates: "Empates",
+        derrotas: "Derrotas",
+        golesAFavor: "Goles a Favor",
+        golesEnContra: "Goles en Contra",
+        posicion: "Posición",
+        numero: "Número",
+        club: "Club",
+        edad: "Edad",
+        directorTecnico: "Director Técnico",
         
         // Ciudades - Descripciones
         ciudadTorontoDesc: "Toronto es la ciudad más grande de Canadá y capital de la provincia de Ontario. Es conocida por su diversidad cultural, su arquitectura moderna y su vibrante escena artística.",
@@ -490,7 +513,7 @@ const translations = {
         // Tabs
         grupos: "Groups",
         eliminatorias: "Knockout Stage",
-        torneo: "Tournament",
+        torneo: "My Tournaments",
         informacion: "Information",
         
         // Buttons
@@ -632,6 +655,29 @@ const translations = {
         caracteristicas: "Features:",
         direccion: "Address:",
         partidosProgramados: "Scheduled Matches",
+        
+        // Países - Información
+        informacionPais: "Country Information",
+        camiseta: "Jersey",
+        camisetaPrincipal: "Home",
+        camisetaAlternativa: "Away",
+        jugadores: "Players",
+        historialMundial: "World Cup History",
+        participaciones: "Participations",
+        mejorResultado: "Best Result",
+        ultimaParticipacion: "Last Participation",
+        titulos: "Titles",
+        partidosJugados: "Matches Played",
+        victorias: "Wins",
+        empates: "Draws",
+        derrotas: "Losses",
+        golesAFavor: "Goals For",
+        golesEnContra: "Goals Against",
+        posicion: "Position",
+        numero: "Number",
+        club: "Club",
+        edad: "Age",
+        directorTecnico: "Coach",
         
         // Ciudades - Descripciones
         ciudadTorontoDesc: "Toronto is the largest city in Canada and the capital of the province of Ontario. It is known for its cultural diversity, modern architecture, and vibrant art scene.",
