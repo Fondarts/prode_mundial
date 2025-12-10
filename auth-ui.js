@@ -25,31 +25,31 @@ function renderizarEstadoAuth() {
                         ⚙️
                     </button>
                     <div id="menu-usuario" class="menu-usuario">
-                        <button id="borrar-todo-btn" class="menu-item menu-item-danger">🗑️ Borrar Todo</button>
+                        <button id="borrar-todo-btn" class="menu-item menu-item-danger">🗑️ ${typeof t === 'function' ? t('borrarTodo') : 'Borrar Todo'}</button>
                         <div class="menu-separador"></div>
-                        <button id="exportar-predicciones-btn" class="menu-item">📥 Exportar Predicciones</button>
-                        <button id="importar-predicciones-btn" class="menu-item">📤 Importar Predicciones</button>
+                        <button id="exportar-predicciones-btn" class="menu-item">📥 ${typeof t === 'function' ? t('exportarPredicciones') : 'Exportar Predicciones'}</button>
+                        <button id="importar-predicciones-btn" class="menu-item">📤 ${typeof t === 'function' ? t('importarPredicciones') : 'Importar Predicciones'}</button>
                         <div class="menu-separador"></div>
-                        <button id="actualizar-resultados-menu-btn" class="menu-item">🔄 Actualizar Resultados</button>
+                        <button id="actualizar-resultados-menu-btn" class="menu-item">🔄 ${typeof t === 'function' ? t('actualizarResultados') : 'Actualizar Resultados'}</button>
                         <label class="menu-item-toggle">
                             <input type="checkbox" id="auto-update-menu-checkbox" ${autoUpdateActivo ? 'checked' : ''}>
-                            <span>⚡ Actualización Automática</span>
+                            <span>⚡ ${typeof t === 'function' ? t('actualizacionAutomatica') : 'Actualización Automática'}</span>
                         </label>
                         <div class="menu-separador"></div>
                         <label class="menu-item-toggle">
                             <input type="checkbox" id="supabase-toggle-checkbox" ${localStorage.getItem('mundial2026_supabase_desconectado') === 'true' ? '' : 'checked'}>
-                            <span>${localStorage.getItem('mundial2026_supabase_desconectado') === 'true' ? '🔴 Supabase Desconectado' : '🟢 Supabase Conectado'}</span>
+                            <span>${localStorage.getItem('mundial2026_supabase_desconectado') === 'true' ? `🔴 ${typeof t === 'function' ? t('supabaseDesconectado') : 'Supabase Desconectado'}` : `🟢 ${typeof t === 'function' ? t('supabaseConectado') : 'Supabase Conectado'}`}</span>
                         </label>
                         <div class="menu-separador"></div>
                         <div class="menu-item-submenu">
-                            <span class="menu-item-label">🌐 Idioma</span>
+                            <span class="menu-item-label">🌐 ${typeof t === 'function' ? t('idioma') : 'Idioma'}</span>
                             <div class="menu-item-idiomas">
-                                <button class="menu-item-idioma ${localStorage.getItem('idioma') === 'es' || !localStorage.getItem('idioma') ? 'activo' : ''}" data-idioma="es">Español</button>
-                                <button class="menu-item-idioma ${localStorage.getItem('idioma') === 'en' ? 'activo' : ''}" data-idioma="en">English</button>
+                                <button class="menu-item-idioma ${localStorage.getItem('idioma') === 'es' || !localStorage.getItem('idioma') ? 'activo' : ''}" data-idioma="es">${typeof t === 'function' ? t('español') : 'Español'}</button>
+                                <button class="menu-item-idioma ${localStorage.getItem('idioma') === 'en' ? 'activo' : ''}" data-idioma="en">${typeof t === 'function' ? t('english') : 'English'}</button>
                             </div>
                         </div>
                         <div class="menu-separador"></div>
-                        <button id="cerrar-sesion-btn" class="menu-item menu-item-danger">🚪 Cerrar Sesión</button>
+                        <button id="cerrar-sesion-btn" class="menu-item menu-item-danger">🚪 ${typeof t === 'function' ? t('cerrarSesion') : 'Cerrar Sesión'}</button>
                     </div>
                 </div>
             </div>
@@ -74,7 +74,8 @@ function renderizarEstadoAuth() {
         // Borrar todo
         document.getElementById('borrar-todo-btn')?.addEventListener('click', () => {
             menu.classList.remove('menu-usuario-abierto');
-            if (confirm('¿Estás seguro de que quieres borrar todas las predicciones? Esta acción no se puede deshacer.')) {
+            const mensajeConfirmacion = typeof t === 'function' ? t('confirmarBorrarTodo') : '¿Estás seguro de que quieres borrar todas las predicciones? Esta acción no se puede deshacer.';
+            if (confirm(mensajeConfirmacion)) {
                 if (typeof resultados !== 'undefined') {
                     // Borrar resultados y partidos jugados
                     localStorage.removeItem('mundial2026_resultados');

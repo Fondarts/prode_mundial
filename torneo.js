@@ -790,9 +790,9 @@ async function renderizarTorneo() {
                 <thead>
                     <tr>
                         <th>Pos</th>
-                        <th>Nombre</th>
-                        <th>Puntos Totales</th>
-                        <th>Torneos</th>
+                        <th>${typeof t === 'function' ? t('nombre') : 'Nombre'}</th>
+                        <th>${typeof t === 'function' ? t('puntosTotales') : 'Puntos Totales'}</th>
+                        <th>${typeof t === 'function' ? t('torneos') : 'Torneos'}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1109,6 +1109,7 @@ function renderizarTablaPosicionesSoloLectura(grupo, grupoIndex, prediccionesGru
 
 // Función para renderizar partidos en solo lectura con predicciones y resultados reales
 function renderizarPartidosSoloLectura(grupo, grupoIndex, prediccionesGrupo, resultadosGrupo) {
+    const t = typeof window.t === 'function' ? window.t : (key) => key;
     return grupo.partidos.map((partido, partidoIndex) => {
         const prediccion = prediccionesGrupo[partidoIndex];
         const resultadoReal = resultadosGrupo[partidoIndex];
@@ -1184,7 +1185,7 @@ function renderizarPartidosSoloLectura(grupo, grupoIndex, prediccionesGrupo, res
                 </div>
                 <div class="resultado-comparacion">
                     <div class="resultado-prediccion">
-                        <span class="resultado-label">Tu predicción</span>
+                        <span class="resultado-label">${t('tuPrediccion')}</span>
                         <div class="resultado-input-solo-lectura">
                             <input type="text" value="${predGolesLocal}" readonly class="input-solo-lectura input-prediccion">
                             <span class="separador">-</span>
@@ -1202,7 +1203,7 @@ function renderizarPartidosSoloLectura(grupo, grupoIndex, prediccionesGrupo, res
                     </div>
                     ` : `
                     <div class="resultado-real">
-                        <span class="resultado-label resultado-pendiente">Pendiente</span>
+                        <span class="resultado-label resultado-pendiente">${t('pendiente')}</span>
                     </div>
                     `}
                 </div>
@@ -1860,11 +1861,17 @@ async function mostrarDialogoEnviarPredicciones() {
             return;
         }
         
+        // Obtener nombre del torneo (reutilizar la variable torneo ya obtenida arriba o buscar en torneos locales)
+        const nombreTorneo = (torneo?.nombre) || (torneos[codigoLimpio]?.nombre) || codigoLimpio;
+        
         const esActualizacion = resultado && resultado.mensaje && resultado.mensaje.includes('actualizada');
-        const titulo = esActualizacion ? '¡Predicción Actualizada!' : '¡Predicciones Enviadas!';
+        const t = typeof window.t === 'function' ? window.t : (key) => key;
+        const titulo = esActualizacion 
+            ? (typeof t === 'function' ? t('prediccionActualizadaTitulo') : '¡Predicción Actualizada!')
+            : (typeof t === 'function' ? t('prediccionesEnviadasTitulo') : '¡Predicciones Enviadas!');
         let mensaje = esActualizacion 
-            ? `Tu predicción ha sido actualizada correctamente en el torneo ${codigoLimpio}`
-            : `Te has unido al torneo ${codigoLimpio} como "${miNombre}"`;
+            ? (typeof t === 'function' ? t('prediccionActualizadaMensaje').replace('{nombre}', nombreTorneo) : `Tu predicción ha sido actualizada correctamente en el torneo "${nombreTorneo}"`)
+            : (typeof t === 'function' ? t('teHasUnidoTorneo').replace('{nombre}', nombreTorneo).replace('{miNombre}', miNombre) : `Te has unido al torneo "${nombreTorneo}" como "${miNombre}"`);
         
         // Si hubo error en Supabase, agregarlo al mensaje
         if (resultado && resultado.errorSupabase) {
@@ -2047,7 +2054,7 @@ async function mostrarDialogoEnviarPredicciones() {
         if (esPrivado) {
             mensajeTorneo = `${typeof t === 'function' ? t('torneoPrivadoCreado') : '¡Torneo privado creado exitosamente!'}\n\n${typeof t === 'function' ? t('contraseñaTorneo') : 'Contraseña del torneo'}: ${clave}\n\n${typeof t === 'function' ? t('compartirContraseña') : 'Comparte esta contraseña con tus amigos para que se unan.'}`;
         } else {
-            mensajeTorneo = `${typeof t === 'function' ? t('torneoCreadoExitosamente') : '¡Torneo creado exitosamente!'}\n\n${typeof t === 'function' ? t('codigoTorneo') : 'Código del torneo'}: ${codigo}\n\n${typeof t === 'function' ? t('compartirCodigo') : 'Comparte este código con tus amigos para que se unan.'}`;
+            mensajeTorneo = `${typeof t === 'function' ? t('torneoCreadoExitosamente') : '¡Torneo creado exitosamente!'}\n\n${typeof t === 'function' ? t('torneoAbiertoMensaje') : 'Cualquiera puede unirse a este torneo desde la lista de torneos abiertos.'}`;
         }
         
         // Si hubo error en Supabase, agregarlo al mensaje

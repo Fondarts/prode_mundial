@@ -42,7 +42,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
                 <div>
                     <h1 data-i18n="title">⚽ Fixture Interactivo Mundial 2026</h1>
-                    <p class="subtitle" data-i18n="subtitle">Predice los resultados y visualiza los cruces</p>
+                    <p class="subtitle" data-i18n="subtitle">Predice los resultados y compite contra tus amigos</p>
                 </div>
                 <div id="auth-status" class="auth-status">
                     <!-- Se llenará dinámicamente -->
@@ -79,8 +79,8 @@
         <!-- Tab Torneo -->
         <div id="torneo" class="tab-content">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                <h2 style="margin: 0;">🏆 Torneo de Predicciones</h2>
-                <button id="btn-reglas-torneo" class="btn-reglas-torneo" style="padding: 10px 20px; background: #1e3c72; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95em; font-weight: 600; transition: background 0.3s;">
+                <h2 style="margin: 0;" data-i18n="torneoDePredicciones">🏆 Torneo de Predicciones</h2>
+                <button id="btn-reglas-torneo" class="btn-reglas-torneo" style="padding: 10px 20px; background: #1e3c72; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95em; font-weight: 600; transition: background 0.3s;" data-i18n="reglas">
                     📋 Reglas
                 </button>
             </div>
@@ -94,33 +94,33 @@
             <h2>ℹ️ Información</h2>
             <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
                 <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
-                    <h3 style="color: #1e3c72; margin-bottom: 15px;">📋 Sobre el Mundial 2026</h3>
-                    <p style="line-height: 1.6; color: #475569; margin-bottom: 10px;">
+                    <h3 style="color: #1e3c72; margin-bottom: 15px;" data-i18n="sobreElMundial">📋 Sobre el Mundial 2026</h3>
+                    <p style="line-height: 1.6; color: #475569; margin-bottom: 10px;" data-i18n="sobreElMundialDesc1">
                         El <strong>Copa Mundial de la FIFA 2026™</strong> será la 23.ª edición de la Copa Mundial de Fútbol. 
                         Se celebrará en <strong>Estados Unidos, Canadá y México</strong>, siendo la primera vez que tres países 
                         organizan conjuntamente el torneo.
                     </p>
-                    <p style="line-height: 1.6; color: #475569; margin-bottom: 10px;">
+                    <p style="line-height: 1.6; color: #475569; margin-bottom: 10px;" data-i18n="sobreElMundialDesc2">
                         Esta edición será histórica al contar con <strong>48 equipos</strong> (ampliado desde 32), 
                         lo que significa más partidos, más emoción y más oportunidades para las selecciones de todo el mundo.
                     </p>
-                    <p style="line-height: 1.6; color: #475569;">
+                    <p style="line-height: 1.6; color: #475569;" data-i18n="sobreElMundialDesc3">
                         El balón oficial se llama <strong>TRIONDA</strong>, un nombre que rinde homenaje a la colaboración 
                         entre los tres países anfitriones: Canadá, México y Estados Unidos.
                     </p>
                 </div>
 
                 <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
-                    <h3 style="color: #1e3c72; margin-bottom: 15px;">🌎 Países y Ciudades Anfitrionas</h3>
+                    <h3 style="color: #1e3c72; margin-bottom: 15px;" data-i18n="paisesCiudades">🌎 Países y Ciudades Anfitrionas</h3>
                     <div style="margin-bottom: 15px;">
-                        <p style="font-weight: 600; color: #1e3c72; margin-bottom: 8px;">🇨🇦 Canadá:</p>
+                        <p style="font-weight: 600; color: #1e3c72; margin-bottom: 8px;">🇨🇦 <span data-i18n="canada">Canadá</span>:</p>
                         <p style="line-height: 1.6; color: #475569; margin-left: 20px;">
                             <a href="#" class="ciudad-link" data-ciudad="toronto" style="color: #2196f3; text-decoration: none; cursor: pointer; margin-right: 10px;">Toronto</a>
                             <a href="#" class="ciudad-link" data-ciudad="vancouver" style="color: #2196f3; text-decoration: none; cursor: pointer;">Vancouver</a>
                         </p>
                     </div>
                     <div style="margin-bottom: 15px;">
-                        <p style="font-weight: 600; color: #1e3c72; margin-bottom: 8px;">🇲🇽 México:</p>
+                        <p style="font-weight: 600; color: #1e3c72; margin-bottom: 8px;">🇲🇽 <span data-i18n="mexico">México</span>:</p>
                         <p style="line-height: 1.6; color: #475569; margin-left: 20px;">
                             <a href="#" class="ciudad-link" data-ciudad="ciudad-de-mexico" style="color: #2196f3; text-decoration: none; cursor: pointer; margin-right: 10px;">Ciudad de México</a>
                             <a href="#" class="ciudad-link" data-ciudad="guadalajara" style="color: #2196f3; text-decoration: none; cursor: pointer; margin-right: 10px;">Guadalajara</a>
@@ -128,7 +128,7 @@
                         </p>
                     </div>
                     <div>
-                        <p style="font-weight: 600; color: #1e3c72; margin-bottom: 8px;">🇺🇸 Estados Unidos:</p>
+                        <p style="font-weight: 600; color: #1e3c72; margin-bottom: 8px;">🇺🇸 <span data-i18n="estadosUnidos">Estados Unidos</span>:</p>
                         <p style="line-height: 1.6; color: #475569; margin-left: 20px;">
                             <a href="#" class="ciudad-link" data-ciudad="atlanta" style="color: #2196f3; text-decoration: none; cursor: pointer; margin-right: 10px;">Atlanta</a>
                             <a href="#" class="ciudad-link" data-ciudad="boston" style="color: #2196f3; text-decoration: none; cursor: pointer; margin-right: 10px;">Boston</a>
@@ -146,38 +146,38 @@
                 </div>
 
                 <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
-                    <h3 style="color: #1e3c72; margin-bottom: 15px;">⚽ Formato del Torneo</h3>
-                    <p style="line-height: 1.6; color: #475569; margin-bottom: 15px;">
+                    <h3 style="color: #1e3c72; margin-bottom: 15px;" data-i18n="formatoTorneo">⚽ Formato del Torneo</h3>
+                    <p style="line-height: 1.6; color: #475569; margin-bottom: 15px;" data-i18n="formatoTorneoDesc">
                         Con <strong>48 equipos participantes</strong>, el formato del torneo se distribuye de la siguiente manera:
                     </p>
                     <ul style="line-height: 1.8; color: #475569; padding-left: 20px;">
-                        <li><strong>AFC (Asia):</strong> 8 plazas directas + 1 en el torneo de repesca</li>
-                        <li><strong>CAF (África):</strong> 9 plazas directas + 1 en el torneo de repesca</li>
-                        <li><strong>Concacaf (Norteamérica, Centroamérica y Caribe):</strong> 6 plazas directas (incluyendo a los 3 anfitriones) + 2 en el torneo de repesca</li>
-                        <li><strong>CONMEBOL (Sudamérica):</strong> 6 plazas directas + 1 en el torneo de repesca</li>
-                        <li><strong>OFC (Oceanía):</strong> 1 plaza directa + 1 en el torneo de repesca</li>
-                        <li><strong>UEFA (Europa):</strong> 16 plazas directas</li>
+                        <li><strong data-i18n="afcAsia">AFC (Asia):</strong> <span data-i18n="afcDesc">8 plazas directas + 1 en el torneo de repesca</span></li>
+                        <li><strong data-i18n="cafAfrica">CAF (África):</strong> <span data-i18n="cafDesc">9 plazas directas + 1 en el torneo de repesca</span></li>
+                        <li><strong data-i18n="concacaf">Concacaf (Norteamérica, Centroamérica y Caribe):</strong> <span data-i18n="concacafDesc">6 plazas directas (incluyendo a los 3 anfitriones) + 2 en el torneo de repesca</span></li>
+                        <li><strong data-i18n="conmebol">CONMEBOL (Sudamérica):</strong> <span data-i18n="conmebolDesc">6 plazas directas + 1 en el torneo de repesca</span></li>
+                        <li><strong data-i18n="ofc">OFC (Oceanía):</strong> <span data-i18n="ofcDesc">1 plaza directa + 1 en el torneo de repesca</span></li>
+                        <li><strong data-i18n="uefa">UEFA (Europa):</strong> <span data-i18n="uefaDesc">16 plazas directas</span></li>
                     </ul>
                 </div>
 
                 <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
-                    <h3 style="color: #1e3c72; margin-bottom: 15px;">📅 Fechas Importantes</h3>
+                    <h3 style="color: #1e3c72; margin-bottom: 15px;" data-i18n="fechasImportantes">📅 Fechas Importantes</h3>
                     <ul style="line-height: 1.8; color: #475569; padding-left: 20px;">
-                        <li><strong>Sorteo Final:</strong> 5 de diciembre de 2025 en el Kennedy Center de Washington D.C.</li>
-                        <li><strong>Partido Inaugural:</strong> 11 de junio de 2026 en el Estadio Azteca de Ciudad de México</li>
-                        <li><strong>Fase de Grupos:</strong> Desde el 11 de junio de 2026</li>
-                        <li><strong>Eliminatorias:</strong> Desde octavos de final</li>
-                        <li><strong>Final:</strong> 19 de julio de 2026 en Nueva York/Nueva Jersey</li>
+                        <li><strong data-i18n="sorteoFinal">Sorteo Final:</strong> <span data-i18n="sorteoFinalDesc">5 de diciembre de 2025 en el Kennedy Center de Washington D.C.</span></li>
+                        <li><strong data-i18n="partidoInaugural">Partido Inaugural:</strong> <span data-i18n="partidoInauguralDesc">11 de junio de 2026 en el Estadio Azteca de Ciudad de México</span></li>
+                        <li><strong data-i18n="faseGrupos">Fase de Grupos:</strong> <span data-i18n="faseGruposDesc">Desde el 11 de junio de 2026</span></li>
+                        <li><strong data-i18n="eliminatoriasDesde">Eliminatorias:</strong> <span data-i18n="eliminatoriasDesdeDesc">Desde octavos de final</span></li>
+                        <li><strong data-i18n="final">Final:</strong> <span data-i18n="finalDesc">19 de julio de 2026 en Nueva York/Nueva Jersey</span></li>
                     </ul>
                 </div>
 
                 <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
-                    <h3 style="color: #1e3c72; margin-bottom: 15px;">🎫 Entradas y Visados</h3>
+                    <h3 style="color: #1e3c72; margin-bottom: 15px;" data-i18n="entradasVisados">🎫 Entradas y Visados</h3>
                     <p style="line-height: 1.6; color: #475569; margin-bottom: 10px;">
-                        Puedes registrarte en <a href="https://www.fifa.com/tickets" target="_blank" rel="noopener noreferrer" style="color: #2196f3; text-decoration: none; font-weight: 500;">fifa.com/tickets</a> 
-                        para recibir información sobre la venta de entradas.
+                        <span data-i18n="entradasDesc1">Puedes registrarte en</span> <a href="https://www.fifa.com/tickets" target="_blank" rel="noopener noreferrer" style="color: #2196f3; text-decoration: none; font-weight: 500;">fifa.com/tickets</a> 
+                        <span data-i18n="entradasDesc2">para recibir información sobre la venta de entradas.</span>
                     </p>
-                    <p style="line-height: 1.6; color: #475569;">
+                    <p style="line-height: 1.6; color: #475569;" data-i18n="entradasDesc3">
                         Los aficionados con boletos podrán beneficiarse de <strong>citas prioritarias para tramitar el visado</strong> 
                         para Estados Unidos. Más información disponible en el sitio oficial de FIFA.
                     </p>
@@ -185,8 +185,8 @@
 
                 <div style="background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px; padding: 15px; margin-top: 20px;">
                     <p style="margin: 0; color: #856404; font-weight: 500;">
-                        📚 <strong>Más información:</strong> Para detalles oficiales y actualizaciones, visita 
-                        <a href="https://www.fifa.com/es/tournaments/mens/worldcup/canadamexicousa2026" target="_blank" rel="noopener noreferrer" style="color: #856404; text-decoration: underline;">el sitio oficial de la FIFA</a>.
+                        📚 <strong data-i18n="masInformacion">Más información:</strong> <span data-i18n="masInformacionDesc">Para detalles oficiales y actualizaciones, visita</span> 
+                        <a href="https://www.fifa.com/es/tournaments/mens/worldcup/canadamexicousa2026" target="_blank" rel="noopener noreferrer" style="color: #856404; text-decoration: underline;" data-i18n="elSitioOficial">el sitio oficial de la FIFA</a>.
                     </p>
                 </div>
             </div>
@@ -237,38 +237,38 @@
     <div id="modal-reglas-torneo-overlay" class="modal-overlay" style="display: none;">
         <div class="modal-container" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
-                <h3>📋 Reglas del Torneo</h3>
+                <h3 data-i18n="reglasTorneo">📋 Reglas del Torneo</h3>
                 <button class="modal-close" id="modal-reglas-torneo-close">&times;</button>
             </div>
             <div class="modal-body" id="modal-reglas-torneo-body">
                 <div style="line-height: 1.8; color: #475569;">
-                    <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.2em;">🎯 Sistema de Puntos</h3>
+                    <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.2em;" data-i18n="sistemaPuntosTitulo">🎯 Sistema de Puntos</h3>
                     <ul style="margin-bottom: 20px; padding-left: 20px;">
-                        <li style="margin-bottom: 10px;"><strong>Resultado exacto:</strong> 3 puntos (acertar el marcador completo)</li>
-                        <li style="margin-bottom: 10px;"><strong>Resultado acertado:</strong> 1 punto (acertar ganador/empate pero no el marcador exacto)</li>
-                        <li style="margin-bottom: 10px;"><strong>Sin acierto:</strong> 0 puntos</li>
+                        <li style="margin-bottom: 10px;"><strong data-i18n="resultadoExacto">Resultado exacto:</strong> <span data-i18n="resultadoExactoDesc">3 puntos (acertar el marcador completo)</span></li>
+                        <li style="margin-bottom: 10px;"><strong data-i18n="resultadoAcertado">Resultado acertado:</strong> <span data-i18n="resultadoAcertadoDesc">1 punto (acertar ganador/empate pero no el marcador exacto)</span></li>
+                        <li style="margin-bottom: 10px;"><strong data-i18n="resultadoErroneo">Sin acierto:</strong> <span data-i18n="sinAciertoDesc">0 puntos</span></li>
                     </ul>
 
-                    <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.2em;">✏️ Crear y Unirse a Torneos</h3>
+                    <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.2em;" data-i18n="crearUnirseTitulo">✏️ Crear y Unirse a Torneos</h3>
                     <ul style="margin-bottom: 20px; padding-left: 20px;">
-                        <li style="margin-bottom: 10px;">Crea tu propio torneo con amigos y comparte el código único con ellos</li>
-                        <li style="margin-bottom: 10px;">Cada participante puede unirse a múltiples torneos</li>
-                        <li style="margin-bottom: 10px;">Solo puedes tener una predicción por torneo</li>
+                        <li style="margin-bottom: 10px;" data-i18n="creaTorneoDesc">Crea tu propio torneo con amigos y comparte el código único con ellos</li>
+                        <li style="margin-bottom: 10px;" data-i18n="multiplesTorneosDesc">Cada participante puede unirse a múltiples torneos</li>
+                        <li style="margin-bottom: 10px;" data-i18n="unaPrediccionDesc">Solo puedes tener una predicción por torneo</li>
                     </ul>
 
-                    <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.2em;">📅 Modificación de Predicciones</h3>
+                    <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.2em;" data-i18n="modificacionTitulo">📅 Modificación de Predicciones</h3>
                     <ul style="margin-bottom: 20px; padding-left: 20px;">
-                        <li style="margin-bottom: 10px;">Las predicciones pueden modificarse hasta el <strong>7 de junio de 2026</strong> (inclusive)</li>
-                        <li style="margin-bottom: 10px;">Después de esa fecha, solo puedes hacer predicciones nuevas para partidos que aún no han comenzado pero no podrán ser modificadas</li>
-                        <li style="margin-bottom: 10px;">Una vez que un partido ha comenzado, su predicción queda bloqueada</li>
-                        <li style="margin-bottom: 10px;">Una vez terminada la fase de grupos se habilitarán las predicciones para la fase eliminatoria</li>
+                        <li style="margin-bottom: 10px;"><span data-i18n="modificablesHasta">Las predicciones pueden modificarse hasta el</span> <strong data-i18n="fechaLimite">7 de junio de 2026</strong> <span data-i18n="inclusive">(inclusive)</span></li>
+                        <li style="margin-bottom: 10px;" data-i18n="despuesFechaDesc">Después de esa fecha, solo puedes hacer predicciones nuevas para partidos que aún no han comenzado pero no podrán ser modificadas</li>
+                        <li style="margin-bottom: 10px;" data-i18n="partidoBloqueadoDesc">Una vez que un partido ha comenzado, su predicción queda bloqueada</li>
+                        <li style="margin-bottom: 10px;" data-i18n="faseEliminatoriaDesc">Una vez terminada la fase de grupos se habilitarán las predicciones para la fase eliminatoria</li>
                     </ul>
 
-                    <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.2em;">🏆 Clasificación</h3>
+                    <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.2em;" data-i18n="clasificacionTitulo">🏆 Clasificación</h3>
                     <ul style="margin-bottom: 20px; padding-left: 20px;">
-                        <li style="margin-bottom: 10px;">La clasificación se actualiza automáticamente según los resultados reales de los partidos</li>
-                        <li style="margin-bottom: 10px;">Se muestra tu posición, puntos totales, resultados exactos y acertados</li>
-                        <li style="margin-bottom: 10px;">La tabla global muestra la clasificación combinada de todos los torneos</li>
+                        <li style="margin-bottom: 10px;" data-i18n="clasificacionAutoDesc">La clasificación se actualiza automáticamente según los resultados reales de los partidos</li>
+                        <li style="margin-bottom: 10px;" data-i18n="muestraPosicionDesc">Se muestra tu posición, puntos totales, resultados exactos y acertados</li>
+                        <li style="margin-bottom: 10px;" data-i18n="tablaGlobalDesc">La tabla global muestra la clasificación combinada de todos los torneos</li>
                     </ul>
                 </div>
             </div>

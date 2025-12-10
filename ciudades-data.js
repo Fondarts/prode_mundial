@@ -409,8 +409,10 @@ function obtenerInfoCiudad(ciudadKey) {
 // Función para formatear fecha
 function formatearFecha(fechaStr) {
     const fecha = new Date(fechaStr + 'T00:00:00');
+    const lang = typeof getCurrentLanguage === 'function' ? getCurrentLanguage() : 'es';
+    const locale = lang === 'en' ? 'en-US' : 'es-ES';
     const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
-    return fecha.toLocaleDateString('es-ES', opciones);
+    return fecha.toLocaleDateString(locale, opciones);
 }
 
 

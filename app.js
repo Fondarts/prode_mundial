@@ -107,15 +107,35 @@ function renderizarGrupos() {
     
     container.innerHTML = '';
 
+    const t = typeof window.t === 'function' ? window.t : (key) => key;
+    
+    // Mapeo de nombres de grupos a traducciones
+    const grupoMap = {
+        'Grupo A': t('grupoA'),
+        'Grupo B': t('grupoB'),
+        'Grupo C': t('grupoC'),
+        'Grupo D': t('grupoD'),
+        'Grupo E': t('grupoE'),
+        'Grupo F': t('grupoF'),
+        'Grupo G': t('grupoG'),
+        'Grupo H': t('grupoH'),
+        'Grupo I': t('grupoI'),
+        'Grupo J': t('grupoJ'),
+        'Grupo K': t('grupoK'),
+        'Grupo L': t('grupoL')
+    };
+    
     GRUPOS_MUNDIAL_2026.forEach((grupo, grupoIndex) => {
         const grupoDiv = document.createElement('div');
         grupoDiv.className = 'grupo';
         
+        const nombreGrupoTraducido = grupoMap[grupo.nombre] || grupo.nombre;
+        
         grupoDiv.innerHTML = `
-            <h3>${grupo.nombre}</h3>
+            <h3>${nombreGrupoTraducido}</h3>
             ${renderizarTablaPosiciones(grupo, grupoIndex)}
             <div class="partidos">
-                <h4 style="margin-bottom: 10px; color: #666;">${typeof t === 'function' ? t('partidos') : 'Partidos'}</h4>
+                <h4 style="margin-bottom: 10px; color: #666;">${t('partidos')}</h4>
                 ${renderizarPartidos(grupo, grupoIndex)}
             </div>
         `;
@@ -148,22 +168,105 @@ function renderizarGrupos() {
     });
 }
 
+// Función para traducir nombres de países
+function traducirNombrePais(nombre) {
+    const t = typeof window.t === 'function' ? window.t : (key) => key;
+    
+    // Mapeo de nombres de países a claves de traducción
+    const paisMap = {
+        'México': 'mexico',
+        'Sudáfrica': 'sudafrica',
+        'Corea del Sur': 'coreaDelSur',
+        'Canadá': 'canada',
+        'Qatar': 'qatar',
+        'Suiza': 'suiza',
+        'Brasil': 'brasil',
+        'Marruecos': 'marruecos',
+        'Haití': 'haiti',
+        'Escocia': 'escocia',
+        'USA': 'usa',
+        'Paraguay': 'paraguay',
+        'Australia': 'australia',
+        'Alemania': 'alemania',
+        'Curaçao': 'curazao',
+        'C de Marfil': 'costaDeMarfil',
+        'Ecuador': 'ecuador',
+        'Holanda': 'holanda',
+        'Japón': 'japon',
+        'Túnez': 'tunez',
+        'Bélgica': 'belgica',
+        'Egipto': 'egipto',
+        'Irán': 'iran',
+        'N. Zelanda': 'nuevaZelanda',
+        'España': 'espana',
+        'Cabo Verde': 'caboVerde',
+        'Arabia Saudí': 'arabiaSaudi',
+        'Uruguay': 'uruguay',
+        'Francia': 'francia',
+        'Senegal': 'senegal',
+        'Noruega': 'noruega',
+        'Argentina': 'argentina',
+        'Argelia': 'argelia',
+        'Austria': 'austria',
+        'Jordania': 'jordania',
+        'Portugal': 'portugal',
+        'Colombia': 'colombia',
+        'Uzbekistán': 'uzbekistan',
+        'Inglaterra': 'inglaterra',
+        'Croacia': 'croacia',
+        'Ghana': 'ghana',
+        'Panamá': 'panama',
+        // Playoffs
+        'Rep. Checa': 'repCheca',
+        'Irlanda': 'irlanda',
+        'Dinamarca': 'dinamarca',
+        'Macedonia del Norte': 'macedoniaDelNorte',
+        'Gales': 'gales',
+        'Bosnia': 'bosnia',
+        'Italia': 'italia',
+        'Irlanda del Norte': 'irlandaDelNorte',
+        'Eslovaquia': 'eslovaquia',
+        'Kosovo': 'kosovo',
+        'Turquía': 'turquia',
+        'Rumania': 'rumania',
+        'Ucrania': 'ucrania',
+        'Suecia': 'suecia',
+        'Polonia': 'polonia',
+        'Albania': 'albania',
+        'Bolivia': 'bolivia',
+        'Surinam': 'surinam',
+        'Irak': 'irak',
+        'Nueva Caledonia': 'nuevaCaledonia',
+        'Jamaica': 'jamaica',
+        'RD Congo': 'rdCongo'
+    };
+    
+    const clave = paisMap[nombre];
+    if (clave) {
+        const traduccion = t(clave);
+        // Si la traducción es diferente a la clave, usar la traducción
+        return traduccion !== clave ? traduccion : nombre;
+    }
+    return nombre;
+}
+
 // Obtener nombre real del equipo (considerando selección de playoff)
 function obtenerNombreEquipo(grupo, grupoIndex, equipoIndex) {
     const equipo = grupo.equipos[equipoIndex];
     if (PLAYOFFS_OPCIONES[equipo]) {
         const seleccion = resultados[grupoIndex]?.playoffSelecciones?.[equipoIndex] || '';
-        return seleccion || equipo;
+        return seleccion ? traducirNombrePais(seleccion) : equipo;
     }
-    return equipo;
+    return traducirNombrePais(equipo);
 }
 
 // Renderizar tabla de posiciones
 function renderizarTablaPosiciones(grupo, grupoIndex) {
     const posiciones = calcularPosiciones(grupo, grupoIndex);
     
+    const t = typeof window.t === 'function' ? window.t : (key) => key;
     let html = '<table class="tabla-posiciones"><thead><tr>';
-    html += '<th>Pos</th><th>Equipo</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th>';
+    html += `<th>${t('pos')}</th><th>${t('equipo')}</th><th>${t('pj')}</th><th>${t('pg')}</th><th>${t('pe')}</th><th>${t('pp')}</th><th>${t('gf')}</th><th>${t('gc')}</th><th>${t('dg')}</th><th>${t('pts')}</th>`;
     html += '</tr></thead><tbody>';
     
     posiciones.forEach((pos, index) => {
@@ -284,19 +387,15 @@ function renderizarPartidos(grupo, grupoIndex) {
     const partidos = resultados[grupoIndex]?.partidos || [];
     
     return grupo.partidos.map((partido, partidoIndex) => {
-        // Si no hay resultado, usar "0" como valor por defecto
-        const resultado = partidos[partidoIndex] || { golesLocal: '0', golesVisitante: '0' };
-        // Si los valores están vacíos, usar "0" como valor por defecto
-        if (resultado.golesLocal === '' || resultado.golesLocal === null || resultado.golesLocal === undefined) {
-            resultado.golesLocal = '0';
-        }
-        if (resultado.golesVisitante === '' || resultado.golesVisitante === null || resultado.golesVisitante === undefined) {
-            resultado.golesVisitante = '0';
-        }
+        // Si no hay resultado, usar valores vacíos
+        const resultado = partidos[partidoIndex] || { golesLocal: '', golesVisitante: '' };
+        // Normalizar valores null/undefined a string vacío
+        const golesLocal = (resultado.golesLocal === null || resultado.golesLocal === undefined) ? '' : resultado.golesLocal;
+        const golesVisitante = (resultado.golesVisitante === null || resultado.golesVisitante === undefined) ? '' : resultado.golesVisitante;
         const yaJugado = typeof partidoYaJugado === 'function' ? partidoYaJugado(grupoIndex, partidoIndex) : false;
         
         // Verificar si tiene predicción existente
-        const tienePrediccion = resultado && (resultado.golesLocal !== '' || resultado.golesVisitante !== '');
+        const tienePrediccion = golesLocal !== '' || golesVisitante !== '';
         
         // Verificar si se puede modificar la predicción según las reglas de fecha
         const puedeModificar = typeof sePuedeModificarPrediccion === 'function' 
@@ -317,12 +416,18 @@ function renderizarPartidos(grupo, grupoIndex) {
             : { fecha: '', horario: '' };
         
         // Formatear fecha para mostrar
+        const t = typeof window.t === 'function' ? window.t : (key) => key;
         let fechaFormateada = '';
         let diaSemana = '';
         if (fechaHorario.fecha) {
             const fechaObj = new Date(fechaHorario.fecha + 'T00:00:00');
-            const dias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+            const lang = typeof getCurrentLanguage === 'function' ? getCurrentLanguage() : 'es';
+            const dias = lang === 'en' 
+                ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+                : ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            const meses = lang === 'en'
+                ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                : ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
             diaSemana = dias[fechaObj.getDay()];
             fechaFormateada = `${fechaObj.getDate()} ${meses[fechaObj.getMonth()]}`;
         }
@@ -337,19 +442,19 @@ function renderizarPartidos(grupo, grupoIndex) {
                     <span class="equipo equipo-local">${equipoLocal}</span>
                     <div class="resultado-input">
                         <input type="number" min="0" max="20" 
-                               value="${resultado.golesLocal}" 
+                               value="${golesLocal}" 
                                data-grupo="${grupoIndex}" 
                                data-partido="${partidoIndex}" 
                                data-tipo="local"
-                               placeholder="0"
+                               placeholder="-"
                                ${disabledAttr}>
                         <span class="separador">-</span>
                         <input type="number" min="0" max="20" 
-                               value="${resultado.golesVisitante}" 
+                               value="${golesVisitante}" 
                                data-grupo="${grupoIndex}" 
                                data-partido="${partidoIndex}" 
                                data-tipo="visitante"
-                               placeholder="0"
+                               placeholder="-"
                                ${disabledAttr}>
                     </div>
                     <span class="equipo equipo-visitante">${equipoVisitante}</span>
@@ -490,7 +595,16 @@ document.addEventListener('input', (e) => {
         }
         
         // Guardar el valor (incluso si es vacío, se guarda como string vacío)
-        resultados[grupoIndex].partidos[partidoIndex][tipo === 'local' ? 'golesLocal' : 'golesVisitante'] = e.target.value || '';
+        const valorIngresado = e.target.value || '';
+        resultados[grupoIndex].partidos[partidoIndex][tipo === 'local' ? 'golesLocal' : 'golesVisitante'] = valorIngresado;
+        
+        // Si se ingresó un valor y el otro campo está vacío, convertir el otro en "0"
+        const otroTipo = tipo === 'local' ? 'golesVisitante' : 'golesLocal';
+        const otroValor = resultados[grupoIndex].partidos[partidoIndex][otroTipo];
+        
+        if (valorIngresado !== '' && (otroValor === '' || otroValor === null || otroValor === undefined)) {
+            resultados[grupoIndex].partidos[partidoIndex][otroTipo] = '0';
+        }
         
         guardarResultados();
         renderizarGrupos();
@@ -618,6 +732,10 @@ function configurarBotonReglasTorneo() {
     
     // Abrir modal
     btnReglas.addEventListener('click', () => {
+        // Traducir el contenido del modal antes de mostrarlo
+        if (typeof translatePage === 'function') {
+            translatePage();
+        }
         modalOverlay.style.display = 'flex';
     });
     
@@ -762,12 +880,30 @@ function buscarPartidosPorFechaYCiudad(fecha, ciudadKey) {
                 if (fechaHorario.fecha === fecha || fechaHorario.fecha === fecha.split('T')[0]) {
                     const equipoLocal = grupo.equipos[partido.local];
                     const equipoVisitante = grupo.equipos[partido.visitante];
+                    
+                    // Traducir nombre del grupo
+                    const grupoMap = {
+                        'Grupo A': t('grupoA'),
+                        'Grupo B': t('grupoB'),
+                        'Grupo C': t('grupoC'),
+                        'Grupo D': t('grupoD'),
+                        'Grupo E': t('grupoE'),
+                        'Grupo F': t('grupoF'),
+                        'Grupo G': t('grupoG'),
+                        'Grupo H': t('grupoH'),
+                        'Grupo I': t('grupoI'),
+                        'Grupo J': t('grupoJ'),
+                        'Grupo K': t('grupoK'),
+                        'Grupo L': t('grupoL')
+                    };
+                    const grupoTraducido = grupoMap[grupo.nombre] || grupo.nombre;
+                    
                     partidosEncontrados.push({
-                        grupo: grupo.nombre,
-                        local: equipoLocal,
-                        visitante: equipoVisitante,
+                        grupo: grupoTraducido,
+                        local: traducirNombrePais(equipoLocal),
+                        visitante: traducirNombrePais(equipoVisitante),
                         horario: fechaHorario.horario,
-                        fase: 'Fase de Grupos'
+                        fase: t('faseGrupos')
                     });
                 }
             }
@@ -785,6 +921,40 @@ function mostrarInfoCiudad(ciudadKey) {
     const title = document.getElementById('modal-ciudad-title');
     const body = document.getElementById('modal-ciudad-body');
     
+    const t = typeof window.t === 'function' ? window.t : (key) => key;
+    
+    // Mapeo directo de claves de ciudad a claves de traducción
+    const ciudadTranslationMap = {
+        'toronto': 'Toronto',
+        'vancouver': 'Vancouver',
+        'ciudad-de-mexico': 'CiudadMexico',
+        'guadalajara': 'Guadalajara',
+        'monterrey': 'Monterrey',
+        'atlanta': 'Atlanta',
+        'boston': 'Boston',
+        'dallas': 'Dallas',
+        'houston': 'Houston',
+        'kansas-city': 'KansasCity',
+        'los-angeles': 'LosAngeles',
+        'miami': 'Miami',
+        'nueva-york': 'NuevaYork',
+        'filadelfia': 'Filadelfia',
+        'san-francisco': 'SanFrancisco',
+        'seattle': 'Seattle'
+    };
+    
+    const ciudadTranslationKey = ciudadTranslationMap[ciudadKey] || ciudadKey;
+    const ciudadDescKey = `ciudad${ciudadTranslationKey}Desc`;
+    const ciudadPobKey = `ciudad${ciudadTranslationKey}Pob`;
+    const ciudadClimaKey = `ciudad${ciudadTranslationKey}Clima`;
+    const estadioCarKey = `estadio${ciudadTranslationKey}Car`;
+    
+    // Obtener traducciones o usar valores por defecto
+    const descripcion = t(ciudadDescKey) !== ciudadDescKey ? t(ciudadDescKey) : ciudad.ciudadInfo.descripcion;
+    const poblacion = t(ciudadPobKey) !== ciudadPobKey ? t(ciudadPobKey) : ciudad.ciudadInfo.poblacion;
+    const clima = t(ciudadClimaKey) !== ciudadClimaKey ? t(ciudadClimaKey) : ciudad.ciudadInfo.clima;
+    const caracteristicas = t(estadioCarKey) !== estadioCarKey ? t(estadioCarKey) : ciudad.estadio.caracteristicas;
+    
     title.textContent = `${ciudad.bandera} ${ciudad.nombre}, ${ciudad.pais}`;
     
     // Imagen del estadio
@@ -792,28 +962,28 @@ function mostrarInfoCiudad(ciudadKey) {
     
     let html = `
         <div style="margin-bottom: 25px;">
-            <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.3em;">🏙️ Información de la Ciudad</h3>
-            <p style="line-height: 1.8; color: #475569; margin-bottom: 10px;">${ciudad.ciudadInfo.descripcion}</p>
-            <p style="line-height: 1.8; color: #475569; margin-bottom: 5px;"><strong>Población:</strong> ${ciudad.ciudadInfo.poblacion}</p>
-            <p style="line-height: 1.8; color: #475569;"><strong>Clima:</strong> ${ciudad.ciudadInfo.clima}</p>
+            <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.3em;">🏙️ ${t('informacionCiudad')}</h3>
+            <p style="line-height: 1.8; color: #475569; margin-bottom: 10px;">${descripcion}</p>
+            <p style="line-height: 1.8; color: #475569; margin-bottom: 5px;"><strong>${t('poblacion')}</strong> ${poblacion}</p>
+            <p style="line-height: 1.8; color: #475569;"><strong>${t('clima')}</strong> ${clima}</p>
         </div>
         
         <div style="margin-bottom: 25px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-            <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.3em;">🏟️ Estadio</h3>
+            <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.3em;">🏟️ ${t('estadio')}</h3>
             <div style="margin-bottom: 15px;">
                 <img src="${imagenEstadio}" alt="${ciudad.estadio.nombre}" style="width: 100%; max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onerror="this.src='https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop';">
             </div>
             <h4 style="color: #2a5298; margin-bottom: 10px; font-size: 1.1em;">${ciudad.estadio.nombre}</h4>
-            <p style="line-height: 1.8; color: #475569; margin-bottom: 8px;"><strong>Capacidad:</strong> ${ciudad.estadio.capacidad}</p>
-            <p style="line-height: 1.8; color: #475569; margin-bottom: 8px;"><strong>Inauguración:</strong> ${ciudad.estadio.inauguracion}</p>
-            <p style="line-height: 1.8; color: #475569; margin-bottom: 8px;"><strong>Características:</strong> ${ciudad.estadio.caracteristicas}</p>
-            <p style="line-height: 1.8; color: #475569;"><strong>Dirección:</strong> ${ciudad.estadio.direccion}</p>
+            <p style="line-height: 1.8; color: #475569; margin-bottom: 8px;"><strong>${t('capacidadLabel')}:</strong> ${ciudad.estadio.capacidad.replace('espectadores', t('espectadores')).replace('ampliable a', t('ampliableA')).replace('para el Mundial', t('paraElMundial'))}</p>
+            <p style="line-height: 1.8; color: #475569; margin-bottom: 8px;"><strong>${t('inauguracion')}</strong> ${ciudad.estadio.inauguracion}</p>
+            <p style="line-height: 1.8; color: #475569; margin-bottom: 8px;"><strong>${t('caracteristicas')}</strong> ${caracteristicas}</p>
+            <p style="line-height: 1.8; color: #475569;"><strong>${t('direccion')}</strong> ${ciudad.estadio.direccion}</p>
         </div>
         
         <div>
-            <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.3em;">⚽ Partidos Programados</h3>
+            <h3 style="color: #1e3c72; margin-bottom: 15px; font-size: 1.3em;">⚽ ${t('partidosProgramados')}</h3>
             <div style="display: grid; gap: 12px;">
-    `;
+`;
     
     ciudad.partidos.forEach(partido => {
         const fechaFormateada = formatearFecha(partido.fecha);
@@ -826,16 +996,53 @@ function mostrarInfoCiudad(ciudadKey) {
                     <div style="padding: 15px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 5px;">
                         <p style="margin: 0; color: #1565c0; font-weight: 600; margin-bottom: 8px;">${fechaFormateada} ${p.horario ? '• ' + p.horario : ''}</p>
                         <p style="margin: 0; color: #1e3c72; font-weight: 600; font-size: 1.05em; margin-bottom: 5px;">${p.local} vs ${p.visitante}</p>
-                        <p style="margin: 0; color: #666; font-size: 0.9em;"><strong>${p.fase}</strong> • ${p.grupo}</p>
+                        <p style="margin: 0; color: #666; font-size: 0.9em;"><strong>${p.fase === 'Fase de Grupos' ? t('faseGrupos') : (p.fase === 'Dieciseisavos' ? t('dieciseisavos') : (p.fase === 'Octavos' ? t('octavos') : (p.fase === 'Cuartos' ? t('cuartos') : (p.fase === 'Semifinal' || p.fase === 'Semifinales' ? t('semifinales') : (p.fase === 'Final' ? t('final') : p.fase)))))})</strong> • ${p.grupo || ''}</p>
                     </div>
                 `;
             });
         } else {
             // Mostrar partido genérico si no se encuentran detalles
+            // Traducir fase y descripción
+            let faseTraducida = partido.fase;
+            let descripcionTraducida = partido.descripcion;
+            
+            // Mapeo de fases
+            const faseMap = {
+                'Fase de Grupos': t('faseGrupos'),
+                'Dieciseisavos': t('dieciseisavos'),
+                'Octavos': t('octavos'),
+                'Cuartos': t('cuartos'),
+                'Semifinal': t('semifinales'),
+                'Semifinales': t('semifinales'),
+                'Final': t('final'),
+                'Tercer Puesto': t('tercerPuesto')
+            };
+            
+            // Mapeo de descripciones
+            const descMap = {
+                'Partido de grupos': t('partidoGrupos'),
+                'Partido inaugural de Canadá': t('partidoInauguralCanada'),
+                'Partido inaugural del Mundial 2026': t('partidoInauguralMundial'),
+                'Partido inaugural de EE.UU.': t('partidoInauguralEEUU'),
+                'Segundo partido del grupo de EE.UU.': t('segundoPartidoEEUU'),
+                'Octavos de final': t('octavosFinal'),
+                'Cuartos de final': t('cuartosFinal'),
+                'Semifinal': t('semifinal'),
+                'Partido por el tercer puesto': t('partidoTercerPuesto'),
+                'FINAL DEL MUNDIAL 2026': t('finalMundial')
+            };
+            
+            if (faseMap[partido.fase]) {
+                faseTraducida = faseMap[partido.fase];
+            }
+            if (descMap[partido.descripcion]) {
+                descripcionTraducida = descMap[partido.descripcion];
+            }
+            
             html += `
                 <div style="padding: 15px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 5px;">
                     <p style="margin: 0; color: #1565c0; font-weight: 600; margin-bottom: 5px;">${fechaFormateada}</p>
-                    <p style="margin: 0; color: #475569;"><strong>${partido.fase}:</strong> ${partido.descripcion}</p>
+                    <p style="margin: 0; color: #475569;"><strong>${faseTraducida}:</strong> ${descripcionTraducida}</p>
                 </div>
             `;
         }
@@ -868,7 +1075,8 @@ function configurarBotones() {
     const resetBtn = document.getElementById('reset-btn');
     if (resetBtn) {
         resetBtn.addEventListener('click', () => {
-            if (confirm('¿Estás seguro de que quieres resetear todas las predicciones?')) {
+            const mensajeConfirmacion = typeof t === 'function' ? t('confirmarResetear') : '¿Estás seguro de que quieres resetear todas las predicciones?';
+            if (confirm(mensajeConfirmacion)) {
                 localStorage.removeItem('mundial2026_resultados');
                 inicializarResultados();
                 renderizarGrupos();
@@ -1050,17 +1258,17 @@ function obtenerClasificados() {
     GRUPOS_MUNDIAL_2026.forEach((grupo, grupoIndex) => {
         const posiciones = calcularPosiciones(grupo, grupoIndex);
         clasificados.primeros.push({
-            grupo: grupo.nombre,
+            grupo: grupo.nombre, // Mantener nombre original para comparaciones
             equipo: obtenerNombreEquipo(grupo, grupoIndex, posiciones[0].indice),
             datos: posiciones[0]
         });
         clasificados.segundos.push({
-            grupo: grupo.nombre,
+            grupo: grupo.nombre, // Mantener nombre original para comparaciones
             equipo: obtenerNombreEquipo(grupo, grupoIndex, posiciones[1].indice),
             datos: posiciones[1]
         });
         clasificados.terceros.push({
-            grupo: grupo.nombre,
+            grupo: grupo.nombre, // Mantener nombre original para comparaciones
             equipo: obtenerNombreEquipo(grupo, grupoIndex, posiciones[2].indice),
             datos: posiciones[2]
         });
@@ -1087,8 +1295,9 @@ function generarDieciseisavos() {
     // Generar 16 partidos: 12 primeros y segundos + 8 mejores terceros
     // Primera mitad: primeros vs segundos (8 partidos)
     for (let i = 0; i < 8; i++) {
-        const primero = clasificados.primeros[i] || { equipo: 'Por definir', grupo: '', datos: {} };
-        const segundo = clasificados.segundos[i] || { equipo: 'Por definir', grupo: '', datos: {} };
+        const porDefinir = typeof t === 'function' ? t('porDefinir') : 'Por definir';
+        const primero = clasificados.primeros[i] || { equipo: porDefinir, grupo: '', datos: {} };
+        const segundo = clasificados.segundos[i] || { equipo: porDefinir, grupo: '', datos: {} };
         partidos.push({
             local: { ...primero, posicion: '1º' },
             visitante: { ...segundo, posicion: '2º' }
@@ -1098,8 +1307,9 @@ function generarDieciseisavos() {
     // Segunda mitad: primeros restantes vs mejores terceros (8 partidos)
     for (let i = 0; i < 8; i++) {
         const primerIndex = (i + 4) % 12;
-        const primero = clasificados.primeros[primerIndex] || mejoresTerceros[i] || { equipo: 'Por definir', grupo: '', datos: {} };
-        const tercero = mejoresTerceros[i] || clasificados.segundos[primerIndex] || { equipo: 'Por definir', grupo: '', datos: {} };
+        const porDefinir = typeof t === 'function' ? t('porDefinir') : 'Por definir';
+        const primero = clasificados.primeros[primerIndex] || mejoresTerceros[i] || { equipo: porDefinir, grupo: '', datos: {} };
+        const tercero = mejoresTerceros[i] || clasificados.segundos[primerIndex] || { equipo: porDefinir, grupo: '', datos: {} };
         partidos.push({
             local: { ...primero, posicion: primero.grupo ? '1º' : (tercero.grupo ? '3º' : '') },
             visitante: { ...tercero, posicion: tercero.grupo ? '3º' : (primero.grupo ? '1º' : '') }
@@ -1109,8 +1319,8 @@ function generarDieciseisavos() {
     // Asegurar que siempre haya 16 partidos
     while (partidos.length < 16) {
         partidos.push({
-            local: { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' },
-            visitante: { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' }
+            local: { equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', datos: {}, posicion: '' },
+            visitante: { equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', datos: {}, posicion: '' }
         });
     }
     
@@ -1148,8 +1358,8 @@ function actualizarOctavos() {
     // Generar 8 partidos de octavos
     for (let i = 0; i < 16; i += 2) {
         partidosOctavos.push({
-            local: ganadores[i] || { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' },
-            visitante: ganadores[i + 1] || { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' }
+            local: ganadores[i] || { equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', datos: {}, posicion: '' },
+            visitante: ganadores[i + 1] || { equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', datos: {}, posicion: '' }
         });
     }
 }
@@ -1162,8 +1372,8 @@ function actualizarCuartos() {
     // Generar 4 partidos de cuartos
     for (let i = 0; i < 8; i += 2) {
         partidosCuartos.push({
-            local: ganadores[i] || { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' },
-            visitante: ganadores[i + 1] || { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' }
+            local: ganadores[i] || { equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', datos: {}, posicion: '' },
+            visitante: ganadores[i + 1] || { equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', datos: {}, posicion: '' }
         });
     }
 }
@@ -1176,8 +1386,8 @@ function actualizarSemis() {
     // Generar 2 partidos de semis
     for (let i = 0; i < 4; i += 2) {
         partidosSemis.push({
-            local: ganadores[i] || { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' },
-            visitante: ganadores[i + 1] || { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' }
+            local: ganadores[i] || { equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', datos: {}, posicion: '' },
+            visitante: ganadores[i + 1] || { equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', datos: {}, posicion: '' }
         });
     }
 }
@@ -1187,8 +1397,8 @@ function actualizarFinal() {
     const ganadores = obtenerGanadores('semis', partidosSemis);
     
     partidoFinal = {
-        local: ganadores[0] || { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' },
-        visitante: ganadores[1] || { equipo: 'Por definir', grupo: '', datos: {}, posicion: '' }
+        local: ganadores[0] || { equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', datos: {}, posicion: '' },
+        visitante: ganadores[1] || { equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', datos: {}, posicion: '' }
     };
 }
 
@@ -1206,15 +1416,15 @@ function actualizarBracketCompleto() {
     
     // Agregar títulos de columna
     const titulos = [
-        { text: 'Dieciseisavos', col: 1 },
-        { text: 'Octavos', col: 2 },
-        { text: 'Cuartos', col: 3 },
-        { text: 'Semifinales', col: 4 },
-        { text: 'Final', col: 5 },
-        { text: 'Semifinales', col: 6 },
-        { text: 'Cuartos', col: 7 },
-        { text: 'Octavos', col: 8 },
-        { text: 'Dieciseisavos', col: 9 }
+        { text: typeof t === 'function' ? t('dieciseisavos') : 'Dieciseisavos', col: 1 },
+        { text: typeof t === 'function' ? t('octavos') : 'Octavos', col: 2 },
+        { text: typeof t === 'function' ? t('cuartos') : 'Cuartos', col: 3 },
+        { text: typeof t === 'function' ? t('semifinales') : 'Semifinales', col: 4 },
+        { text: typeof t === 'function' ? t('final') : 'Final', col: 5 },
+        { text: typeof t === 'function' ? t('semifinales') : 'Semifinales', col: 6 },
+        { text: typeof t === 'function' ? t('cuartos') : 'Cuartos', col: 7 },
+        { text: typeof t === 'function' ? t('octavos') : 'Octavos', col: 8 },
+        { text: typeof t === 'function' ? t('dieciseisavos') : 'Dieciseisavos', col: 9 }
     ];
     
     titulos.forEach((titulo) => {
@@ -1231,13 +1441,13 @@ function actualizarBracketCompleto() {
     // Dieciseisavos (16 partidos): 8 a la izquierda (col 1), 8 a la derecha (col 9)
     // Asegurar que siempre haya exactamente 16 partidos
     let dieciseisavos = partidosDieciseisavos.length > 0 ? [...partidosDieciseisavos] : 
-        Array(16).fill(null).map(() => ({ local: { equipo: 'Por definir', grupo: '', posicion: '' }, visitante: { equipo: 'Por definir', grupo: '', posicion: '' } }));
+        Array(16).fill(null).map(() => ({ local: { equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', posicion: '' }, visitante: { equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', posicion: '' } }));
     
     // Si hay menos de 16 partidos, completar con "Por definir"
     while (dieciseisavos.length < 16) {
         dieciseisavos.push({
-            local: { equipo: 'Por definir', grupo: '', posicion: '' },
-            visitante: { equipo: 'Por definir', grupo: '', posicion: '' }
+            local: { equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', posicion: '' },
+            visitante: { equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', posicion: '' }
         });
     }
     
@@ -1369,6 +1579,7 @@ function actualizarBracketCompleto() {
 
 // Crear una tarjeta de partido
 function crearMatchCard(fase, index, partido) {
+    const t = typeof window.t === 'function' ? window.t : (key) => key;
     const matchDiv = document.createElement('div');
     matchDiv.className = 'bracket-match';
     
@@ -1387,10 +1598,11 @@ function crearMatchCard(fase, index, partido) {
     
     const ganadorLocal = golesLocal > golesVisitante;
     const ganadorVisitante = golesVisitante > golesLocal;
-    const equipoLocalNombre = partido.local?.equipo || 'Por definir';
-    const equipoVisitanteNombre = partido.visitante?.equipo || 'Por definir';
-    const esPorDefinirLocal = equipoLocalNombre === 'Por definir';
-    const esPorDefinirVisitante = equipoVisitanteNombre === 'Por definir';
+    const porDefinir = t('porDefinir');
+    const equipoLocalNombre = partido.local?.equipo || porDefinir;
+    const equipoVisitanteNombre = partido.visitante?.equipo || porDefinir;
+    const esPorDefinirLocal = equipoLocalNombre === porDefinir;
+    const esPorDefinirVisitante = equipoVisitanteNombre === porDefinir;
     
     // Obtener información de posición y grupo
     const localPosicion = partido.local?.posicion || '';
@@ -1398,9 +1610,27 @@ function crearMatchCard(fase, index, partido) {
     const visitantePosicion = partido.visitante?.posicion || '';
     const visitanteGrupo = partido.visitante?.grupo || '';
     
+    // Traducir nombres de grupos
+    const grupoMap = {
+        'Grupo A': t('grupoA'),
+        'Grupo B': t('grupoB'),
+        'Grupo C': t('grupoC'),
+        'Grupo D': t('grupoD'),
+        'Grupo E': t('grupoE'),
+        'Grupo F': t('grupoF'),
+        'Grupo G': t('grupoG'),
+        'Grupo H': t('grupoH'),
+        'Grupo I': t('grupoI'),
+        'Grupo J': t('grupoJ'),
+        'Grupo K': t('grupoK'),
+        'Grupo L': t('grupoL')
+    };
+    const localGrupoTraducido = localGrupo ? (grupoMap[localGrupo] || localGrupo) : '';
+    const visitanteGrupoTraducido = visitanteGrupo ? (grupoMap[visitanteGrupo] || visitanteGrupo) : '';
+    
     // Formatear texto de posición y grupo
-    const localInfo = (localPosicion && localGrupo) ? `${localPosicion} ${localGrupo}` : '';
-    const visitanteInfo = (visitantePosicion && visitanteGrupo) ? `${visitantePosicion} ${visitanteGrupo}` : '';
+    const localInfo = (localPosicion && localGrupoTraducido) ? `${localPosicion} ${localGrupoTraducido}` : '';
+    const visitanteInfo = (visitantePosicion && visitanteGrupoTraducido) ? `${visitantePosicion} ${visitanteGrupoTraducido}` : '';
     
     // Verificar si el partido ya se jugó
     const yaJugado = typeof partidoEliminatoriaYaJugado === 'function' ? partidoEliminatoriaYaJugado(fase, index) : false;
@@ -1462,7 +1692,7 @@ function obtenerGanadores(fase, partidosFase) {
     
     partidosFase.forEach((partido, index) => {
         if (!partido) {
-            ganadores.push({ equipo: 'Por definir', grupo: '', datos: {}, posicion: '' });
+            ganadores.push({ equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', datos: {}, posicion: '' });
             return;
         }
         
@@ -1500,19 +1730,19 @@ function obtenerGanadores(fase, partidosFase) {
                         });
                     } else {
                         // Empate - mantener "Por definir"
-                        ganadores.push({ equipo: 'Por definir', grupo: '', datos: {}, posicion: '' });
+                        ganadores.push({ equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', datos: {}, posicion: '' });
                     }
                 } else {
                     // Valores inválidos
-                    ganadores.push({ equipo: 'Por definir', grupo: '', datos: {}, posicion: '' });
+                    ganadores.push({ equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', datos: {}, posicion: '' });
                 }
             } else {
                 // Ambos campos vacíos - no hay resultado aún
-                ganadores.push({ equipo: 'Por definir', grupo: '', datos: {}, posicion: '' });
+                ganadores.push({ equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', datos: {}, posicion: '' });
             }
         } else {
             // Sin resultado aún
-            ganadores.push({ equipo: 'Por definir', grupo: '', datos: {}, posicion: '' });
+            ganadores.push({ equipo: (typeof t === 'function' ? t('porDefinir') : 'Por definir'), grupo: '', datos: {}, posicion: '' });
         }
     });
     

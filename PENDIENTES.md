@@ -15,3 +15,4 @@
 - Asegurar que los equipos avanzan correctamente según los resultados
 - Verificar que los brackets se actualizan correctamente después de cada partido
 
+

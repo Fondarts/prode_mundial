@@ -87,3 +87,4 @@ Vercel se conecta automáticamente con GitHub:
 - El sitio funcionará igual que en GitHub Pages, pero desde la raíz del dominio
 
 
+
