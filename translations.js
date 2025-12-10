@@ -2,7 +2,7 @@
 const translations = {
     es: {
         // Header
-        title: "⚽ Fixture Interactivo Mundial 2026",
+        title: "Fixture Interactivo Mundial 2026 ⚽",
         subtitle: "Predice los resultados y compite contra tus amigos",
         
         // Tabs
@@ -405,6 +405,7 @@ const translations = {
         yaHasEnviadoPrediccion: "Ya has enviado una predicción para este torneo. Las predicciones no se pueden modificar después del 7 de junio.",
         prediccionNoModificable: "Predicción no modificable",
         prediccionesNoModificablesDespues: "Las predicciones existentes no se pueden modificar después del 7 de junio. Solo puedes hacer nuevas predicciones de partidos que aún no han empezado.",
+        infoPredicciones: "📝 Las predicciones son actualizables hasta antes del mundial. No hace falta completarlas todas de una.",
         
         // Otros
         borrarTodo: "Borrar Todo",
@@ -483,7 +484,7 @@ const translations = {
     },
     en: {
         // Header
-        title: "⚽ Interactive World Cup 2026 Fixture",
+        title: "Interactive World Cup 2026 Fixture ⚽",
         subtitle: "Predict results and compete against your friends",
         
         // Tabs
@@ -879,6 +880,7 @@ const translations = {
         yaHasEnviadoPrediccion: "You have already sent a prediction for this tournament. Predictions cannot be modified after June 7.",
         prediccionNoModificable: "Prediction Not Modifiable",
         prediccionesNoModificablesDespues: "Existing predictions cannot be modified after June 7. You can only make new predictions for matches that have not yet started.",
+        infoPredicciones: "📝 Predictions can be updated until before the World Cup. You don't need to complete them all at once.",
         
         // Otros
         borrarTodo: "Delete All",
