@@ -1969,7 +1969,7 @@ header h1 {
     }
 }
 
-/* Ajustes para móviles */
+    /* Ajustes para móviles */
 @media (max-width: 767px) {
     body {
         padding: 0;
@@ -1977,13 +1977,25 @@ header h1 {
     }
     
     .main-layout {
-        padding: 5px;
+        padding: 8px 5px;
         gap: 0;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .main-content {
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
     
     .container {
         border-radius: 10px;
-        margin: 5px;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 100%;
     }
     
     /* Header móvil */
@@ -2069,46 +2081,117 @@ header h1 {
         padding: 15px 10px;
     }
     
-    /* Grupos móvil */
+    /* Grupos móvil - Comprimido y centrado */
     #grupos-container {
         grid-template-columns: 1fr !important;
-        gap: 10px;
+        gap: 8px;
+        max-width: 100%;
+        margin: 0 auto;
     }
     
     .grupo {
-        padding: 12px;
+        padding: 10px 8px;
+        margin: 0 auto;
+        max-width: 100%;
     }
     
     .grupo h3 {
-        font-size: 1.4em;
+        font-size: 1.2em;
         margin-bottom: 10px;
+        padding-bottom: 8px;
     }
     
+    /* Tabla de posiciones - Comprimida pero nombres visibles */
     .tabla-posiciones {
-        font-size: 0.9em;
+        font-size: 0.95em;
+        width: 100%;
+        margin-bottom: 10px;
     }
     
     .tabla-posiciones th,
     .tabla-posiciones td {
-        padding: 8px 4px;
+        padding: 6px 4px;
         font-size: 0.9em;
     }
     
+    .tabla-posiciones th:nth-child(1),
+    .tabla-posiciones td:nth-child(1) {
+        width: 26px;
+        min-width: 26px;
+    }
+    
+    .tabla-posiciones th:nth-child(2),
+    .tabla-posiciones td:nth-child(2) {
+        min-width: 0;
+        max-width: none;
+        font-size: 0.9em;
+        /* Nombres de países sin comprimir - máxima prioridad */
+    }
+    
+    /* Columnas numéricas más finas */
+    .tabla-posiciones th:nth-child(3),
+    .tabla-posiciones td:nth-child(3),
+    .tabla-posiciones th:nth-child(4),
+    .tabla-posiciones td:nth-child(4),
+    .tabla-posiciones th:nth-child(5),
+    .tabla-posiciones td:nth-child(5),
+    .tabla-posiciones th:nth-child(6),
+    .tabla-posiciones td:nth-child(6),
+    .tabla-posiciones th:nth-child(7),
+    .tabla-posiciones td:nth-child(7),
+    .tabla-posiciones th:nth-child(8),
+    .tabla-posiciones td:nth-child(8),
+    .tabla-posiciones th:nth-child(9),
+    .tabla-posiciones td:nth-child(9),
+    .tabla-posiciones th:nth-child(10),
+    .tabla-posiciones td:nth-child(10) {
+        width: 24px;
+        min-width: 24px;
+        max-width: 24px;
+        text-align: center;
+        font-size: 0.8em;
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+    
+    /* Partidos - Comprimidos pero nombres visibles */
     .partido {
-        padding: 8px;
-        margin-bottom: 5px;
+        padding: 6px 8px;
+        margin-bottom: 6px;
         flex-wrap: wrap;
     }
     
+    .partido-fecha-horario {
+        font-size: 0.7em;
+        margin-bottom: 5px;
+        padding-bottom: 3px;
+    }
+    
+    .fecha-partido {
+        font-size: 0.75em;
+    }
+    
+    .horario-partido {
+        font-size: 0.75em;
+        padding: 2px 6px;
+    }
+    
     .equipo {
-        font-size: 0.85em;
-        min-width: 80px;
+        font-size: 0.8em;
+        min-width: 0;
+        /* Nombres de equipos sin comprimir */
     }
     
     .resultado-input input {
-        width: 35px;
-        padding: 5px;
-        font-size: 0.9em;
+        width: 32px;
+        padding: 4px 2px;
+        font-size: 0.85em;
+        min-height: 32px;
+    }
+    
+    .partidos h4 {
+        font-size: 0.85em;
+        margin-bottom: 6px;
     }
     
     /* ============================================
