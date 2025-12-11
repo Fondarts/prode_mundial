@@ -1560,22 +1560,33 @@ function mostrarInfoPais(paisKey) {
         // Si tienen la misma posición, ordenar por número de camiseta
         return (a.numero || 0) - (b.numero || 0);
     });
+    // Función para abreviar posición
+    const abreviarPosicion = (posicion) => {
+        const abreviaciones = {
+            'Portero': 'POR',
+            'Defensor': 'DEF',
+            'Mediocampista': 'MED',
+            'Delantero': 'DEL'
+        };
+        return abreviaciones[posicion] || posicion.substring(0, 3).toUpperCase();
+    };
+    
     let jugadoresHtml = `
         <div style="margin-bottom: 20px;">
             <h3 style="color: #1e3c72; margin-bottom: 10px; font-size: 1.1em; display: flex; align-items: center; gap: 6px;">
                 <span style="font-size: 1.1em;">⚽</span> ${t('jugadores')}
             </h3>
-            <div style="background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
-                <table style="width: 100%; border-collapse: collapse;">
+            <div style="background: white; border-radius: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
+                <table class="tabla-jugadores" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                     <thead>
                         <tr style="background: #f5f5f5; border-bottom: 1px solid #e0e0e0;">
-                            <th style="padding: 8px 10px; text-align: left; font-size: 0.8em; color: #666; font-weight: 600; width: 35px;">#</th>
-                            <th style="padding: 8px 10px; text-align: left; font-size: 0.8em; color: #666; font-weight: 600;">${t('nombre')}</th>
-                            <th style="padding: 8px 10px; text-align: left; font-size: 0.8em; color: #666; font-weight: 600;">${t('posicion')}</th>
-                            <th style="padding: 8px 10px; text-align: left; font-size: 0.8em; color: #666; font-weight: 600;">${t('club')}</th>
-                            <th style="padding: 8px 10px; text-align: left; font-size: 0.8em; color: #666; font-weight: 600;">${t('edad')}</th>
-                            <th style="padding: 8px 10px; text-align: center; font-size: 0.8em; color: #666; font-weight: 600; width: 60px;">${t('pj')}</th>
-                            <th style="padding: 8px 10px; text-align: center; font-size: 0.8em; color: #666; font-weight: 600; width: 60px;">${t('goles')}</th>
+                            <th style="padding: 6px 2px; text-align: center; font-size: 0.7em; color: #666; font-weight: 600;">#</th>
+                            <th style="padding: 6px 6px; text-align: left; font-size: 0.7em; color: #666; font-weight: 600;">${t('nombre')}</th>
+                            <th style="padding: 6px 2px; text-align: center; font-size: 0.7em; color: #666; font-weight: 600;">${t('posicion')}</th>
+                            <th style="padding: 6px 4px; text-align: left; font-size: 0.7em; color: #666; font-weight: 600;">${t('club')}</th>
+                            <th style="padding: 6px 1px; text-align: center; font-size: 0.7em; color: #666; font-weight: 600;">${t('edad')}</th>
+                            <th style="padding: 6px 1px; text-align: center; font-size: 0.7em; color: #666; font-weight: 600;">${t('pj')}</th>
+                            <th style="padding: 6px 1px; text-align: center; font-size: 0.7em; color: #666; font-weight: 600;">${t('goles')}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1597,30 +1608,33 @@ function mostrarInfoPais(paisKey) {
     
     jugadoresOrdenados.forEach((jugador, index) => {
         const rowStyle = index % 2 === 0 ? 'background: #fafafa;' : 'background: white;';
+        const posicionAbreviada = abreviarPosicion(jugador.posicion);
+        const edadTexto = jugador.edad ? (lang === 'en' ? jugador.edad : jugador.edad) : '-';
         jugadoresHtml += `
                         <tr style="${rowStyle} border-bottom: 1px solid #f0f0f0;">
-                            <td style="padding: 7px 10px; font-weight: 600; color: #2196f3; font-size: 0.85em;">${jugador.numero || '-'}</td>
-                            <td style="padding: 7px 10px; color: #1e3c72; font-weight: 500; font-size: 0.85em;">${jugador.nombre || '-'}</td>
-                            <td style="padding: 7px 10px; color: #666; font-size: 0.8em;">${traducirPosicion(jugador.posicion) || '-'}</td>
-                            <td style="padding: 7px 10px; color: #666; font-size: 0.8em;">${jugador.club || '-'}</td>
-                            <td style="padding: 7px 10px; color: #666; font-size: 0.8em;">${jugador.edad ? `${jugador.edad} ${lang === 'en' ? 'yrs' : 'años'}` : '-'}</td>
-                            <td style="padding: 7px 10px; color: #666; font-size: 0.8em; text-align: center;">${jugador.partidosJugados !== undefined ? jugador.partidosJugados : '-'}</td>
-                            <td style="padding: 7px 10px; color: #666; font-size: 0.8em; text-align: center;">${jugador.goles !== undefined ? jugador.goles : '-'}</td>
+                            <td style="padding: 5px 2px; font-weight: 600; color: #2196f3; font-size: 0.75em; text-align: center;">${jugador.numero || '-'}</td>
+                            <td style="padding: 5px 6px; color: #1e3c72; font-weight: 500; font-size: 0.75em;">${jugador.nombre || '-'}</td>
+                            <td style="padding: 5px 2px; color: #666; font-size: 0.7em; text-align: center;" title="${traducirPosicion(jugador.posicion) || '-'}">${posicionAbreviada}</td>
+                            <td style="padding: 5px 4px; color: #666; font-size: 0.7em;">${jugador.club || '-'}</td>
+                            <td style="padding: 5px 1px; color: #666; font-size: 0.7em; text-align: center;">${edadTexto}</td>
+                            <td style="padding: 5px 1px; color: #666; font-size: 0.7em; text-align: center;">${jugador.partidosJugados !== undefined ? jugador.partidosJugados : '-'}</td>
+                            <td style="padding: 5px 1px; color: #666; font-size: 0.7em; text-align: center;">${jugador.goles !== undefined ? jugador.goles : '-'}</td>
                         </tr>
         `;
     });
     
     // Agregar director técnico separado al final
     if (directorTecnico) {
+        const edadDTTexto = pais.edadDT ? (lang === 'en' ? pais.edadDT : pais.edadDT) : '-';
         jugadoresHtml += `
                         <tr style="background: #fff3cd; border-bottom: 1px solid #f0f0f0;">
-                            <td style="padding: 7px 10px; font-weight: 600; color: #856404; font-size: 0.85em;">👔</td>
-                            <td style="padding: 7px 10px; color: #856404; font-weight: 600; font-size: 0.85em;">${directorTecnico}</td>
-                            <td style="padding: 7px 10px; color: #856404; font-size: 0.8em;">${t('directorTecnico')}</td>
-                            <td style="padding: 7px 10px; color: #856404; font-size: 0.8em;">-</td>
-                            <td style="padding: 7px 10px; color: #856404; font-size: 0.8em;">${pais.edadDT ? `${pais.edadDT} ${lang === 'en' ? 'yrs' : 'años'}` : '-'}</td>
-                            <td style="padding: 7px 10px; color: #856404; font-size: 0.8em; text-align: center;">${pais.partidosJugadosDT !== undefined && pais.partidosJugadosDT !== null ? pais.partidosJugadosDT : '-'}</td>
-                            <td style="padding: 7px 10px; color: #856404; font-size: 0.8em; text-align: center;">-</td>
+                            <td style="padding: 5px 2px; font-weight: 600; color: #856404; font-size: 0.75em; text-align: center;">👔</td>
+                            <td style="padding: 5px 6px; color: #856404; font-weight: 600; font-size: 0.75em;">${directorTecnico}</td>
+                            <td style="padding: 5px 2px; color: #856404; font-size: 0.7em; text-align: center;">DT</td>
+                            <td style="padding: 5px 4px; color: #856404; font-size: 0.7em;">-</td>
+                            <td style="padding: 5px 1px; color: #856404; font-size: 0.7em; text-align: center;">${edadDTTexto}</td>
+                            <td style="padding: 5px 1px; color: #856404; font-size: 0.7em; text-align: center;">${pais.partidosJugadosDT !== undefined && pais.partidosJugadosDT !== null ? pais.partidosJugadosDT : '-'}</td>
+                            <td style="padding: 5px 1px; color: #856404; font-size: 0.7em; text-align: center;">-</td>
                         </tr>
         `;
     }

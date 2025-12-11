@@ -2111,6 +2111,86 @@ header h1 {
         font-size: 0.9em;
     }
     
+    /* ============================================
+       TABLA DE JUGADORES - ESTILOS MÓVIL
+       ============================================ */
+    
+    .tabla-jugadores {
+        table-layout: fixed;
+        width: 100%;
+    }
+    
+    .tabla-jugadores th,
+    .tabla-jugadores td {
+        overflow: hidden;
+    }
+    
+    /* Columna # (Número) - Mínimo posible */
+    .tabla-jugadores th:nth-child(1),
+    .tabla-jugadores td:nth-child(1) {
+        width: 22px;
+        min-width: 22px;
+        max-width: 22px;
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+    
+    /* Columna Nombre - Máxima prioridad, más espacio */
+    .tabla-jugadores th:nth-child(2),
+    .tabla-jugadores td:nth-child(2) {
+        width: auto;
+        min-width: 0;
+        max-width: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* Columna Posición - Mínimo (POR, DEF, MED, DEL) */
+    .tabla-jugadores th:nth-child(3),
+    .tabla-jugadores td:nth-child(3) {
+        width: 32px;
+        min-width: 32px;
+        max-width: 32px;
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+    
+    /* Columna Club - Menor prioridad que nombres */
+    .tabla-jugadores th:nth-child(4),
+    .tabla-jugadores td:nth-child(4) {
+        width: 60px;
+        min-width: 60px;
+        max-width: 60px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+    
+    /* Columna Edad - Compacta */
+    .tabla-jugadores th:nth-child(5),
+    .tabla-jugadores td:nth-child(5) {
+        width: 28px;
+        min-width: 28px;
+        max-width: 28px;
+        padding-left: 1px;
+        padding-right: 1px;
+    }
+    
+    /* Columnas PJ y Goles - Mínimas */
+    .tabla-jugadores th:nth-child(6),
+    .tabla-jugadores td:nth-child(6),
+    .tabla-jugadores th:nth-child(7),
+    .tabla-jugadores td:nth-child(7) {
+        width: 24px;
+        min-width: 24px;
+        max-width: 24px;
+        padding-left: 1px;
+        padding-right: 1px;
+    }
+    
     /* Bracket móvil - Diseño vertical apilado */
     .eliminatoria-container {
         padding: 10px;
@@ -3295,4 +3375,5 @@ header h1 {
         width: 100%;
     }
 }
+
 
