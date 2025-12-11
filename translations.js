@@ -180,6 +180,15 @@ const translations = {
         club: "Club",
         edad: "Edad",
         directorTecnico: "Director Técnico",
+        portero: "Portero",
+        defensor: "Defensor",
+        mediocampista: "Mediocampista",
+        delantero: "Delantero",
+        goles: "Goles",
+        general: "General",
+        matches: "Partidos",
+        goals: "Goles",
+        diferencia: "Diferencia",
         
         // Ciudades - Descripciones
         ciudadTorontoDesc: "Toronto es la ciudad más grande de Canadá y capital de la provincia de Ontario. Es conocida por su diversidad cultural, su arquitectura moderna y su vibrante escena artística.",
@@ -678,6 +687,15 @@ const translations = {
         club: "Club",
         edad: "Age",
         directorTecnico: "Coach",
+        portero: "Goalkeeper",
+        defensor: "Defender",
+        mediocampista: "Midfielder",
+        delantero: "Forward",
+        goles: "Goals",
+        general: "General",
+        matches: "Matches",
+        goals: "Goals",
+        diferencia: "Goal Difference",
         
         // Ciudades - Descripciones
         ciudadTorontoDesc: "Toronto is the largest city in Canada and the capital of the province of Ontario. It is known for its cultural diversity, modern architecture, and vibrant art scene.",

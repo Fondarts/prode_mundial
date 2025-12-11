@@ -1544,8 +1544,22 @@ function mostrarInfoPais(paisKey) {
         ` : ''}
         
         ${pais.jugadores && pais.jugadores.length > 0 ? (() => {
-    // Ordenar jugadores por número de camiseta
-    const jugadoresOrdenados = [...pais.jugadores].sort((a, b) => (a.numero || 0) - (b.numero || 0));
+    // Ordenar jugadores por posición y luego por número de camiseta
+    const ordenPosiciones = {
+        'Portero': 1,
+        'Defensor': 2,
+        'Mediocampista': 3,
+        'Delantero': 4
+    };
+    const jugadoresOrdenados = [...pais.jugadores].sort((a, b) => {
+        const ordenA = ordenPosiciones[a.posicion] || 99;
+        const ordenB = ordenPosiciones[b.posicion] || 99;
+        if (ordenA !== ordenB) {
+            return ordenA - ordenB;
+        }
+        // Si tienen la misma posición, ordenar por número de camiseta
+        return (a.numero || 0) - (b.numero || 0);
+    });
     let jugadoresHtml = `
         <div style="margin-bottom: 20px;">
             <h3 style="color: #1e3c72; margin-bottom: 10px; font-size: 1.1em; display: flex; align-items: center; gap: 6px;">
@@ -1556,14 +1570,30 @@ function mostrarInfoPais(paisKey) {
                     <thead>
                         <tr style="background: #f5f5f5; border-bottom: 1px solid #e0e0e0;">
                             <th style="padding: 8px 10px; text-align: left; font-size: 0.8em; color: #666; font-weight: 600; width: 35px;">#</th>
-                            <th style="padding: 8px 10px; text-align: left; font-size: 0.8em; color: #666; font-weight: 600;">${lang === 'en' ? 'Name' : 'Nombre'}</th>
+                            <th style="padding: 8px 10px; text-align: left; font-size: 0.8em; color: #666; font-weight: 600;">${t('nombre')}</th>
                             <th style="padding: 8px 10px; text-align: left; font-size: 0.8em; color: #666; font-weight: 600;">${t('posicion')}</th>
                             <th style="padding: 8px 10px; text-align: left; font-size: 0.8em; color: #666; font-weight: 600;">${t('club')}</th>
-                            <th style="padding: 8px 10px; text-align: left; font-size: 0.8em; color: #666; font-weight: 600;">${lang === 'en' ? 'Age' : 'Edad'}</th>
+                            <th style="padding: 8px 10px; text-align: left; font-size: 0.8em; color: #666; font-weight: 600;">${t('edad')}</th>
+                            <th style="padding: 8px 10px; text-align: center; font-size: 0.8em; color: #666; font-weight: 600; width: 60px;">${t('pj')}</th>
+                            <th style="padding: 8px 10px; text-align: center; font-size: 0.8em; color: #666; font-weight: 600; width: 60px;">${t('goles')}</th>
                         </tr>
                     </thead>
                     <tbody>
 `;
+    
+    // Función para traducir posiciones
+    const traducirPosicion = (posicion) => {
+        if (lang === 'en') {
+            const posicionesMap = {
+                'Portero': t('portero'),
+                'Defensor': t('defensor'),
+                'Mediocampista': t('mediocampista'),
+                'Delantero': t('delantero')
+            };
+            return posicionesMap[posicion] || posicion;
+        }
+        return posicion;
+    };
     
     jugadoresOrdenados.forEach((jugador, index) => {
         const rowStyle = index % 2 === 0 ? 'background: #fafafa;' : 'background: white;';
@@ -1571,9 +1601,11 @@ function mostrarInfoPais(paisKey) {
                         <tr style="${rowStyle} border-bottom: 1px solid #f0f0f0;">
                             <td style="padding: 7px 10px; font-weight: 600; color: #2196f3; font-size: 0.85em;">${jugador.numero || '-'}</td>
                             <td style="padding: 7px 10px; color: #1e3c72; font-weight: 500; font-size: 0.85em;">${jugador.nombre || '-'}</td>
-                            <td style="padding: 7px 10px; color: #666; font-size: 0.8em;">${jugador.posicion || '-'}</td>
+                            <td style="padding: 7px 10px; color: #666; font-size: 0.8em;">${traducirPosicion(jugador.posicion) || '-'}</td>
                             <td style="padding: 7px 10px; color: #666; font-size: 0.8em;">${jugador.club || '-'}</td>
                             <td style="padding: 7px 10px; color: #666; font-size: 0.8em;">${jugador.edad ? `${jugador.edad} ${lang === 'en' ? 'yrs' : 'años'}` : '-'}</td>
+                            <td style="padding: 7px 10px; color: #666; font-size: 0.8em; text-align: center;">${jugador.partidosJugados !== undefined ? jugador.partidosJugados : '-'}</td>
+                            <td style="padding: 7px 10px; color: #666; font-size: 0.8em; text-align: center;">${jugador.goles !== undefined ? jugador.goles : '-'}</td>
                         </tr>
         `;
     });
@@ -1587,6 +1619,8 @@ function mostrarInfoPais(paisKey) {
                             <td style="padding: 7px 10px; color: #856404; font-size: 0.8em;">${t('directorTecnico')}</td>
                             <td style="padding: 7px 10px; color: #856404; font-size: 0.8em;">-</td>
                             <td style="padding: 7px 10px; color: #856404; font-size: 0.8em;">${pais.edadDT ? `${pais.edadDT} ${lang === 'en' ? 'yrs' : 'años'}` : '-'}</td>
+                            <td style="padding: 7px 10px; color: #856404; font-size: 0.8em; text-align: center;">${pais.partidosJugadosDT !== undefined && pais.partidosJugadosDT !== null ? pais.partidosJugadosDT : '-'}</td>
+                            <td style="padding: 7px 10px; color: #856404; font-size: 0.8em; text-align: center;">-</td>
                         </tr>
         `;
     }
@@ -1607,24 +1641,24 @@ function mostrarInfoPais(paisKey) {
             ${pais.historial.resumen ? `<p style="background: #e3f2fd; padding: 10px 12px; border-radius: 6px; margin-bottom: 12px; color: #475569; font-size: 0.9em; line-height: 1.5; border-left: 3px solid #2196f3;">${pais.historial.resumen}</p>` : ''}
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
                 <div style="background: white; padding: 12px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
-                    <h4 style="color: #2a5298; margin-bottom: 10px; font-size: 0.95em; font-weight: 600; border-bottom: 1px solid #e3f2fd; padding-bottom: 6px;">${lang === 'en' ? 'General' : 'General'}</h4>
+                    <h4 style="color: #2a5298; margin-bottom: 10px; font-size: 0.95em; font-weight: 600; border-bottom: 1px solid #e3f2fd; padding-bottom: 6px;">${t('general')}</h4>
                     <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('participaciones')}:</strong> <span style="color: #1e3c72; font-weight: 600;">${pais.historial.participaciones}</span></p>
                     <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('mejorResultado')}:</strong> <span style="color: #1e3c72; font-weight: 600; text-align: right; flex: 1; margin-left: 8px; font-size: 0.8em;">${pais.historial.mejorResultado}</span></p>
                     <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('ultimaParticipacion')}:</strong> <span style="color: #1e3c72; font-weight: 600;">${pais.historial.ultimaParticipacion}</span></p>
                     <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('titulos')}:</strong> <span style="color: #1e3c72; font-weight: 600;">${pais.historial.titulos}</span></p>
                 </div>
                 <div style="background: white; padding: 12px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
-                    <h4 style="color: #2a5298; margin-bottom: 10px; font-size: 0.95em; font-weight: 600; border-bottom: 1px solid #e3f2fd; padding-bottom: 6px;">${lang === 'en' ? 'Matches' : 'Partidos'}</h4>
+                    <h4 style="color: #2a5298; margin-bottom: 10px; font-size: 0.95em; font-weight: 600; border-bottom: 1px solid #e3f2fd; padding-bottom: 6px;">${t('matches')}</h4>
                     <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('partidosJugados')}:</strong> <span style="color: #1e3c72; font-weight: 600;">${pais.historial.partidosJugados}</span></p>
                     <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('victorias')}:</strong> <span style="color: #4caf50; font-weight: 600;">${pais.historial.victorias}</span></p>
                     <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('empates')}:</strong> <span style="color: #ff9800; font-weight: 600;">${pais.historial.empates}</span></p>
                     <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('derrotas')}:</strong> <span style="color: #f44336; font-weight: 600;">${pais.historial.derrotas}</span></p>
                 </div>
                 <div style="background: white; padding: 12px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
-                    <h4 style="color: #2a5298; margin-bottom: 10px; font-size: 0.95em; font-weight: 600; border-bottom: 1px solid #e3f2fd; padding-bottom: 6px;">${lang === 'en' ? 'Goals' : 'Goles'}</h4>
+                    <h4 style="color: #2a5298; margin-bottom: 10px; font-size: 0.95em; font-weight: 600; border-bottom: 1px solid #e3f2fd; padding-bottom: 6px;">${t('goals')}</h4>
                     <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('golesAFavor')}:</strong> <span style="color: #4caf50; font-weight: 600;">${pais.historial.golesAFavor}</span></p>
                     <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('golesEnContra')}:</strong> <span style="color: #f44336; font-weight: 600;">${pais.historial.golesEnContra}</span></p>
-                    <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${lang === 'en' ? 'Goal Difference' : 'Diferencia'}:</strong> <span style="color: ${pais.historial.golesAFavor - pais.historial.golesEnContra >= 0 ? '#4caf50' : '#f44336'}; font-weight: 600;">${pais.historial.golesAFavor - pais.historial.golesEnContra > 0 ? '+' : ''}${pais.historial.golesAFavor - pais.historial.golesEnContra}</span></p>
+                    <p style="margin: 6px 0; color: #475569; font-size: 0.85em; display: flex; justify-content: space-between;"><strong>${t('diferencia')}:</strong> <span style="color: ${pais.historial.golesAFavor - pais.historial.golesEnContra >= 0 ? '#4caf50' : '#f44336'}; font-weight: 600;">${pais.historial.golesAFavor - pais.historial.golesEnContra > 0 ? '+' : ''}${pais.historial.golesAFavor - pais.historial.golesEnContra}</span></p>
                 </div>
             </div>
         </div>
