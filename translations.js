@@ -94,6 +94,7 @@ const translations = {
         verTorneo: "Ver Torneo",
         iniciarSesionParaUnirse: "Iniciar Sesión para Unirse",
         compartir: "Compartir",
+        invitar: "Invitar",
         unirseAlTorneo: "Unirse al Torneo",
         cerrar: "Cerrar",
         codigo6Digitos: "6 dígitos",
@@ -626,6 +627,7 @@ const translations = {
         verTorneo: "View Tournament",
         iniciarSesionParaUnirse: "Log In to Join",
         compartir: "Share",
+        invitar: "Invite",
         unirseAlTorneo: "Join Tournament",
         
         // Eliminatorias

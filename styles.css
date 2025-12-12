@@ -1337,6 +1337,9 @@ header h1 {
     transition: all 0.3s;
     display: flex;
     align-items: center;
+    height: 42px;
+    box-sizing: border-box;
+    align-items: center;
     gap: 8px;
 }
 
@@ -1344,6 +1347,16 @@ header h1 {
     background: #2a5298;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(30, 60, 114, 0.3);
+}
+
+.btn-compartir-torneo {
+    height: 42px;
+    box-sizing: border-box;
+}
+
+.btn-compartir-torneo:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(37, 211, 102, 0.3);
 }
 
 .torneo-item-participantes {

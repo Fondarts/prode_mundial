@@ -708,12 +708,13 @@ async function renderizarTorneo() {
                         <p><strong>${typeof t === 'function' ? t('participantes') : 'Participantes'}:</strong> ${participantes ? participantes.length : 0}</p>
                         ${miParticipante ? `<p><strong>${typeof t === 'function' ? t('tuPosicion') : 'Tu posición'}:</strong> ${miPosicion}º ${typeof t === 'function' ? t('con') : 'con'} ${miParticipante.puntos || 0} ${typeof t === 'function' ? t('puntos') : 'puntos'}</p>` : ''}
                     </div>
-                    <div class="torneo-item-acciones">
+                    <div class="torneo-item-acciones" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                         <button class="btn-ver-predicciones" data-codigo="${codigo}">
                             ${typeof t === 'function' ? t('verMisPredicciones') : '👁️ Ver Mis Predicciones'}
                         </button>
-                        <button class="btn-compartir-torneo" data-codigo="${codigo}" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 0.95em; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-left: 8px;">
-                            ${typeof t === 'function' ? t('compartir') : '📲 Compartir'}
+                        <button class="btn-compartir-torneo" data-codigo="${codigo}" style="background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 0.95em; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; box-sizing: border-box;">
+                            <img src="fotos/Whatsapp-Logo (2).webp" alt="WhatsApp" style="width: 26px; height: 26px; object-fit: contain; filter: brightness(0) invert(1);">
+                            <span>${typeof t === 'function' ? t('invitar') : 'Invitar'}</span>
                         </button>
                     </div>
                     <div class="torneo-item-participantes">
