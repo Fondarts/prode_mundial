@@ -2653,24 +2653,34 @@ async function compartirTorneo(codigo) {
     }
     
     const url = `${window.location.origin}${window.location.pathname}?torneo=${codigo}`;
-    let mensaje = `🏆 ${textoUnete}: ${torneo.nombre}\n\n${textoPredice}\n\n`;
+    
+    // Construir mensaje con emojis explícitos
+    let mensaje = '';
+    mensaje += '🏆 '; // Emoji trofeo
+    mensaje += `${textoUnete}: ${torneo.nombre}\n\n`;
+    mensaje += `${textoPredice}\n\n`;
     
     // Agregar contraseña si el torneo es privado
     if (esPrivadoFinal && tieneClave) {
-        mensaje += `🔒 ${textoContraseñaLabel}: ${torneo.clave}\n\n`;
+        mensaje += '🔒 '; // Emoji candado
+        mensaje += `${textoContraseñaLabel}: *${torneo.clave}*\n\n`; // Contraseña en negrita
     }
     
-    mensaje += `👉 ${url}`;
+    mensaje += '👉 '; // Emoji dedo apuntando
+    mensaje += url;
     
     // Detectar si es móvil o desktop
     const esMovil = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
+    // Codificar el mensaje preservando emojis
+    const mensajeCodificado = encodeURIComponent(mensaje);
+    
     if (esMovil) {
         // Intentar abrir WhatsApp app
-        window.open(`whatsapp://send?text=${encodeURIComponent(mensaje)}`, '_blank');
+        window.open(`whatsapp://send?text=${mensajeCodificado}`, '_blank');
     } else {
         // Abrir WhatsApp Web
-        window.open(`https://wa.me/?text=${encodeURIComponent(mensaje)}`, '_blank');
+        window.open(`https://wa.me/?text=${mensajeCodificado}`, '_blank');
     }
 }
 
