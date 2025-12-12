@@ -395,14 +395,26 @@ async function salirDeTorneo(codigo) {
     // Eliminar de Supabase (con await para asegurar que se elimine)
     if (usarSupabase() && typeof eliminarParticipanteSupabase === 'function') {
         try {
+            console.log('Iniciando eliminación de participante en Supabase:', { codigo, nombreUsuario });
             const exitoSupabase = await eliminarParticipanteSupabase(codigo, nombreUsuario);
             if (!exitoSupabase) {
-                console.warn('No se pudo eliminar participante de Supabase. Puede ser un problema de permisos. Verifica que la política RLS para DELETE esté configurada.');
+                const mensajeError = 'No se pudo eliminar participante de Supabase. Esto puede deberse a:\n1. Falta la política RLS para DELETE (ejecuta agregar-politica-delete-participantes.sql)\n2. Problema de permisos en Supabase\n\nEl participante fue eliminado localmente, pero puede seguir apareciendo en Supabase.';
+                console.error(mensajeError);
+                await mostrarModal({
+                    titulo: typeof t === 'function' ? t('advertencia') : 'Advertencia',
+                    mensaje: mensajeError,
+                    cancelar: false
+                });
             } else {
-                console.log('Participante y predicciones eliminados correctamente de Supabase');
+                console.log('✅ Participante y predicciones eliminados correctamente de Supabase');
             }
         } catch (error) {
             console.error('Error al eliminar participante de Supabase:', error);
+            await mostrarModal({
+                titulo: typeof t === 'function' ? t('error') : 'Error',
+                mensaje: `Error al eliminar participante de Supabase: ${error.message || error}. Verifica la consola para más detalles.`,
+                cancelar: false
+            });
         }
     }
     

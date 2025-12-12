@@ -370,63 +370,83 @@ async function guardarParticipanteSupabase(codigo, nombre, predicciones, usuario
 
 // Eliminar participante de un torneo
 async function eliminarParticipanteSupabase(codigo, nombre) {
-    if (!usarSupabase()) return false;
+    if (!usarSupabase()) {
+        console.warn('Supabase no está disponible');
+        return false;
+    }
     
     try {
         // Obtener el ID del torneo
         const torneo = await obtenerTorneoPorCodigoSupabase(codigo);
-        if (!torneo) return false;
-        
-        // Buscar el participante por nombre
-        const { data: participante, error: errorBuscar } = await supabaseClient
-            .from('participantes')
-            .select('id')
-            .eq('torneo_id', torneo.id)
-            .eq('nombre', nombre)
-            .maybeSingle();
-        
-        if (errorBuscar) {
-            console.error('Error al buscar participante:', errorBuscar);
+        if (!torneo) {
+            console.error('Torneo no encontrado:', codigo);
             return false;
         }
         
-        if (!participante) {
-            // El participante no existe, considerar éxito
-            return true;
-        }
+        console.log('Intentando eliminar participante:', { codigo, nombre, torneoId: torneo.id });
         
-        // Eliminar el participante (esto elimina el registro completo incluyendo predicciones)
+        // Intentar eliminar directamente por torneo_id y nombre (más eficiente)
         const { data: eliminado, error: errorEliminar } = await supabaseClient
             .from('participantes')
             .delete()
-            .eq('id', participante.id)
+            .eq('torneo_id', torneo.id)
+            .eq('nombre', nombre)
             .select();
         
         if (errorEliminar) {
-            console.error('Error al eliminar participante:', errorEliminar);
-            // Intentar también por nombre y torneo_id como fallback
-            const { error: errorEliminarFallback } = await supabaseClient
-                .from('participantes')
-                .delete()
-                .eq('torneo_id', torneo.id)
-                .eq('nombre', nombre);
+            console.error('Error al eliminar participante (directo):', errorEliminar);
             
-            if (errorEliminarFallback) {
-                console.error('Error al eliminar participante (fallback):', errorEliminarFallback);
+            // Si falla, intentar buscar primero y luego eliminar por ID
+            const { data: participante, error: errorBuscar } = await supabaseClient
+                .from('participantes')
+                .select('id')
+                .eq('torneo_id', torneo.id)
+                .eq('nombre', nombre)
+                .maybeSingle();
+            
+            if (errorBuscar) {
+                console.error('Error al buscar participante:', errorBuscar);
                 return false;
             }
-            return true;
+            
+            if (!participante) {
+                // El participante no existe, considerar éxito
+                console.log('Participante no encontrado, ya fue eliminado');
+                return true;
+            }
+            
+            // Intentar eliminar por ID
+            const { data: eliminadoPorId, error: errorEliminarPorId } = await supabaseClient
+                .from('participantes')
+                .delete()
+                .eq('id', participante.id)
+                .select();
+            
+            if (errorEliminarPorId) {
+                console.error('Error al eliminar participante por ID:', errorEliminarPorId);
+                console.error('Detalles del error:', JSON.stringify(errorEliminarPorId, null, 2));
+                return false;
+            }
+            
+            if (eliminadoPorId && eliminadoPorId.length > 0) {
+                console.log('Participante eliminado correctamente por ID:', eliminadoPorId[0].id);
+                return true;
+            }
+            
+            return false;
         }
         
         // Verificar que se eliminó correctamente
         if (eliminado && eliminado.length > 0) {
             console.log('Participante eliminado correctamente:', eliminado[0].id);
             return true;
+        } else {
+            console.warn('No se encontró participante para eliminar');
+            return true; // Considerar éxito si no existe
         }
-        
-        return true;
     } catch (error) {
         console.error('Error en eliminarParticipanteSupabase:', error);
+        console.error('Stack trace:', error.stack);
         return false;
     }
 }
