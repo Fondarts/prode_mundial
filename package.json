@@ -1,0 +1,31 @@
+{
+  "name": "mundial-2026-app",
+  "version": "1.0.0",
+  "description": "Fixture Interactivo Mundial 2026 - App Android",
+  "main": "index.html",
+  "scripts": {
+    "build": "node copy-files.js && npx cap sync",
+    "sync": "node copy-files.js && npx cap sync",
+    "open:android": "npx cap open android",
+    "copy": "node copy-files.js && npx cap copy"
+  },
+  "keywords": [
+    "mundial",
+    "fifa",
+    "world-cup",
+    "football"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^6.2.1",
+    "@capacitor/app": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/haptics": "^6.0.0",
+    "@capacitor/keyboard": "^6.0.0",
+    "@capacitor/status-bar": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  }
+}
