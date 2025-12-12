@@ -279,34 +279,37 @@ async function unirseATorneo(codigo, nombre) {
         puntos: 0
     };
     
-    // Guardar en Supabase primero si está disponible
-    if (usarSupabase() && typeof guardarParticipanteSupabase === 'function') {
-        const usuarioId = obtenerIdUsuarioUnico();
-        try {
-            const exitoSupabase = await guardarParticipanteSupabase(codigo, nombre, {}, usuarioId, false);
-            if (!exitoSupabase) {
-                // Si falla Supabase, intentar continuar con localStorage
-                console.warn('No se pudo guardar participante en Supabase. Se guardará solo localmente.');
-            }
-        } catch (error) {
-            console.error('Error al guardar participante en Supabase:', error);
-            // Continuar con localStorage si falla Supabase
-        }
-    }
-    
-    // Agregar a memoria local
+    // Agregar a memoria local primero (para feedback inmediato)
     torneos[codigo].participantes.push(nuevoParticipante);
     await guardarTorneos();
     
-    // Recargar desde Supabase para asegurar sincronización
-    if (usarSupabase() && typeof cargarDatosDesdeSupabase === 'function') {
+    // Guardar en Supabase después (sin bloquear)
+    if (usarSupabase() && typeof guardarParticipanteSupabase === 'function') {
+        const usuarioId = obtenerIdUsuarioUnico();
         try {
-            const datosActualizados = await cargarDatosDesdeSupabase();
-            if (datosActualizados && datosActualizados[codigo]) {
-                torneos[codigo] = datosActualizados[codigo];
+            // Usar Promise.race con timeout para evitar que se quede trabado
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout')), 10000)
+            );
+            
+            const guardarPromise = guardarParticipanteSupabase(codigo, nombre, {}, usuarioId, false);
+            await Promise.race([guardarPromise, timeoutPromise]);
+            
+            // Si se guardó exitosamente, recargar desde Supabase
+            if (usarSupabase() && typeof cargarDatosDesdeSupabase === 'function') {
+                try {
+                    const datosActualizados = await cargarDatosDesdeSupabase();
+                    if (datosActualizados && datosActualizados[codigo]) {
+                        torneos[codigo] = datosActualizados[codigo];
+                        await guardarTorneos(); // Actualizar localStorage con datos de Supabase
+                    }
+                } catch (error) {
+                    console.error('Error al recargar datos desde Supabase:', error);
+                }
             }
         } catch (error) {
-            console.error('Error al recargar datos desde Supabase:', error);
+            console.warn('No se pudo guardar participante en Supabase (se guardó localmente):', error);
+            // Continuar con localStorage si falla Supabase
         }
     }
     
@@ -2323,10 +2326,34 @@ async function mostrarLandingTorneo(codigo) {
                     }
                 }
                 
-                // Unirse al torneo
-                const resultado = await unirseATorneo(codigo, nombreUsuario);
+                // Unirse al torneo con timeout
+                let resultado;
+                try {
+                    const timeoutPromise = new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('Timeout')), 15000)
+                    );
+                    
+                    resultado = await Promise.race([
+                        unirseATorneo(codigo, nombreUsuario),
+                        timeoutPromise
+                    ]);
+                } catch (error) {
+                    console.error('Error al unirse al torneo:', error);
+                    resultado = { 
+                        exito: false, 
+                        mensaje: error.message === 'Timeout' 
+                            ? 'La operación está tardando demasiado. Por favor intenta nuevamente.' 
+                            : 'Error al unirse al torneo. Por favor intenta nuevamente.'
+                    };
+                }
                 
-                if (resultado.exito) {
+                // Restaurar botón siempre antes de mostrar resultado
+                btnUnirse.disabled = false;
+                btnUnirse.style.opacity = '1';
+                btnUnirse.style.cursor = 'pointer';
+                btnUnirse.innerHTML = textoOriginal;
+                
+                if (resultado && resultado.exito) {
                     await mostrarModal({
                         titulo: typeof t === 'function' ? t('exito') : '¡Éxito!',
                         mensaje: typeof t === 'function' ? t('teHasUnidoAlTorneo') : `¡Te has unido al torneo "${torneo.nombre}"! Ahora puedes enviar tus predicciones desde la pestaña "Grupos".`,
@@ -2350,13 +2377,9 @@ async function mostrarLandingTorneo(codigo) {
                 } else {
                     await mostrarModal({
                         titulo: typeof t === 'function' ? t('error') : 'Error',
-                        mensaje: resultado.mensaje || (typeof t === 'function' ? t('errorAlUnirse') : 'Error al unirse al torneo'),
+                        mensaje: (resultado && resultado.mensaje) || (typeof t === 'function' ? t('errorAlUnirse') : 'Error al unirse al torneo'),
                         cancelar: false
                     });
-                    btnUnirse.disabled = false;
-                    btnUnirse.style.opacity = '1';
-                    btnUnirse.style.cursor = 'pointer';
-                    btnUnirse.innerHTML = textoOriginal;
                 }
             } catch (error) {
                 console.error('Error al unirse al torneo:', error);
