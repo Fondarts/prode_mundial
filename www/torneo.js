@@ -2430,16 +2430,12 @@ async function mostrarLandingTorneo(codigo) {
     const btnUnirse = document.getElementById('btn-unirse-torneo');
     if (btnUnirse) {
         btnUnirse.addEventListener('click', async () => {
-            // Deshabilitar botón mientras se procesa
-            btnUnirse.disabled = true;
-            btnUnirse.style.opacity = '0.6';
-            btnUnirse.style.cursor = 'not-allowed';
             const textoOriginal = btnUnirse.innerHTML;
-            btnUnirse.innerHTML = typeof t === 'function' ? t('procesando') || 'Procesando...' : 'Procesando...';
             
             try {
+                // Si es privado, pedir contraseña ANTES de deshabilitar el botón
                 if (esPrivadoFinal && torneo.clave) {
-                    // Pedir contraseña
+                    // Pedir contraseña (sin deshabilitar botón todavía)
                     const clave = await mostrarModal({
                         titulo: typeof t === 'function' ? t('torneoPrivado') : 'Torneo Privado',
                         mensaje: typeof t === 'function' ? t('ingresarContraseñaTorneo') : 'Este torneo es privado. Ingresa la contraseña:',
@@ -2450,10 +2446,7 @@ async function mostrarLandingTorneo(codigo) {
                     });
                     
                     if (!clave || clave === false) {
-                        btnUnirse.disabled = false;
-                        btnUnirse.style.opacity = '1';
-                        btnUnirse.style.cursor = 'pointer';
-                        btnUnirse.innerHTML = textoOriginal;
+                        // Usuario canceló, no hacer nada
                         return;
                     }
                     
@@ -2463,17 +2456,20 @@ async function mostrarLandingTorneo(codigo) {
                             mensaje: typeof t === 'function' ? t('contraseñaIncorrecta') : 'Contraseña incorrecta.',
                             cancelar: false
                         });
-                        btnUnirse.disabled = false;
-                        btnUnirse.style.opacity = '1';
-                        btnUnirse.style.cursor = 'pointer';
-                        btnUnirse.innerHTML = textoOriginal;
                         return;
                     }
                 }
                 
+                // Ahora sí deshabilitar botón y mostrar "procesando"
+                btnUnirse.disabled = true;
+                btnUnirse.style.opacity = '0.6';
+                btnUnirse.style.cursor = 'not-allowed';
+                btnUnirse.innerHTML = typeof t === 'function' ? t('procesando') || 'Procesando...' : 'Procesando...';
+                
                 // Unirse al torneo con timeout
                 let resultado;
                 try {
+                    console.log('Iniciando unirseATorneo para torneo privado:', { codigo, nombreUsuario });
                     const timeoutPromise = new Promise((_, reject) => 
                         setTimeout(() => reject(new Error('Timeout')), 15000)
                     );
@@ -2482,21 +2478,22 @@ async function mostrarLandingTorneo(codigo) {
                         unirseATorneo(codigo, nombreUsuario),
                         timeoutPromise
                     ]);
+                    console.log('Resultado de unirseATorneo:', resultado);
                 } catch (error) {
                     console.error('Error al unirse al torneo:', error);
                     resultado = { 
                         exito: false, 
                         mensaje: error.message === 'Timeout' 
-                            ? 'La operación está tardando demasiado. Por favor intenta nuevamente.' 
-                            : 'Error al unirse al torneo. Por favor intenta nuevamente.'
+                            ? (typeof t === 'function' ? t('timeoutUnirse') : 'La operación está tardando demasiado. Por favor intenta nuevamente.')
+                            : (typeof t === 'function' ? t('errorAlUnirse') : 'Error al unirse al torneo. Por favor intenta nuevamente.')
                     };
+                } finally {
+                    // Restaurar botón SIEMPRE, incluso si hay errores
+                    btnUnirse.disabled = false;
+                    btnUnirse.style.opacity = '1';
+                    btnUnirse.style.cursor = 'pointer';
+                    btnUnirse.innerHTML = textoOriginal;
                 }
-                
-                // Restaurar botón siempre antes de mostrar resultado
-                btnUnirse.disabled = false;
-                btnUnirse.style.opacity = '1';
-                btnUnirse.style.cursor = 'pointer';
-                btnUnirse.innerHTML = textoOriginal;
                 
                 if (resultado && resultado.exito) {
                     // Cerrar modal de landing primero antes de mostrar el modal de éxito
@@ -2533,12 +2530,14 @@ async function mostrarLandingTorneo(codigo) {
                     });
                 }
             } catch (error) {
-                console.error('Error al unirse al torneo:', error);
+                console.error('Error inesperado al unirse al torneo:', error);
+                console.error('Stack trace:', error.stack);
                 await mostrarModal({
                     titulo: typeof t === 'function' ? t('error') : 'Error',
-                    mensaje: typeof t === 'function' ? t('errorAlUnirse') : 'Error al unirse al torneo. Por favor intenta nuevamente.',
+                    mensaje: `${typeof t === 'function' ? t('errorAlUnirse') : 'Error al unirse al torneo'}: ${error.message || error}`,
                     cancelar: false
                 });
+                // Restaurar botón SIEMPRE
                 btnUnirse.disabled = false;
                 btnUnirse.style.opacity = '1';
                 btnUnirse.style.cursor = 'pointer';
@@ -2626,8 +2625,42 @@ async function compartirTorneo(codigo) {
         console.warn('Error al obtener traducciones:', e);
     }
     
+    // Determinar si es privado y tiene contraseña
+    const tieneClave = torneo.clave && torneo.clave.trim() !== '';
+    const esAbiertoExplicito = torneo.esPrivado === false;
+    const esPrivadoExplicito = torneo.esPrivado === true;
+    const esPrivadoFinal = esAbiertoExplicito ? false : (esPrivadoExplicito || tieneClave || torneo.esPrivado === undefined);
+    
+    // Obtener texto de contraseña traducido
+    let textoContraseña = 'Contraseña';
+    let textoContraseñaLabel = 'Contraseña del torneo';
+    try {
+        if (typeof window !== 'undefined' && window.translations) {
+            const lang = (typeof getCurrentLanguage === 'function' ? getCurrentLanguage() : null) || 'es';
+            const traducciones = window.translations[lang] || window.translations.es;
+            if (traducciones) {
+                if (traducciones.contraseña) textoContraseña = traducciones.contraseña;
+                if (traducciones.contraseñaTorneo) textoContraseñaLabel = traducciones.contraseñaTorneo;
+            }
+        } else if (typeof t === 'function') {
+            const contraseñaTraducido = t('contraseña');
+            const contraseñaTorneoTraducido = t('contraseñaTorneo');
+            if (contraseñaTraducido && contraseñaTraducido !== 'contraseña') textoContraseña = contraseñaTraducido;
+            if (contraseñaTorneoTraducido && contraseñaTorneoTraducido !== 'contraseñaTorneo') textoContraseñaLabel = contraseñaTorneoTraducido;
+        }
+    } catch (e) {
+        console.warn('Error al obtener traducciones de contraseña:', e);
+    }
+    
     const url = `${window.location.origin}${window.location.pathname}?torneo=${codigo}`;
-    const mensaje = `🏆 ${textoUnete}: ${torneo.nombre}\n\n${textoPredice}\n\n👉 ${url}`;
+    let mensaje = `🏆 ${textoUnete}: ${torneo.nombre}\n\n${textoPredice}\n\n`;
+    
+    // Agregar contraseña si el torneo es privado
+    if (esPrivadoFinal && tieneClave) {
+        mensaje += `🔒 ${textoContraseñaLabel}: ${torneo.clave}\n\n`;
+    }
+    
+    mensaje += `👉 ${url}`;
     
     // Detectar si es móvil o desktop
     const esMovil = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
