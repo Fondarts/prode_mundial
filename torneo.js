@@ -269,7 +269,7 @@ async function unirseATorneo(codigo, nombre) {
     }
     
     // Verificar que no esté ya en el torneo (en memoria local)
-    if (torneos[codigo].participantes.some(p => p.nombre === nombre)) {
+    if (torneos[codigo].participantes.some(p => p && p.nombre === nombre)) {
         return { exito: false, mensaje: 'Ya estás en este torneo' };
     }
     
@@ -279,8 +279,37 @@ async function unirseATorneo(codigo, nombre) {
         puntos: 0
     };
     
+    // Guardar en Supabase primero si está disponible
+    if (usarSupabase() && typeof guardarParticipanteSupabase === 'function') {
+        const usuarioId = obtenerIdUsuarioUnico();
+        try {
+            const exitoSupabase = await guardarParticipanteSupabase(codigo, nombre, {}, usuarioId, false);
+            if (!exitoSupabase) {
+                // Si falla Supabase, intentar continuar con localStorage
+                console.warn('No se pudo guardar participante en Supabase. Se guardará solo localmente.');
+            }
+        } catch (error) {
+            console.error('Error al guardar participante en Supabase:', error);
+            // Continuar con localStorage si falla Supabase
+        }
+    }
+    
+    // Agregar a memoria local
     torneos[codigo].participantes.push(nuevoParticipante);
     await guardarTorneos();
+    
+    // Recargar desde Supabase para asegurar sincronización
+    if (usarSupabase() && typeof cargarDatosDesdeSupabase === 'function') {
+        try {
+            const datosActualizados = await cargarDatosDesdeSupabase();
+            if (datosActualizados && datosActualizados[codigo]) {
+                torneos[codigo] = datosActualizados[codigo];
+            }
+        } catch (error) {
+            console.error('Error al recargar datos desde Supabase:', error);
+        }
+    }
+    
     return { exito: true };
 }
 
@@ -2253,61 +2282,93 @@ async function mostrarLandingTorneo(codigo) {
     const btnUnirse = document.getElementById('btn-unirse-torneo');
     if (btnUnirse) {
         btnUnirse.addEventListener('click', async () => {
-            if (esPrivadoFinal && torneo.clave) {
-                // Pedir contraseña
-                const clave = await mostrarModal({
-                    titulo: typeof t === 'function' ? t('torneoPrivado') : 'Torneo Privado',
-                    mensaje: typeof t === 'function' ? t('ingresarContraseñaTorneo') : 'Este torneo es privado. Ingresa la contraseña:',
-                    input: true,
-                    inputType: 'password',
-                    placeholder: typeof t === 'function' ? t('contraseña') : 'Contraseña',
-                    cancelar: true
-                });
-                
-                if (!clave || clave === false) {
-                    return;
+            // Deshabilitar botón mientras se procesa
+            btnUnirse.disabled = true;
+            btnUnirse.style.opacity = '0.6';
+            btnUnirse.style.cursor = 'not-allowed';
+            const textoOriginal = btnUnirse.innerHTML;
+            btnUnirse.innerHTML = typeof t === 'function' ? t('procesando') || 'Procesando...' : 'Procesando...';
+            
+            try {
+                if (esPrivadoFinal && torneo.clave) {
+                    // Pedir contraseña
+                    const clave = await mostrarModal({
+                        titulo: typeof t === 'function' ? t('torneoPrivado') : 'Torneo Privado',
+                        mensaje: typeof t === 'function' ? t('ingresarContraseñaTorneo') : 'Este torneo es privado. Ingresa la contraseña:',
+                        input: true,
+                        inputType: 'password',
+                        placeholder: typeof t === 'function' ? t('contraseña') : 'Contraseña',
+                        cancelar: true
+                    });
+                    
+                    if (!clave || clave === false) {
+                        btnUnirse.disabled = false;
+                        btnUnirse.style.opacity = '1';
+                        btnUnirse.style.cursor = 'pointer';
+                        btnUnirse.innerHTML = textoOriginal;
+                        return;
+                    }
+                    
+                    if (clave.trim() !== torneo.clave.trim()) {
+                        await mostrarModal({
+                            titulo: typeof t === 'function' ? t('error') : 'Error',
+                            mensaje: typeof t === 'function' ? t('contraseñaIncorrecta') : 'Contraseña incorrecta.',
+                            cancelar: false
+                        });
+                        btnUnirse.disabled = false;
+                        btnUnirse.style.opacity = '1';
+                        btnUnirse.style.cursor = 'pointer';
+                        btnUnirse.innerHTML = textoOriginal;
+                        return;
+                    }
                 }
                 
-                if (clave.trim() !== torneo.clave.trim()) {
+                // Unirse al torneo
+                const resultado = await unirseATorneo(codigo, nombreUsuario);
+                
+                if (resultado.exito) {
                     await mostrarModal({
-                        titulo: typeof t === 'function' ? t('error') : 'Error',
-                        mensaje: typeof t === 'function' ? t('contraseñaIncorrecta') : 'Contraseña incorrecta.',
+                        titulo: typeof t === 'function' ? t('exito') : '¡Éxito!',
+                        mensaje: typeof t === 'function' ? t('teHasUnidoAlTorneo') : `¡Te has unido al torneo "${torneo.nombre}"! Ahora puedes enviar tus predicciones desde la pestaña "Grupos".`,
                         cancelar: false
                     });
-                    return;
+                    
+                    // Cerrar modal y limpiar URL
+                    document.body.removeChild(overlay);
+                    limpiarURLTorneo();
+                    
+                    // Recargar vista de torneos si está activa
+                    if (typeof renderizarTorneo === 'function') {
+                        await renderizarTorneo();
+                    }
+                    
+                    // Cambiar a pestaña de torneos
+                    const tabTorneo = document.querySelector('.tab-btn[data-tab="torneo"]');
+                    if (tabTorneo) {
+                        tabTorneo.click();
+                    }
+                } else {
+                    await mostrarModal({
+                        titulo: typeof t === 'function' ? t('error') : 'Error',
+                        mensaje: resultado.mensaje || (typeof t === 'function' ? t('errorAlUnirse') : 'Error al unirse al torneo'),
+                        cancelar: false
+                    });
+                    btnUnirse.disabled = false;
+                    btnUnirse.style.opacity = '1';
+                    btnUnirse.style.cursor = 'pointer';
+                    btnUnirse.innerHTML = textoOriginal;
                 }
-            }
-            
-            // Unirse al torneo
-            const resultado = await unirseATorneo(codigo, nombreUsuario);
-            
-            if (resultado.exito) {
-                await mostrarModal({
-                    titulo: typeof t === 'function' ? t('exito') : '¡Éxito!',
-                    mensaje: typeof t === 'function' ? t('teHasUnidoAlTorneo') : `¡Te has unido al torneo "${torneo.nombre}"! Ahora puedes enviar tus predicciones desde la pestaña "Grupos".`,
-                    cancelar: false
-                });
-                
-                // Cerrar modal y limpiar URL
-                document.body.removeChild(overlay);
-                limpiarURLTorneo();
-                
-                // Recargar vista de torneos si está activa
-                if (typeof renderizarTorneo === 'function') {
-                    await renderizarTorneo();
-                }
-                
-                // Cambiar a pestaña de torneos
-                const tabTorneo = document.querySelector('.tab-btn[data-tab="torneo"]');
-                if (tabTorneo) {
-                    tabTorneo.click();
-                }
-            } else {
+            } catch (error) {
+                console.error('Error al unirse al torneo:', error);
                 await mostrarModal({
                     titulo: typeof t === 'function' ? t('error') : 'Error',
-                    mensaje: resultado.mensaje || (typeof t === 'function' ? t('errorAlUnirse') : 'Error al unirse al torneo'),
+                    mensaje: typeof t === 'function' ? t('errorAlUnirse') : 'Error al unirse al torneo. Por favor intenta nuevamente.',
                     cancelar: false
                 });
+                btnUnirse.disabled = false;
+                btnUnirse.style.opacity = '1';
+                btnUnirse.style.cursor = 'pointer';
+                btnUnirse.innerHTML = textoOriginal;
             }
         });
     }
