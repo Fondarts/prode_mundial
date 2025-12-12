@@ -395,15 +395,33 @@ async function eliminarParticipanteSupabase(codigo, nombre) {
             return true;
         }
         
-        // Eliminar el participante
-        const { error: errorEliminar } = await supabaseClient
+        // Eliminar el participante (esto elimina el registro completo incluyendo predicciones)
+        const { data: eliminado, error: errorEliminar } = await supabaseClient
             .from('participantes')
             .delete()
-            .eq('id', participante.id);
+            .eq('id', participante.id)
+            .select();
         
         if (errorEliminar) {
             console.error('Error al eliminar participante:', errorEliminar);
-            return false;
+            // Intentar también por nombre y torneo_id como fallback
+            const { error: errorEliminarFallback } = await supabaseClient
+                .from('participantes')
+                .delete()
+                .eq('torneo_id', torneo.id)
+                .eq('nombre', nombre);
+            
+            if (errorEliminarFallback) {
+                console.error('Error al eliminar participante (fallback):', errorEliminarFallback);
+                return false;
+            }
+            return true;
+        }
+        
+        // Verificar que se eliminó correctamente
+        if (eliminado && eliminado.length > 0) {
+            console.log('Participante eliminado correctamente:', eliminado[0].id);
+            return true;
         }
         
         return true;

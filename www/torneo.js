@@ -392,12 +392,18 @@ async function salirDeTorneo(codigo) {
         localStorage.setItem('mundial2026_torneos_salidos', JSON.stringify(torneosSalidos));
     }
     
-    // Eliminar de Supabase en segundo plano (sin bloquear)
+    // Eliminar de Supabase (con await para asegurar que se elimine)
     if (usarSupabase() && typeof eliminarParticipanteSupabase === 'function') {
-        // Ejecutar en segundo plano sin await para no bloquear
-        eliminarParticipanteSupabase(codigo, nombreUsuario).catch(error => {
+        try {
+            const exitoSupabase = await eliminarParticipanteSupabase(codigo, nombreUsuario);
+            if (!exitoSupabase) {
+                console.warn('No se pudo eliminar participante de Supabase. Puede ser un problema de permisos. Verifica que la política RLS para DELETE esté configurada.');
+            } else {
+                console.log('Participante y predicciones eliminados correctamente de Supabase');
+            }
+        } catch (error) {
             console.error('Error al eliminar participante de Supabase:', error);
-        });
+        }
     }
     
     // NO recargar desde Supabase después de eliminar para evitar que vuelva a aparecer

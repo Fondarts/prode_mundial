@@ -88,6 +88,10 @@ CREATE POLICY "Cualquiera puede crear participantes" ON participantes
 CREATE POLICY "Cualquiera puede actualizar participantes" ON participantes
     FOR UPDATE USING (true);
 
+-- Política: Cualquiera puede eliminar participantes (para salir de torneos)
+CREATE POLICY "Cualquiera puede eliminar participantes" ON participantes
+    FOR DELETE USING (true);
+
 -- Tabla de usuarios
 CREATE TABLE IF NOT EXISTS usuarios (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
