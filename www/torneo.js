@@ -238,6 +238,14 @@ async function crearTorneo(nombre, nombreCreador, esPrivado = false, clave = nul
 
 // Unirse a un torneo
 async function unirseATorneo(codigo, nombre) {
+    // Si el usuario había salido de este torneo, removerlo de la lista
+    const torneosSalidos = JSON.parse(localStorage.getItem('mundial2026_torneos_salidos') || '[]');
+    const indiceSalido = torneosSalidos.indexOf(codigo);
+    if (indiceSalido !== -1) {
+        torneosSalidos.splice(indiceSalido, 1);
+        localStorage.setItem('mundial2026_torneos_salidos', JSON.stringify(torneosSalidos));
+    }
+    
     // Si Supabase está disponible, verificar el torneo ahí primero
     if (usarSupabase() && typeof obtenerTorneoPorCodigoSupabase === 'function') {
         const torneoSupabase = await obtenerTorneoPorCodigoSupabase(codigo);
@@ -314,6 +322,98 @@ async function unirseATorneo(codigo, nombre) {
     }
     
     return { exito: true };
+}
+
+// Salir de un torneo
+async function salirDeTorneo(codigo) {
+    // Obtener nombre del usuario actual
+    let nombreUsuario = '';
+    if (typeof obtenerUsuarioActual === 'function') {
+        const usuario = obtenerUsuarioActual();
+        if (usuario && usuario.nombreUsuario) {
+            nombreUsuario = usuario.nombreUsuario;
+        }
+    }
+    if (!nombreUsuario) {
+        nombreUsuario = localStorage.getItem('mundial2026_mi_nombre') || '';
+    }
+    
+    if (!nombreUsuario) {
+        await mostrarModal({
+            titulo: typeof t === 'function' ? t('error') : 'Error',
+            mensaje: typeof t === 'function' ? t('debesEstarLogueado') : 'Debes estar logueado para salir de un torneo.',
+            cancelar: false
+        });
+        return;
+    }
+    
+    // Confirmar antes de salir
+    const confirmar = await mostrarModal({
+        titulo: typeof t === 'function' ? t('confirmarSalir') : '¿Salir del Torneo?',
+        mensaje: typeof t === 'function' ? t('confirmarSalirMensaje') : '¿Estás seguro de que quieres salir de este torneo?\n\n⚠️ Se eliminarán todas tus predicciones y puntos. Si vuelves a entrar, tendrás que empezar desde cero.',
+        cancelar: true,
+        okTexto: typeof t === 'function' ? t('salir') : 'Salir',
+        cancelarTexto: typeof t === 'function' ? t('cancelar') : 'Cancelar'
+    });
+    
+    if (!confirmar || confirmar === false) {
+        return;
+    }
+    
+    // Verificar que el torneo existe
+    if (!torneos[codigo]) {
+        await mostrarModal({
+            titulo: typeof t === 'function' ? t('error') : 'Error',
+            mensaje: typeof t === 'function' ? t('torneoNoEncontrado') : 'Torneo no encontrado',
+            cancelar: false
+        });
+        return;
+    }
+    
+    // Verificar que el usuario está en el torneo
+    const participanteIndex = torneos[codigo].participantes.findIndex(p => p && p.nombre === nombreUsuario);
+    if (participanteIndex === -1) {
+        await mostrarModal({
+            titulo: typeof t === 'function' ? t('error') : 'Error',
+            mensaje: typeof t === 'function' ? t('noEstasEnEsteTorneo') : 'No estás en este torneo',
+            cancelar: false
+        });
+        return;
+    }
+    
+    // Eliminar de memoria local primero (para feedback inmediato)
+    torneos[codigo].participantes.splice(participanteIndex, 1);
+    await guardarTorneos();
+    
+    // Marcar que el usuario salió de este torneo en localStorage
+    const torneosSalidos = JSON.parse(localStorage.getItem('mundial2026_torneos_salidos') || '[]');
+    if (!torneosSalidos.includes(codigo)) {
+        torneosSalidos.push(codigo);
+        localStorage.setItem('mundial2026_torneos_salidos', JSON.stringify(torneosSalidos));
+    }
+    
+    // Eliminar de Supabase en segundo plano (sin bloquear)
+    if (usarSupabase() && typeof eliminarParticipanteSupabase === 'function') {
+        // Ejecutar en segundo plano sin await para no bloquear
+        eliminarParticipanteSupabase(codigo, nombreUsuario).catch(error => {
+            console.error('Error al eliminar participante de Supabase:', error);
+        });
+    }
+    
+    // NO recargar desde Supabase después de eliminar para evitar que vuelva a aparecer
+    // La eliminación local es suficiente para que el usuario vea el cambio inmediatamente
+    
+    // Mostrar mensaje de éxito
+    await mostrarModal({
+        titulo: typeof t === 'function' ? t('exito') : '¡Éxito!',
+        mensaje: typeof t === 'function' ? t('hasSalidoDelTorneo') : 'Has salido del torneo. Todas tus predicciones han sido eliminadas.',
+        cancelar: false
+    });
+    
+    // Recargar vista de torneos
+    if (typeof renderizarTorneo === 'function') {
+        await renderizarTorneo();
+    }
 }
 
 // Enviar predicciones a un torneo
@@ -564,8 +664,16 @@ async function obtenerMisTorneos() {
             return [];
         }
         
+        // Obtener lista de torneos de los que el usuario salió
+        const torneosSalidos = JSON.parse(localStorage.getItem('mundial2026_torneos_salidos') || '[]');
+        
         // Filtrar torneos donde el usuario es creador o participante
         for (const [codigo, torneo] of Object.entries(todosLosTorneos)) {
+            // Si el usuario salió de este torneo, no incluirlo (a menos que sea el creador)
+            if (torneosSalidos.includes(codigo) && torneo.creadoPor !== nombreUsuario) {
+                continue;
+            }
+            
             let estaEnTorneo = false;
             
             // Verificar si es el creador
@@ -748,6 +856,9 @@ async function renderizarTorneo() {
                             <img src="fotos/Whatsapp-Logo (2).webp" alt="WhatsApp" style="width: 26px; height: 26px; object-fit: contain; filter: brightness(0) invert(1);">
                             <span>${typeof t === 'function' ? t('invitar') : 'Invitar'}</span>
                         </button>
+                        ${miParticipante && !esCreador ? `<button class="btn-salir-torneo" data-codigo="${codigo}" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 0.95em; font-weight: 600; cursor: pointer; transition: all 0.2s; box-sizing: border-box;">
+                            ${typeof t === 'function' ? t('salirDelTorneo') : '🚪 Salir del Torneo'}
+                        </button>` : ''}
                     </div>
                     <div class="torneo-item-participantes">
                         <h5>${typeof t === 'function' ? t('clasificacion') : 'Clasificación'}:</h5>
@@ -817,6 +928,14 @@ async function renderizarTorneo() {
             if (btnCompartir) {
                 btnCompartir.addEventListener('click', () => {
                     compartirTorneo(codigo);
+                });
+            }
+            
+            // Agregar event listener para el botón de salir
+            const btnSalir = torneoItem.querySelector('.btn-salir-torneo');
+            if (btnSalir) {
+                btnSalir.addEventListener('click', async () => {
+                    await salirDeTorneo(codigo);
                 });
             }
         });
@@ -2267,17 +2386,25 @@ async function mostrarLandingTorneo(codigo) {
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
     
+    // Función auxiliar para cerrar el modal de forma segura
+    const cerrarModalLanding = () => {
+        if (overlay && overlay.parentNode === document.body) {
+            try {
+                document.body.removeChild(overlay);
+            } catch (e) {
+                console.warn('El overlay ya fue removido:', e);
+            }
+        }
+        limpiarURLTorneo();
+    };
+    
     // Event listeners
     const btnCerrar = document.getElementById('btn-cerrar-landing');
-    btnCerrar.addEventListener('click', () => {
-        document.body.removeChild(overlay);
-        limpiarURLTorneo();
-    });
+    btnCerrar.addEventListener('click', cerrarModalLanding);
     
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay) {
-            document.body.removeChild(overlay);
-            limpiarURLTorneo();
+            cerrarModalLanding();
         }
     });
     
@@ -2354,15 +2481,21 @@ async function mostrarLandingTorneo(codigo) {
                 btnUnirse.innerHTML = textoOriginal;
                 
                 if (resultado && resultado.exito) {
+                    // Cerrar modal de landing primero antes de mostrar el modal de éxito
+                    if (overlay && overlay.parentNode === document.body) {
+                        try {
+                            document.body.removeChild(overlay);
+                        } catch (e) {
+                            console.warn('El overlay ya fue removido:', e);
+                        }
+                    }
+                    limpiarURLTorneo();
+                    
                     await mostrarModal({
                         titulo: typeof t === 'function' ? t('exito') : '¡Éxito!',
                         mensaje: typeof t === 'function' ? t('teHasUnidoAlTorneo') : `¡Te has unido al torneo "${torneo.nombre}"! Ahora puedes enviar tus predicciones desde la pestaña "Grupos".`,
                         cancelar: false
                     });
-                    
-                    // Cerrar modal y limpiar URL
-                    document.body.removeChild(overlay);
-                    limpiarURLTorneo();
                     
                     // Recargar vista de torneos si está activa
                     if (typeof renderizarTorneo === 'function') {
@@ -2401,7 +2534,7 @@ async function mostrarLandingTorneo(codigo) {
     if (btnLoginUnirse) {
         btnLoginUnirse.addEventListener('click', async () => {
             // Cerrar este modal temporalmente
-            document.body.removeChild(overlay);
+            cerrarModalLanding();
             
             // Mostrar diálogo de login
             if (typeof mostrarDialogoLogin === 'function') {
@@ -2422,8 +2555,7 @@ async function mostrarLandingTorneo(codigo) {
     const btnVerTorneo = document.getElementById('btn-ver-torneo');
     if (btnVerTorneo) {
         btnVerTorneo.addEventListener('click', () => {
-            document.body.removeChild(overlay);
-            limpiarURLTorneo();
+            cerrarModalLanding();
             
             // Cambiar a pestaña de torneos
             const tabTorneo = document.querySelector('.tab-btn[data-tab="torneo"]');

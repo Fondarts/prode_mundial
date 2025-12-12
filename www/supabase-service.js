@@ -368,6 +368,51 @@ async function guardarParticipanteSupabase(codigo, nombre, predicciones, usuario
     }
 }
 
+// Eliminar participante de un torneo
+async function eliminarParticipanteSupabase(codigo, nombre) {
+    if (!usarSupabase()) return false;
+    
+    try {
+        // Obtener el ID del torneo
+        const torneo = await obtenerTorneoPorCodigoSupabase(codigo);
+        if (!torneo) return false;
+        
+        // Buscar el participante por nombre
+        const { data: participante, error: errorBuscar } = await supabaseClient
+            .from('participantes')
+            .select('id')
+            .eq('torneo_id', torneo.id)
+            .eq('nombre', nombre)
+            .maybeSingle();
+        
+        if (errorBuscar) {
+            console.error('Error al buscar participante:', errorBuscar);
+            return false;
+        }
+        
+        if (!participante) {
+            // El participante no existe, considerar éxito
+            return true;
+        }
+        
+        // Eliminar el participante
+        const { error: errorEliminar } = await supabaseClient
+            .from('participantes')
+            .delete()
+            .eq('id', participante.id);
+        
+        if (errorEliminar) {
+            console.error('Error al eliminar participante:', errorEliminar);
+            return false;
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Error en eliminarParticipanteSupabase:', error);
+        return false;
+    }
+}
+
 // Actualizar estadísticas de un participante
 async function actualizarEstadisticasParticipanteSupabase(codigo, nombre, estadisticas) {
     if (!usarSupabase()) return false;
