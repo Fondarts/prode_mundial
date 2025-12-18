@@ -19,7 +19,8 @@ const filesToCopy = [
   'auth-ui.js',
   'api-config.js',
   'api-service.js',
-  'torneo.js'
+  'torneo.js',
+  'privacidad.html'
 ];
 
 // Crear carpeta www si no existe
