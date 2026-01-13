@@ -1,0 +1,11 @@
+# ads.txt file for prode2026.com
+# This file lists authorized digital sellers for this domain
+# Managed by Ezoic - Update this file from your Ezoic dashboard
+
+# Google AdSense
+google.com, pub-7829392929574421, DIRECT, f08c47fec0942fa0
+
+# Ezoic
+# TODO: Descomenta y reemplaza [YOUR_EZOIC_PUBLISHER_ID] con tu ID real de Ezoic
+# Puedes obtenerlo desde tu panel de Ezoic > Settings > ads.txt
+# ezoic.com, [YOUR_EZOIC_PUBLISHER_ID], DIRECT

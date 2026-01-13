@@ -4,13 +4,6 @@
   "outputDirectory": "www",
   "cleanUrls": true,
   "trailingSlash": false,
-  "redirects": [
-    {
-      "source": "/ads.txt",
-      "destination": "https://srv.adstxtmanager.com/19390/prode2026.com",
-      "permanent": true
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -39,6 +32,15 @@
         {
           "key": "Content-Type",
           "value": "text/css"
+        }
+      ]
+    },
+    {
+      "source": "/ads.txt",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain"
         }
       ]
     }
