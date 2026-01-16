@@ -1,9 +1,16 @@
 {
   "version": 2,
-  "buildCommand": "node update-ads-txt.js && node copy-files.js",
+  "buildCommand": "node copy-files.js",
   "outputDirectory": "www",
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/ads.txt",
+      "destination": "https://srv.adstxtmanager.com/19390/prode2026.com",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
